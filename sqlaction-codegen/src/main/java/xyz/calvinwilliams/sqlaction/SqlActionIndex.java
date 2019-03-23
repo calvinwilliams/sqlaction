@@ -71,11 +71,13 @@ public class SqlActionIndex {
 		return 0;
 	}
 
-	public static int TravelAllIndexes( List<SqlActionIndex> sqlactionIndexList ) throws Exception {
+	public static int TravelAllIndexes( List<SqlActionIndex> sqlactionIndexList, int depth ) throws Exception {
 		for( SqlActionIndex i : sqlactionIndexList ) {
-			System.out.println( "\t\tindexName["+i.indexName+"] isUnique["+i.isUnique+"]" );
+			for( int n = 0 ; n < depth ; n++ )
+				System.out.print( "\t" );
+			System.out.println( "indexName["+i.indexName+"] isUnique["+i.isUnique+"]" );
 
-			SqlActionColumn.TravelAllColumns( i.columnList );
+			SqlActionColumn.TravelAllColumns( i.columnList, depth+1 );
 		}
 		
 		return 0;

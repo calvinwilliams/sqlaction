@@ -135,9 +135,11 @@ public class SqlActionColumn {
 		return 0;
 	}
 
-	public static int TravelAllColumns( List<SqlActionColumn> sqlactionColumnList ) throws Exception {
+	public static int TravelAllColumns( List<SqlActionColumn> sqlactionColumnList, int depth ) throws Exception {
 		for( SqlActionColumn c : sqlactionColumnList ) {
-			System.out.println( "\t\tcolumnName["+c.columnName+"] columnDefault["+c.columnDefault+"] isNullable["+c.isNullable+"] DataType["+c.dataType+"] columnLength["+c.columnMaximumLength+"] numericPrecision["+c.numericPrecision+"] numericScale["+c.numericScale+"] isPrimaryKey["+c.isPrimaryKey+"] columnComment["+c.columnComment+"]" );
+			for( int n = 0 ; n < depth ; n++ )
+				System.out.print( "\t" );
+			System.out.println( "columnName["+c.columnName+"] columnDefault["+c.columnDefault+"] isNullable["+c.isNullable+"] DataType["+c.dataType+"] columnLength["+c.columnMaximumLength+"] numericPrecision["+c.numericPrecision+"] numericScale["+c.numericScale+"] isPrimaryKey["+c.isPrimaryKey+"] columnComment["+c.columnComment+"]" );
 		}
 		
 		return 0;

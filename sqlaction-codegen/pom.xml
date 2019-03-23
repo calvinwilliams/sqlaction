@@ -7,4 +7,11 @@
   </parent>
   <artifactId>sqlaction-codegen</artifactId>
   <version>0.1.0</version>
+  <dependencies>
+  	<dependency>
+  		<groupId>xyz.calvinwilliams.okjson</groupId>
+  		<artifactId>okjson</artifactId>
+  		<version>0.7.0</version>
+  	</dependency>
+  </dependencies>
 </project>

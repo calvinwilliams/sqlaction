@@ -1,0 +1,8 @@
+{
+	"database" : "calvindb" ,
+	"table" : "my_table2" ,
+	"sqlactions" : [
+		"SELECT name FROM my_table WHERE id =" ,
+		"SELECT * FROM my_table WHERE code ="
+	]
+}

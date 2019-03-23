@@ -8,7 +8,7 @@ public class SqlActionTable {
 	List<SqlActionColumn>	columnList ;
 	List<SqlActionIndex>	indexList ;
 
-	public static int GetAllTablesInDatabase( Connection conn, SqlActionDatabase database ) throws Exception {
+	public static int GetAllTablesInDatabase( SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database ) throws Exception {
 		PreparedStatement	prestmt = null ;
 		ResultSet			rs ;
 		SqlActionTable		table ;
@@ -24,6 +24,8 @@ public class SqlActionTable {
 			table = new SqlActionTable() ;
 			
 			table.tableName = rs.getString(1) ;
+			if( ! table.tableName.equals(sqlactionConf.table) )
+				continue;
 			tableType = rs.getString(2) ;
 			if( ! tableType.equals("BASE TABLE") )
 				continue;
@@ -49,27 +51,15 @@ public class SqlActionTable {
 		return 0;
 	}
 
-	public static int TravelAllTables( List<SqlActionTable> sqlactionTableList ) throws Exception {
+	public static int TravelAllTables( List<SqlActionTable> sqlactionTableList, int depth ) throws Exception {
 		for( SqlActionTable t : sqlactionTableList ) {
-			System.out.println( "\ttableName["+t.tableName+"]" );
+			for( int n = 0 ; n < depth ; n++ )
+				System.out.print( "\t" );
+			System.out.println( "tableName["+t.tableName+"]" );
 			
-			SqlActionColumn.TravelAllColumns( t.columnList );
+			SqlActionColumn.TravelAllColumns( t.columnList, depth+1 );
 			
-			SqlActionIndex.TravelAllIndexes( t.indexList );
-			
-			/*
-			for( SqlActionColumn c : t.sqlactionColumnList ) {
-				System.out.println( "\t\tcolumnName["+c.columnName+"] columnDefault["+c.columnDefault+"] isNullable["+c.isNullable+"] DataType["+c.dataType+"] columnLength["+c.columnMaximumLength+"] numericPrecision["+c.numericPrecision+"] numericScale["+c.numericScale+"] isPrimaryKey["+c.isPrimaryKey+"] columnComment["+c.columnComment+"]" );
-			}
-
-			for( SqlActionIndex i : t.sqlactionIndexList ) {
-				System.out.println( "\t\tindexName["+i.indexName+"] isUnique["+i.isUnique+"]" );
-
-				for( SqlActionColumn ic : i.sqlactionColumnList ) {
-					System.out.println( "\t\t\tcolumn["+ic.columnName+"] columnDefault["+ic.columnDefault+"] isNullable["+ic.isNullable+"] DataType["+ic.dataType+"] columnLength["+ic.columnMaximumLength+"] numericPrecision["+ic.numericPrecision+"] numericScale["+ic.numericScale+"] isPrimaryKey["+ic.isPrimaryKey+"] columnComment["+ic.columnComment+"]" );
-				}
-			}
-			*/
+			SqlActionIndex.TravelAllIndexes( t.indexList, depth+1 );
 		}
 		
 		return 0;

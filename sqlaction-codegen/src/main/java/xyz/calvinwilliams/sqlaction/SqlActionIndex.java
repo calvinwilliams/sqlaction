@@ -85,7 +85,7 @@ public class SqlActionIndex {
 
 			// SqlActionColumn.TravelAllColumnsForGeneratingClassCode( dbserverConf, sqlactionConf, i.columnList, depth+1, out );
 			for( SqlActionColumn c : i.columnList ) {
-				for( int n = 0 ; n < depth ; n++ )
+				for( int n = 0 ; n < depth+1 ; n++ )
 					System.out.print( "\t" );
 				System.out.println( "columnName["+c.columnName+"] columnDefault["+c.columnDefault+"] isNullable["+c.isNullable+"] DataType["+c.dataType+"] columnLength["+c.columnMaximumLength+"] numericPrecision["+c.numericPrecision+"] numericScale["+c.numericScale+"] isPrimaryKey["+c.isPrimaryKey+"] columnComment["+c.columnComment+"]" );
 			}

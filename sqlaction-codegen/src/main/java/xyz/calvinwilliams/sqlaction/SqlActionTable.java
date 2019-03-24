@@ -58,8 +58,10 @@ public class SqlActionTable {
 		StringBuilder		out = new StringBuilder() ; ;
 		
 		for( SqlActionTable t : sqlactionTableList ) {
-			if( ! t.tableName.equals(sqlactionConf.table) )
+			if( SqlActionUtil.wildcardMatch( sqlactionConf.table, t.tableName ) != 0 )
 				continue;
+			
+			sqlactionConf.javaTableName = new String(t.tableName) ;
 			
 			if( sqlactionConf.javaClassName == null ) {
 				String[] sa = sqlactionConf.table.split( "_" ) ;
@@ -67,10 +69,11 @@ public class SqlActionTable {
 				for( String s : sa ) {
 					sb.append( s.substring(0,1).toUpperCase(Locale.getDefault()) + s.substring(1) );
 				}
-				sqlactionConf.javaClassName = sb.toString() ;
+				sqlactionConf.javaClassName = sb.toString() + "SAO" ;
 			}
+			
 			if( sqlactionConf.javaFileName == null ) {
-				sqlactionConf.javaFileName = sqlactionConf.javaClassName + "SAO.java" ;
+				sqlactionConf.javaFileName = sqlactionConf.javaClassName + ".java" ;
 			}
 			
 			for( int n = 0 ; n < depth ; n++ )
@@ -83,8 +86,12 @@ public class SqlActionTable {
 			out.append( "import java.util.*;\n" );
 			out.append( "import java.sql.Time;\n" );
 			out.append( "import java.sql.Timestamp;\n" );
+			out.append( "import java.sql.Connection;\n" );
+			out.append( "import java.sql.Statement;\n" );
+			out.append( "import java.sql.PreparedStatement;\n" );
+			out.append( "import java.sql.ResultSet;\n" );
 			out.append( "\n" );
-			out.append( "public class "+sqlactionConf.javaClassName+"SAO {\n" );
+			out.append( "public class "+sqlactionConf.javaClassName+" {\n" );
 			
 			SqlActionColumn.TravelAllColumnsForGeneratingClassCode( dbserverConf, sqlactionConf, t.columnList, depth+1, out );
 			

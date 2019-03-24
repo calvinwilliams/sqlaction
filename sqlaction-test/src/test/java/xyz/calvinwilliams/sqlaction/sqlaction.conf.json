@@ -7,8 +7,8 @@
 		"UPDATE my_demo_table SET name,fname_cn WHERE id >=" ,
 		"DELETE FROM my_demo_table WHERE id <>" ,
 		"SELECT name FROM my_demo_table WHERE id =" ,
-		"SELECT fname_cn,price FROM my_demo_table WHERE id <" ,
-		"SELECT * FROM my_demo_table WHERE code ="
+		"SELECT fname_cn,price FROM my_demo_table WHERE id < AND code <" ,
+		"SELECT * FROM my_demo_table"
 	] ,
 	"javaPackage" : "xyz.calvinwilliams.sqlaction"
 }

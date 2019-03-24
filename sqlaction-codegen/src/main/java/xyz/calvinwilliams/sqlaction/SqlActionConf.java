@@ -8,6 +8,7 @@ public class SqlActionConf {
 	LinkedList<String>	sqlactions ;
 	String				javaPackage ;
 	
+	String				javaTableName ;
 	String				javaClassName ;
 	String				javaFileName ;
 }

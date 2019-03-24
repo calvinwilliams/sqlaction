@@ -1,5 +1,6 @@
 package xyz.calvinwilliams.sqlaction;
 
+import java.nio.file.*;
 import java.sql.*;
 import java.util.*;
 
@@ -8,7 +9,7 @@ public class SqlActionTable {
 	List<SqlActionColumn>	columnList ;
 	List<SqlActionIndex>	indexList ;
 
-	public static int GetAllTablesInDatabase( SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database ) throws Exception {
+	public static int GetAllTablesInDatabase( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database ) throws Exception {
 		PreparedStatement	prestmt = null ;
 		ResultSet			rs ;
 		SqlActionTable		table ;
@@ -17,8 +18,10 @@ public class SqlActionTable {
 		
 		database.tableList = new LinkedList<SqlActionTable>() ;
 		
-		prestmt = conn.prepareStatement("SELECT table_name,table_type FROM information_schema.TABLES WHERE table_schema=?") ;
-		prestmt.setString( 1, database.databaseName );
+		if( dbserverConf.dbms.equals(SqlActionDatabase.SQLACTION_DBMS_MYSQL) ) {
+			prestmt = conn.prepareStatement("SELECT table_name,table_type FROM information_schema.TABLES WHERE table_schema=?") ;
+			prestmt.setString( 1, database.databaseName );
+		}
 		rs = prestmt.executeQuery() ;
 		while( rs.next() ) {
 			table = new SqlActionTable() ;
@@ -35,13 +38,13 @@ public class SqlActionTable {
 		rs.close();
 		
 		for( SqlActionTable t : database.tableList ) {
-			nret = SqlActionColumn.GetAllColumnsInTable( conn, database, t ) ;
+			nret = SqlActionColumn.GetAllColumnsInTable( dbserverConf, sqlactionConf, conn, database, t ) ;
 			if( nret != 0 ) {
 				System.out.println( "GetAllColumnsInTable failed["+nret+"] , database["+database.databaseName+"] table["+t.tableName+"]" );
 				return nret;
 			}
 			
-			nret = SqlActionIndex.GetAllIndexesInTable( conn, database, t ) ;
+			nret = SqlActionIndex.GetAllIndexesInTable( dbserverConf, sqlactionConf, conn, database, t ) ;
 			if( nret != 0 ) {
 				System.out.println( "GetAllIndexesInTable failed["+nret+"] , database["+database.databaseName+"] table["+t.tableName+"]" );
 				return nret;
@@ -50,18 +53,49 @@ public class SqlActionTable {
 		
 		return 0;
 	}
-
-	public static int TravelAllTables( List<SqlActionTable> sqlactionTableList, int depth ) throws Exception {
+	
+	public static int TravelAllTablesForGeneratingClassCode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionTable> sqlactionTableList, int depth ) throws Exception {
+		StringBuilder		out = new StringBuilder() ; ;
+		
 		for( SqlActionTable t : sqlactionTableList ) {
+			if( ! t.tableName.equals(sqlactionConf.table) )
+				continue;
+			
+			if( sqlactionConf.javaClassName == null ) {
+				String[] sa = sqlactionConf.table.split( "_" ) ;
+				StringBuilder sb = new StringBuilder() ;
+				for( String s : sa ) {
+					sb.append( s.substring(0,1).toUpperCase(Locale.getDefault()) + s.substring(1) );
+				}
+				sqlactionConf.javaClassName = sb.toString() ;
+			}
+			if( sqlactionConf.javaFileName == null ) {
+				sqlactionConf.javaFileName = sqlactionConf.javaClassName + "SAO.java" ;
+			}
+			
 			for( int n = 0 ; n < depth ; n++ )
 				System.out.print( "\t" );
 			System.out.println( "tableName["+t.tableName+"]" );
 			
-			SqlActionColumn.TravelAllColumns( t.columnList, depth+1 );
+			out.append( "package "+sqlactionConf.javaPackage+";\n" );
+			out.append( "\n" );
+			out.append( "import java.math.*;\n" );
+			out.append( "import java.util.*;\n" );
+			out.append( "import java.sql.Time;\n" );
+			out.append( "import java.sql.Timestamp;\n" );
+			out.append( "\n" );
+			out.append( "public class "+sqlactionConf.javaClassName+"SAO {\n" );
 			
-			SqlActionIndex.TravelAllIndexes( t.indexList, depth+1 );
+			SqlActionColumn.TravelAllColumnsForGeneratingClassCode( dbserverConf, sqlactionConf, t.columnList, depth+1, out );
+			
+			SqlActionIndex.TravelAllIndexesForGeneratingClassCode( dbserverConf, sqlactionConf, t.indexList, depth+1, out );
+			
+			out.append( "}\n" );
+			
+			Files.write( Paths.get(sqlactionConf.javaFileName) , out.toString().getBytes() );
 		}
 		
 		return 0;
 	}
+	
 }

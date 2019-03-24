@@ -24,6 +24,7 @@ public class SqlActionCodegen {
 		int						nret = 0 ;
 		
 		try {
+			// load sqlaction.conf.json
 			currentPath = Paths.get(System.getProperty("user.dir")) ;
 			
 			while( true ) {
@@ -46,6 +47,7 @@ public class SqlActionCodegen {
 				return;
 			}
 			
+			// load dbserver.conf.json
 			while( true ) {
 				try {
 					dbserverConfJsonFilePath = Paths.get(currentPath.toString(),"dbserver.conf.json") ;
@@ -66,23 +68,66 @@ public class SqlActionCodegen {
 				return;
 			}
 			
+			if( dbserverConf.dbms == null ) {
+				String[] sa = dbserverConf.url.split( ":" ) ;
+				if( sa.length < 3 ) {
+					System.out.println( "dbserverConf.url["+dbserverConf.dbms+"] invalid" );
+					return;
+				}
+				
+				dbserverConf.dbms = sa[1] ;
+			}
+			
+			if( ! dbserverConf.dbms.equals("mysql") ) {
+				System.out.println( "dbserverConf.dbms["+dbserverConf.dbms+"] not support" );
+				return;
+			}
+			
+			System.out.println( "--- dbserverConf ---" );
+			System.out.println( "  dbms["+dbserverConf.dbms+"]" );
+			System.out.println( "driver["+dbserverConf.driver+"]" );
+			System.out.println( "   url["+dbserverConf.url+"]" );
+			System.out.println( "  user["+dbserverConf.user+"]" );
+			System.out.println( "   pwd["+dbserverConf.pwd+"]" );
+			
+			System.out.println( "--- sqlactionConf ---" );
+			System.out.println( " database["+sqlactionConf.database+"]" );
+			System.out.println( "    table["+sqlactionConf.table+"]" );
+			for( String sqlaction : sqlactionConf.sqlactions ) {
+				System.out.println( "sqlaction["+sqlaction+"]" );
+			}
+			
+			// query database metadata
 			Class.forName( dbserverConf.driver );
 			conn = DriverManager.getConnection( dbserverConf.url, dbserverConf.user, dbserverConf.pwd ) ;
 			
 			databaseList = new LinkedList<SqlActionDatabase>() ;
 			
-			nret = SqlActionDatabase.GetAllDatabases( sqlactionConf, conn, databaseList ) ;
+			nret = SqlActionDatabase.GetAllDatabases( dbserverConf, sqlactionConf, conn, databaseList ) ;
 			if( nret != 0 ) {
-				System.out.println("GetAllSchemas failed["+nret+"]");
+				System.out.println("*** ERROR : GetAllDatabases failed["+nret+"]");
 				conn.close();
 				return;
 			} else {
-				System.out.println("GetAllSchemas ok");
+				System.out.println("GetAllDatabases ok");
 			}
 			
 			conn.close();
 			
-			SqlActionDatabase.TravelAllDatabases( databaseList, 0 );
+			// generate class code
+			
+			nret = SqlActionDatabase.TravelAllDatabasesForGeneratingClassCode( dbserverConf, sqlactionConf, databaseList, 0 ) ;
+			if( nret != 0 ) {
+				System.out.println("*** ERROR : TravelAllDatabasesForGeneratingClassCode failed["+nret+"]");
+				return;
+			} else {
+				System.out.println("TravelAllDatabasesForGeneratingClassCode ok");
+			}
+			
+			
+			
+			
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

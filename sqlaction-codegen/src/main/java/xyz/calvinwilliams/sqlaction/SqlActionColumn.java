@@ -14,7 +14,7 @@ public class SqlActionColumn {
 	boolean					isPrimaryKey ;
 	String					columnComment ;
 
-	public static int GetColumnFromResultSet( SqlActionDatabase database, SqlActionTable table, SqlActionColumn column, ResultSet rs ) throws Exception {
+	public static int GetColumnFromResultSet( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionDatabase database, SqlActionTable table, SqlActionColumn column, ResultSet rs ) throws Exception {
 		column.columnName = rs.getString(1) ;
 		column.columnDefault = rs.getString(2) ;
 		if( rs.getString(3).equals("NO") )
@@ -39,6 +39,9 @@ public class SqlActionColumn {
 				break;
 			case "bigint" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_BIGINT ;
+				break;
+			case "real" :
+				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_REAL ;
 				break;
 			case "float" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_FLOAT ;
@@ -107,7 +110,7 @@ public class SqlActionColumn {
 		return 0;
 	}
 	
-	public static int GetAllColumnsInTable( Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception  {
+	public static int GetAllColumnsInTable( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception  {
 		PreparedStatement	prestmt = null ;
 		ResultSet			rs ;
 		SqlActionColumn		column ;
@@ -115,14 +118,16 @@ public class SqlActionColumn {
 		
 		table.columnList = new LinkedList<SqlActionColumn>() ;
 		
-		prestmt = conn.prepareStatement("SELECT column_name,column_default,is_nullable,data_type,character_maximum_length,numeric_precision,numeric_scale,column_key,column_comment FROM information_schema.COLUMNS WHERE table_schema=? AND table_name=? ORDER BY ordinal_position ASC") ;
-		prestmt.setString( 1, database.databaseName );
-		prestmt.setString( 2, table.tableName );
+		if( dbserverConf.dbms.equals(SqlActionDatabase.SQLACTION_DBMS_MYSQL) ) {
+			prestmt = conn.prepareStatement("SELECT column_name,column_default,is_nullable,data_type,character_maximum_length,numeric_precision,numeric_scale,column_key,column_comment FROM information_schema.COLUMNS WHERE table_schema=? AND table_name=? ORDER BY ordinal_position ASC") ;
+			prestmt.setString( 1, database.databaseName );
+			prestmt.setString( 2, table.tableName );
+		}
 		rs = prestmt.executeQuery() ;
 		while( rs.next() ) {
 			column = new SqlActionColumn() ;
 			
-			nret = GetColumnFromResultSet( database, table, column, rs );
+			nret = GetColumnFromResultSet( dbserverConf, sqlactionConf, database, table, column, rs );
 			if( nret != 0 ) {
 				System.out.println( "GetColumnFromResultSet failed["+nret+"] , database["+database.databaseName+"] table["+table.tableName+"] column["+column.columnName+"]" );
 				return nret;
@@ -135,13 +140,117 @@ public class SqlActionColumn {
 		return 0;
 	}
 
-	public static int TravelAllColumns( List<SqlActionColumn> sqlactionColumnList, int depth ) throws Exception {
+	public static int TravelAllColumnsForGeneratingClassCode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionColumn> sqlactionColumnList, int depth, StringBuilder out ) throws Exception {
+		String[]		sa ;
+		StringBuilder	sb ;
+		String			javaProperty = null ;
+		
 		for( SqlActionColumn c : sqlactionColumnList ) {
 			for( int n = 0 ; n < depth ; n++ )
 				System.out.print( "\t" );
 			System.out.println( "columnName["+c.columnName+"] columnDefault["+c.columnDefault+"] isNullable["+c.isNullable+"] DataType["+c.dataType+"] columnLength["+c.columnMaximumLength+"] numericPrecision["+c.numericPrecision+"] numericScale["+c.numericScale+"] isPrimaryKey["+c.isPrimaryKey+"] columnComment["+c.columnComment+"]" );
+			
+			sa = c.columnName.split( "_" ) ;
+			sb = new StringBuilder() ;
+			for( String s : sa ) {
+				if( sb.length() == 0 )
+					sb.append( s.substring(0,1).toLowerCase(Locale.getDefault()) + s.substring(1) );
+				else
+					sb.append( s.substring(0,1).toUpperCase(Locale.getDefault()) + s.substring(1) );
+			}
+			javaProperty = sb.toString() ;
+			
+			out.append( "\n" );
+			out.append( "\t" );
+			out.append( "// "+c.columnComment+"\n" );
+			
+			out.append( "\t" );
+			switch( c.dataType ) {
+				case SQLACTION_DATA_TYPE_BIT :
+					out.append( "boolean "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_TINYINT :
+					out.append( "byte "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_SMALLINT :
+					out.append( "short "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_MEDIUMINT :
+					out.append( "int "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_INTEGER :
+					out.append( "int "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_BIGINT :
+					out.append( "long "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_REAL :
+					out.append( "float "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_FLOAT :
+					out.append( "double "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_DOUBLE :
+					out.append( "double "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_DECIMAL :
+					out.append( "BigDecimal "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_NUMBERIC :
+					out.append( "BigDecimal "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_CHAR :
+					out.append( "String "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_VARCHAR :
+					out.append( "String "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_DATE :
+					out.append( "Date "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_TIME :
+					out.append( "Time "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_DATETIME :
+					out.append( "Date "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_TIMESTAMP :
+					out.append( "Timestamp "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_YEAR :
+					out.append( "Date "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_BINARY :
+					out.append( "byte[] "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_VARBINARY :
+					out.append( "byte[] "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_BLOB :
+					out.append( "byte[] "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_TINYBLOB :
+					out.append( "byte[] "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_MEDIUMBLOB :
+					out.append( "byte[] "+javaProperty+" ;" );
+					break;
+				case SQLACTION_DATA_TYPE_LONGBLOB :
+					out.append( "byte[] "+javaProperty+" ;" );
+					break;
+				default :
+					out.append( "String "+javaProperty+" ;" );
+					break;
+			}
+			out.append( "\n" );
+			
 		}
 		
+		
+		out.append( "\n" );
+			
+			
+			
 		return 0;
 	}
 }

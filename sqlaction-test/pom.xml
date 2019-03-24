@@ -7,10 +7,13 @@
   </parent>
   <artifactId>sqlaction-test</artifactId>
   <version>0.1.0</version>
+  <!--
   <dependencies>  
     <dependency>  
       <groupId>xyz.calvinwilliams.sqlaction</groupId>  
-      <artifactId>sqlaction-test</artifactId>  
+      <artifactId>sqlaction-gencode</artifactId>  
       <version>0.1.0</version>  
     </dependency>  
-  </dependencies> </project>
+  </dependencies>
+  -->
+</project>

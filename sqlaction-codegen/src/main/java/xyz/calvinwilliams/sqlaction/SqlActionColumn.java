@@ -13,6 +13,8 @@ public class SqlActionColumn {
 	int						numericScale ;
 	boolean					isPrimaryKey ;
 	String					columnComment ;
+	
+	String					javaPropertyName ;
 
 	public static int GetColumnFromResultSet( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionDatabase database, SqlActionTable table, SqlActionColumn column, ResultSet rs ) throws Exception {
 		column.columnName = rs.getString(1) ;
@@ -141,116 +143,117 @@ public class SqlActionColumn {
 	}
 
 	public static int TravelAllColumnsForGeneratingClassCode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionColumn> sqlactionColumnList, int depth, StringBuilder out ) throws Exception {
-		String[]		sa ;
-		StringBuilder	sb ;
-		String			javaProperty = null ;
 		
+		out.append( "\n" );
 		for( SqlActionColumn c : sqlactionColumnList ) {
 			for( int n = 0 ; n < depth ; n++ )
 				System.out.print( "\t" );
 			System.out.println( "columnName["+c.columnName+"] columnDefault["+c.columnDefault+"] isNullable["+c.isNullable+"] DataType["+c.dataType+"] columnLength["+c.columnMaximumLength+"] numericPrecision["+c.numericPrecision+"] numericScale["+c.numericScale+"] isPrimaryKey["+c.isPrimaryKey+"] columnComment["+c.columnComment+"]" );
 			
-			sa = c.columnName.split( "_" ) ;
-			sb = new StringBuilder() ;
+			String[] sa = c.columnName.split( "_" ) ;
+			StringBuilder javaPropertyNameBuilder = new StringBuilder() ;
 			for( String s : sa ) {
-				if( sb.length() == 0 )
-					sb.append( s.substring(0,1).toLowerCase(Locale.getDefault()) + s.substring(1) );
+				if( javaPropertyNameBuilder.length() == 0 )
+					javaPropertyNameBuilder.append( s.substring(0,1).toLowerCase(Locale.getDefault()) + s.substring(1) );
 				else
-					sb.append( s.substring(0,1).toUpperCase(Locale.getDefault()) + s.substring(1) );
+					javaPropertyNameBuilder.append( s.substring(0,1).toUpperCase(Locale.getDefault()) + s.substring(1) );
 			}
-			javaProperty = sb.toString() ;
+			c.javaPropertyName = javaPropertyNameBuilder.toString() ;
 			
-			out.append( "\n" );
 			out.append( "\t" );
 			out.append( "// "+c.columnComment+"\n" );
 			
 			out.append( "\t" );
 			switch( c.dataType ) {
 				case SQLACTION_DATA_TYPE_BIT :
-					out.append( "boolean "+javaProperty+" ;" );
+					out.append( "boolean "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_TINYINT :
-					out.append( "byte "+javaProperty+" ;" );
+					out.append( "byte "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_SMALLINT :
-					out.append( "short "+javaProperty+" ;" );
+					out.append( "short "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_MEDIUMINT :
-					out.append( "int "+javaProperty+" ;" );
+					out.append( "int "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_INTEGER :
-					out.append( "int "+javaProperty+" ;" );
+					out.append( "int "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_BIGINT :
-					out.append( "long "+javaProperty+" ;" );
+					out.append( "long "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_REAL :
-					out.append( "float "+javaProperty+" ;" );
+					out.append( "float "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_FLOAT :
-					out.append( "double "+javaProperty+" ;" );
+					out.append( "double "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_DOUBLE :
-					out.append( "double "+javaProperty+" ;" );
+					out.append( "double "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_DECIMAL :
-					out.append( "BigDecimal "+javaProperty+" ;" );
+					out.append( "BigDecimal "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_NUMBERIC :
-					out.append( "BigDecimal "+javaProperty+" ;" );
+					out.append( "BigDecimal "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_CHAR :
-					out.append( "String "+javaProperty+" ;" );
+					out.append( "String "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_VARCHAR :
-					out.append( "String "+javaProperty+" ;" );
+					out.append( "String "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_DATE :
-					out.append( "Date "+javaProperty+" ;" );
+					out.append( "Date "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_TIME :
-					out.append( "Time "+javaProperty+" ;" );
+					out.append( "Time "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_DATETIME :
-					out.append( "Date "+javaProperty+" ;" );
+					out.append( "Date "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_TIMESTAMP :
-					out.append( "Timestamp "+javaProperty+" ;" );
+					out.append( "Timestamp "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_YEAR :
-					out.append( "Date "+javaProperty+" ;" );
+					out.append( "Date "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_BINARY :
-					out.append( "byte[] "+javaProperty+" ;" );
+					out.append( "byte[] "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_VARBINARY :
-					out.append( "byte[] "+javaProperty+" ;" );
+					out.append( "byte[] "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_BLOB :
-					out.append( "byte[] "+javaProperty+" ;" );
+					out.append( "byte[] "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_TINYBLOB :
-					out.append( "byte[] "+javaProperty+" ;" );
+					out.append( "byte[] "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_MEDIUMBLOB :
-					out.append( "byte[] "+javaProperty+" ;" );
+					out.append( "byte[] "+c.javaPropertyName+" ;" );
 					break;
 				case SQLACTION_DATA_TYPE_LONGBLOB :
-					out.append( "byte[] "+javaProperty+" ;" );
+					out.append( "byte[] "+c.javaPropertyName+" ;" );
 					break;
 				default :
-					out.append( "String "+javaProperty+" ;" );
+					out.append( "String "+c.javaPropertyName+" ;" );
 					break;
 			}
 			out.append( "\n" );
+		}
+		
+		out.append( "\n" );
+		for( String s : sqlactionConf.sqlactions ) {
+			String[] sa = s.split( " " ) ;
+			int n = 0 ;
+			
 			
 		}
 		
-		
 		out.append( "\n" );
-			
-			
-			
+		
 		return 0;
 	}
 }

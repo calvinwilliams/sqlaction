@@ -2,7 +2,12 @@
 	"database" : "calvindb" ,
 	"table" : "my_demo_table" ,
 	"sqlactions" : [
+		"INSERT INTO my_demo_table" ,
+		"UPDATE my_demo_table SET fname_cn WHERE id =" ,
+		"UPDATE my_demo_table SET name,fname_cn WHERE id >=" ,
+		"DELETE FROM my_demo_table WHERE id <>" ,
 		"SELECT name FROM my_demo_table WHERE id =" ,
+		"SELECT fname_cn,price FROM my_demo_table WHERE id <" ,
 		"SELECT * FROM my_demo_table WHERE code ="
 	] ,
 	"javaPackage" : "xyz.calvinwilliams.sqlaction"

@@ -57,7 +57,7 @@ public class SqlActionIndex {
 			
 			for( SqlActionColumn c : i.columnList ) {
 				if( dbserverConf.dbms.equals(SqlActionDatabase.SQLACTION_DBMS_MYSQL) ) {
-					prestmt = conn.prepareStatement("SELECT column_name,column_default,is_nullable,data_type,character_maximum_length,numeric_precision,numeric_scale,column_key,column_comment FROM information_schema.COLUMNS WHERE table_schema=? AND table_name=? AND column_name=?") ;
+					prestmt = conn.prepareStatement("SELECT column_name,column_default,is_nullable,data_type,character_maximum_length,numeric_precision,numeric_scale,column_key,extra,column_comment FROM information_schema.COLUMNS WHERE table_schema=? AND table_name=? AND column_name=?") ;
 					prestmt.setString( 1, database.databaseName );
 					prestmt.setString( 2, table.tableName );
 					prestmt.setString( 3, c.columnName );

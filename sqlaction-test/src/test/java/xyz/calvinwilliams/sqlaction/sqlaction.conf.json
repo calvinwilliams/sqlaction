@@ -2,15 +2,15 @@
 	"database" : "calvindb" ,
 	"table" : "my_demo_table" ,
 	"sqlactions" : [
-		"SELECT name FROM my_demo_table WHERE id =" ,
+		"SELECT name FROM my_demo_table WHERE code =" ,
 		"SELECT fname_cn,price FROM my_demo_table WHERE id < AND code =" ,
 		"SELECT * FROM my_demo_table" ,
 		"INSERT INTO my_demo_table" ,
 		"UPDATE my_demo_table SET fname_cn" ,
-		"UPDATE my_demo_table SET fname_cn WHERE id =" ,
+		"UPDATE my_demo_table SET fname_cn WHERE code =" ,
 		"UPDATE my_demo_table SET name,fname_cn WHERE id >= AND code =" ,
 		"DELETE FROM my_demo_table" ,
-		"DELETE FROM my_demo_table WHERE id <>" ,
+		"DELETE FROM my_demo_table WHERE code <>" ,
 		"DELETE FROM my_demo_table WHERE id <> AND code <>"
 	] ,
 	"javaPackage" : "xyz.calvinwilliams.sqlaction"

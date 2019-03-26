@@ -242,6 +242,89 @@ public class SqlActionColumn {
 		return index;
 	}
 	
+	public static int ParseSetInputColumnForGeneratingMethodCode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, int columnIndex, SqlActionColumn column, StringBuilder out ) {
+
+		switch( column.dataType ) {
+			case SQLACTION_DATA_TYPE_BIT :
+				out.append( "\t\t" + "prestmt.setBoolean( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_TINYINT :
+				out.append( "\t\t" + "prestmt.setByte( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_SMALLINT :
+				out.append( "\t\t" + "prestmt.setShort( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_MEDIUMINT :
+				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_INTEGER :
+				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_BIGINT :
+				out.append( "\t\t" + "prestmt.setLong( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_REAL :
+				out.append( "\t\t" + "prestmt.setFloat( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_FLOAT :
+				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_DOUBLE :
+				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_DECIMAL :
+				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_NUMBERIC :
+				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_CHAR :
+				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_VARCHAR :
+				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_DATE :
+				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_TIME :
+				out.append( "\t\t" + "prestmt.setTime( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_DATETIME :
+				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_TIMESTAMP :
+				out.append( "\t\t" + "prestmt.setTimestamp( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_YEAR :
+				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_BINARY :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_VARBINARY :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_BLOB :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_TINYBLOB :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_MEDIUMBLOB :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_LONGBLOB :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
+				break;
+			default :
+				System.out.println( "dataType["+column.dataType+"] invalid" );
+				return -1;
+		}
+		
+		return 0;
+	}
+	
 	public static int ParseWhereInputColumnForGeneratingMethodCode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, int columnIndex, SqlActionColumn column, StringBuilder out ) {
 
 		switch( column.dataType ) {
@@ -481,8 +564,8 @@ public class SqlActionColumn {
 		
 		out.append( "\n" );
 		out.append( "\t" + "// "+sqlaction+"\n" );
-		out.append( "\t" + "public int " + methodName.toString() + "( Connection conn, List<" +sqlactionConf.javaClassName+ "> selectOutputList, " + sqlactionConf.javaClassName + " whereInput ) throws Exception {\n" );
 		if( hasWHERE == true ) {
+			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, List<" +sqlactionConf.javaClassName+ "> selectOutputList, " + sqlactionConf.javaClassName + " whereInput ) throws Exception {\n" );
 			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
 			int	columnIndex = 0 ;
 			for( SqlActionColumn c : whereInputputColumnList ) {
@@ -495,12 +578,12 @@ public class SqlActionColumn {
 			}
 			out.append( "\t\t" + "ResultSet rs = prestmt.executeQuery() ;\n" );
 		} else {
+			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, List<" +sqlactionConf.javaClassName+ "> selectOutputList ) throws Exception {\n" );
 			out.append( "\t\t" + "Statement stmt = conn.createStatement() ;\n" );
 			out.append( "\t\t" + "ResultSet rs = stmt.executeQuery(\""+sql+"\") ;\n" );
 		}
-		out.append( "\t\t" + sqlactionConf.javaClassName+ " selectOutput ;\n" );
 		out.append( "\t\t" + "while( rs.next() ) {\n" );
-		out.append( "\t\t\t" + "selectOutput = new "+sqlactionConf.javaClassName+"() ;\n" );
+		out.append( "\t\t\t" + sqlactionConf.javaClassName + " selectOutput = new "+sqlactionConf.javaClassName+"() ;\n" );
 		if( selectOutputputColumnList != null )
 			nret = ParseSelectOutputColumnsForGeneratingMethodCode( dbserverConf, sqlactionConf, selectOutputputColumnList, out ) ;
 		else
@@ -511,7 +594,7 @@ public class SqlActionColumn {
 		}
 		out.append( "\t\t\t" + "selectOutputList.add(selectOutput);\n" );
 		out.append( "\t\t" + "}\n" );
-		out.append( "\t\t" + "return 0;\n" );
+		out.append( "\t\t" + "return selectOutputList.size();\n" );
 		out.append( "\t" + "}\n" );
 		
 		return 0;
@@ -550,7 +633,7 @@ public class SqlActionColumn {
 		
 		out.append( "\n" );
 		out.append( "\t" + "// "+sqlaction+"\n" );
-		out.append( "\t" + "public int " + methodName.toString() + "( Connection conn, List<" +sqlactionConf.javaClassName+ "> selectOutputList, " + sqlactionConf.javaClassName + " whereInput ) throws Exception {\n" );
+		out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionConf.javaClassName + " whereInput ) throws Exception {\n" );
 		out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
 		int	columnIndex = 0 ;
 		for( SqlActionColumn c : sqlactionColumnList ) {
@@ -632,12 +715,12 @@ public class SqlActionColumn {
 		out.append( "\n" );
 		out.append( "\t" + "// "+sqlaction+"\n" );
 		if( hasWHERE == true ) {
-			out.append( "\t" + "public int " + methodName.toString() + "( Connection conn, " + sqlactionConf.javaClassName + " whereInput ) throws Exception {\n" );
+			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionConf.javaClassName + " setInput, " + sqlactionConf.javaClassName + " whereInput ) throws Exception {\n" );
 			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
 			int	columnIndex = 0 ;
 			for( SqlActionColumn c : setInputColumnList ) {
 				columnIndex++;
-				nret = ParseWhereInputColumnForGeneratingMethodCode( dbserverConf, sqlactionConf, columnIndex, c, out ) ;
+				nret = ParseSetInputColumnForGeneratingMethodCode( dbserverConf, sqlactionConf, columnIndex, c, out ) ;
 				if( nret != 0 ) {
 					System.out.println( "ParseWhereInputColumnForGeneratingMethodCode["+sa.toString()+"] failed["+nret+"]" );
 					return nret;
@@ -653,9 +736,18 @@ public class SqlActionColumn {
 			}
 			out.append( "\t\t" + "return prestmt.executeUpdate() ;\n" );
 		} else {
-			out.append( "\t" + "public int " + methodName.toString() + "( Connection conn ) throws Exception {\n" );
-			out.append( "\t\t" + "Statement stmt = conn.createStatement() ;\n" );
-			out.append( "\t\t" + "return stmt.executeUpdate(\""+sql+"\") ;\n" );
+			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionConf.javaClassName + " setInput ) throws Exception {\n" );
+			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
+			int	columnIndex = 0 ;
+			for( SqlActionColumn c : setInputColumnList ) {
+				columnIndex++;
+				nret = ParseSetInputColumnForGeneratingMethodCode( dbserverConf, sqlactionConf, columnIndex, c, out ) ;
+				if( nret != 0 ) {
+					System.out.println( "ParseWhereInputColumnForGeneratingMethodCode["+sa.toString()+"] failed["+nret+"]" );
+					return nret;
+				}
+			}
+			out.append( "\t\t" + "return prestmt.executeUpdate() ;\n" );
 		}
 		out.append( "\t" + "}\n" );
 		
@@ -668,7 +760,6 @@ public class SqlActionColumn {
 		StringBuilder			methodName = new StringBuilder() ;
 		boolean					hasWHERE ;
 		int						index ;
-		List<SqlActionColumn>	selectOutputputColumnList = null ;
 		List<SqlActionColumn>	whereInputputColumnList = null ;
 		int						nret = 0 ;
 		
@@ -709,7 +800,7 @@ public class SqlActionColumn {
 		out.append( "\n" );
 		out.append( "\t" + "// "+sqlaction+"\n" );
 		if( hasWHERE == true ) {
-			out.append( "\t" + "public int " + methodName.toString() + "( Connection conn, " + sqlactionConf.javaClassName + " whereInput ) throws Exception {\n" );
+			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionConf.javaClassName + " whereInput ) throws Exception {\n" );
 			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
 			int	columnIndex = 0 ;
 			for( SqlActionColumn c : whereInputputColumnList ) {
@@ -722,7 +813,7 @@ public class SqlActionColumn {
 			}
 			out.append( "\t\t" + "return prestmt.executeUpdate() ;\n" );
 		} else {
-			out.append( "\t" + "public int " + methodName.toString() + "( Connection conn ) throws Exception {\n" );
+			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn ) throws Exception {\n" );
 			out.append( "\t\t" + "Statement stmt = conn.createStatement() ;\n" );
 			out.append( "\t\t" + "return stmt.executeUpdate(\""+sql+"\") ;\n" );
 		}

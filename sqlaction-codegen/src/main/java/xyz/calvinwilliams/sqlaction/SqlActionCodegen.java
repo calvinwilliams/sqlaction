@@ -5,8 +5,6 @@ import java.nio.file.*;
 import java.sql.*;
 import java.util.*;
 
-import xyz.calvinwilliams.okjson.*;
-
 public class SqlActionCodegen {
 
 	public static void main(String[] args) {

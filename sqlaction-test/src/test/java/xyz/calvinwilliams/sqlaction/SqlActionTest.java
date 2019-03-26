@@ -10,8 +10,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
 
-import xyz.calvinwilliams.okjson.OKJSON;
-
 public class SqlActionTest {
 
 	public static int TestSelectTable( Connection conn ) throws Exception {
@@ -183,7 +181,6 @@ public class SqlActionTest {
 	
 	public static int TestDeleteTable2( Connection conn ) throws Exception {
 		
-		MyDemoTableSAO			whereInput ;
 		int						nret = 0 ;
 		
 		try {

@@ -931,6 +931,27 @@ public class SqlActionColumn {
 		}
 		
 		for( String s : sqlactionConf.sqlactions ) {
+			SqlActionSyntaxParser parser = new SqlActionSyntaxParser() ;
+			nret = parser.ParseSyntax(s) ;
+			if( nret != 0 ) {
+				System.out.println( "SqlActionSyntaxParser.ParseSyntax failed["+nret+"]" );
+				return nret;
+			}
+			
+			if( parser.fromTableTokenList.size() > 0 ) {
+				
+			} else if( parser.insertTableName != null ) {
+				
+			} else if( parser.updateTableName != null ) {
+				
+			} else if( parser.deleteTableName != null ) {
+				
+			} else {
+				System.out.println( "sqlaction["+s+"] invalid" );
+				return -1;
+			}
+			
+			/*
 			s = s.toLowerCase() ;
 			String[] sa = s.split( " |\t|\r|\n" ) ;
 			if( sa[0].equals("select") && sa[2].equals("from") && sa[3].equals(sqlactionConf.javaTableName) ) {
@@ -961,6 +982,7 @@ public class SqlActionColumn {
 				System.out.println( "sqlaction["+sa[0]+"] invalid" );
 				return -1;
 			}
+			*/
 		}
 		
 		out.append( "\n" );

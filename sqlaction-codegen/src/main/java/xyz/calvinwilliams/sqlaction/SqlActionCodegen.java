@@ -113,7 +113,6 @@ public class SqlActionCodegen {
 			conn.close();
 			
 			// generate class code
-			
 			nret = SqlActionDatabase.TravelAllDatabasesForGeneratingClassCode( dbserverConf, sqlactionConf, databaseList, 0 ) ;
 			if( nret != 0 ) {
 				System.out.println("*** ERROR : TravelAllDatabasesForGeneratingClassCode failed["+nret+"]");
@@ -121,11 +120,6 @@ public class SqlActionCodegen {
 			} else {
 				System.out.println("TravelAllDatabasesForGeneratingClassCode ok");
 			}
-			
-			
-			
-			
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

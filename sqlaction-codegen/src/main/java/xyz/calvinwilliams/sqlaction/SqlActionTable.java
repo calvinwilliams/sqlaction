@@ -60,6 +60,10 @@ public class SqlActionTable {
 		StringBuilder		out = new StringBuilder() ;
 		
 		for( SqlActionTable t : sqlactionTableList ) {
+			for( int n = 0 ; n < depth ; n++ )
+				System.out.print( "\t" );
+			System.out.println( "tableName["+t.tableName+"]" );
+			
 			SqlActionColumn.TravelAllColumns( dbserverConf, sqlactionConf, t.columnList, depth+1, out );
 			
 			SqlActionIndex.TravelAllIndexes( dbserverConf, sqlactionConf, t.indexList, depth+1, out );

@@ -4,6 +4,6 @@ import java.util.*;
 
 public class SqlActionConf {
 	String							database ;
-	LinkedList<SqlActionTableConf>	tableConfList ;
+	LinkedList<SqlActionTableConf>	tables ;
 	String							javaPackage ;
 }

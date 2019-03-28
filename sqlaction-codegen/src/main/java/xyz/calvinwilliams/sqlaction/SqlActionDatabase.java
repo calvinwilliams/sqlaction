@@ -42,7 +42,7 @@ public class SqlActionDatabase {
 		return 0;
 	}
 	
-	public static int TravelAllDatabasesForGeneratingClassCode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionDatabase> sqlactionDatabaseList, int depth ) throws Exception {
+	public static int TravelAllDatabases( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionDatabase> sqlactionDatabaseList, int depth ) throws Exception {
 		for( SqlActionDatabase d : sqlactionDatabaseList ) {
 			if( ! d.databaseName.equals(sqlactionConf.database) )
 				continue;
@@ -51,7 +51,7 @@ public class SqlActionDatabase {
 				System.out.print( "\t" );
 			System.out.println( "databaseName["+d.databaseName+"]" );
 			
-			SqlActionTable.TravelAllTablesForGeneratingClassCode( dbserverConf, sqlactionConf, d.tableList, depth+1 );
+			SqlActionTable.TravelAllTables( dbserverConf, sqlactionConf, d.tableList, depth+1 );
 		}
 		
 		return 0;

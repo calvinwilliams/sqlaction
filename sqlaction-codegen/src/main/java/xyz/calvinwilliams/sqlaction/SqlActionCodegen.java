@@ -17,12 +17,12 @@ public class SqlActionCodegen {
 		DbServerConf			dbserverConf ;
 		
 		Connection				conn = null ;
-		List<SqlActionDatabase>	databaseList = null ;
+		SqlActionDatabase		database = null ;
 		
 		int						nret = 0 ;
 		
 		try {
-			// load sqlaction.conf.json
+			// Load sqlaction.conf.json
 			currentPath = Paths.get(System.getProperty("user.dir")) ;
 			
 			while( true ) {
@@ -45,7 +45,7 @@ public class SqlActionCodegen {
 				return;
 			}
 			
-			// load dbserver.conf.json
+			// Load dbserver.conf.json
 			while( true ) {
 				try {
 					dbserverConfJsonFilePath = Paths.get(currentPath.toString(),"dbserver.conf.json") ;
@@ -90,36 +90,96 @@ public class SqlActionCodegen {
 			
 			System.out.println( "--- sqlactionConf ---" );
 			System.out.println( " database["+sqlactionConf.database+"]" );
-			System.out.println( "    table["+sqlactionConf.table+"]" );
-			for( String sqlaction : sqlactionConf.sqlactions ) {
-				System.out.println( "sqlaction["+sqlaction+"]" );
+			for( SqlActionTableConf tc : sqlactionConf.tableConfList ) {
+				System.out.println( "    table["+tc.table+"]" );
+				for( String s : tc.sqlactions ) {
+					System.out.println( "sqlaction["+s+"]" );
+				}
 			}
 			
-			// query database metadata
+			// Query database metadata
 			Class.forName( dbserverConf.driver );
 			conn = DriverManager.getConnection( dbserverConf.url, dbserverConf.user, dbserverConf.pwd ) ;
 			
-			databaseList = new LinkedList<SqlActionDatabase>() ;
+			database = new SqlActionDatabase() ;
+			database.databaseName = sqlactionConf.database ;
 			
-			nret = SqlActionDatabase.GetAllDatabases( dbserverConf, sqlactionConf, conn, databaseList ) ;
+			nret = SqlActionTable.GetAllTablesInDatabase( dbserverConf, sqlactionConf, conn, database ) ;
 			if( nret != 0 ) {
-				System.out.println("*** ERROR : GetAllDatabases failed["+nret+"]");
+				System.out.println("*** ERROR : SqlActionTable.GetAllTablesInDatabase failed["+nret+"]");
 				conn.close();
 				return;
 			} else {
-				System.out.println("GetAllDatabases ok");
+				System.out.println("SqlActionTable.GetAllTablesInDatabase ok");
 			}
 			
 			conn.close();
 			
-			// generate class code
-			nret = SqlActionDatabase.TravelAllDatabasesForGeneratingClassCode( dbserverConf, sqlactionConf, databaseList, 0 ) ;
+			// Show all databases and tables and columns and indexes
+			nret = SqlActionTable.TravelAllTables( dbserverConf, sqlactionConf, database.tableList, 1 ) ;
 			if( nret != 0 ) {
-				System.out.println("*** ERROR : TravelAllDatabasesForGeneratingClassCode failed["+nret+"]");
+				System.out.println("*** ERROR : SqlActionTable.TravelAllTables failed["+nret+"]");
 				return;
 			} else {
-				System.out.println("TravelAllDatabasesForGeneratingClassCode ok");
+				System.out.println("SqlActionTable.TravelAllTables ok");
 			}
+			
+			// Generate class code
+			for( SqlActionTableConf sqlactionTableConf : sqlactionConf.tableConfList ) {
+				String[] sa = sqlactionTableConf.table.split( "_" ) ;
+				StringBuilder sb = new StringBuilder() ;
+				for( String s : sa ) {
+					sb.append( s.substring(0,1).toUpperCase(Locale.getDefault()) + s.substring(1) );
+				}
+				sqlactionTableConf.javaClassName = sb.toString() + "SAO" ;
+				sqlactionTableConf.javaFileName = sqlactionTableConf.javaClassName + ".java" ;
+				
+				StringBuilder out = new StringBuilder() ;
+				
+				out.append( "package "+sqlactionConf.javaPackage+";\n" );
+				out.append( "\n" );
+				out.append( "import java.math.*;\n" );
+				out.append( "import java.util.*;\n" );
+				out.append( "import java.sql.Time;\n" );
+				out.append( "import java.sql.Timestamp;\n" );
+				out.append( "import java.sql.Connection;\n" );
+				out.append( "import java.sql.Statement;\n" );
+				out.append( "import java.sql.PreparedStatement;\n" );
+				out.append( "import java.sql.ResultSet;\n" );
+				out.append( "\n" );
+				out.append( "public class "+sqlactionTableConf.javaClassName+" {\n" );
+				
+				// Parse sql actions and dump gencode
+				for( String sqlactions : sqlactionTableConf.sqlactions ) {
+					SqlActionSyntaxParser parser = new SqlActionSyntaxParser() ;
+					nret = parser.ParseSyntax(sqlactions) ;
+					if( nret != 0 ) {
+						System.out.println( "SqlActionSyntaxParser.ParseSyntax failed["+nret+"]" );
+						return;
+					}
+					
+					if( parser.selectAllColumn == true ) {
+						for( SqlActionFromTableToken tt : parser.fromTableTokenList ) {
+							
+							
+							
+							SqlActionSelectColumnToken ct = new SqlActionSelectColumnToken() ;
+							ct.tableName = tt.tableName ;
+							ct.tableAliasName = tt.tableAliasName ;
+							
+							
+							
+						}
+					}
+				}
+				
+				out.append( "}\n" );
+				
+				Files.write( Paths.get(sqlactionTableConf.javaFileName) , out.toString().getBytes() );
+			}
+			
+			
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

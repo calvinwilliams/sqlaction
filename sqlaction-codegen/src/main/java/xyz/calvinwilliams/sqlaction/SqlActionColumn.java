@@ -907,16 +907,17 @@ public class SqlActionColumn {
 		return 0;
 	}
 	
-	public static int TravelAllColumnsForGeneratingClassCode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionColumn> sqlactionColumnList, int depth, StringBuilder out ) throws Exception {
+	public static int TravelAllColumns( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionColumn> sqlactionColumnList, int depth, StringBuilder out ) throws Exception {
 		
 		int		nret = 0 ;
 		
-		out.append( "\n" );
+		// out.append( "\n" );
 		for( SqlActionColumn c : sqlactionColumnList ) {
 			for( int n = 0 ; n < depth ; n++ )
 				System.out.print( "\t" );
 			System.out.println( "columnName["+c.columnName+"] columnDefault["+c.columnDefault+"] isNullable["+c.isNullable+"] DataType["+c.dataType+"] columnLength["+c.columnMaximumLength+"] numericPrecision["+c.numericPrecision+"] numericScale["+c.numericScale+"] isPrimaryKey["+c.isPrimaryKey+"] isAutoIncrement["+c.isAutoIncrement+"] columnComment["+c.columnComment+"]" );
 			
+			/*
 			String[] sa = c.columnName.split( "_" ) ;
 			StringBuilder javaPropertyNameBuilder = new StringBuilder() ;
 			for( String s : sa ) {
@@ -928,14 +929,25 @@ public class SqlActionColumn {
 			c.javaPropertyName = javaPropertyNameBuilder.toString() ;
 			
 			ParseDefinePropertyForGeneratingClassCode( c, out );
+			*/
 		}
 		
+		/*
 		for( String s : sqlactionConf.sqlactions ) {
 			SqlActionSyntaxParser parser = new SqlActionSyntaxParser() ;
 			nret = parser.ParseSyntax(s) ;
 			if( nret != 0 ) {
 				System.out.println( "SqlActionSyntaxParser.ParseSyntax failed["+nret+"]" );
 				return nret;
+			}
+			
+			if( parser.selectAllColumn == true ) {
+				for( SqlActionFromTableToken tt : parser.fromTableTokenList ) {
+					SqlActionSelectColumnToken ct = new SqlActionSelectColumnToken() ;
+					ct.tableName = tt.tableName ;
+					ct.tableAliasName = tt.tableAliasName ;
+					
+				}
 			}
 			
 			if( parser.fromTableTokenList.size() > 0 ) {
@@ -951,7 +963,11 @@ public class SqlActionColumn {
 				return -1;
 			}
 			
-			/*
+			
+			
+			
+			
+			
 			s = s.toLowerCase() ;
 			String[] sa = s.split( " |\t|\r|\n" ) ;
 			if( sa[0].equals("select") && sa[2].equals("from") && sa[3].equals(sqlactionConf.javaTableName) ) {
@@ -982,10 +998,10 @@ public class SqlActionColumn {
 				System.out.println( "sqlaction["+sa[0]+"] invalid" );
 				return -1;
 			}
-			*/
 		}
 		
 		out.append( "\n" );
+		*/
 		
 		return 0;
 	}

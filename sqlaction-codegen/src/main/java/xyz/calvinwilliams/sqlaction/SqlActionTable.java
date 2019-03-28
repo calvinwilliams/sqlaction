@@ -27,8 +27,10 @@ public class SqlActionTable {
 			table = new SqlActionTable() ;
 			
 			table.tableName = rs.getString(1) ;
+			/*
 			if( ! table.tableName.equals(sqlactionConf.table) )
 				continue;
+			*/
 			tableType = rs.getString(2) ;
 			if( ! tableType.equals("BASE TABLE") )
 				continue;
@@ -54,10 +56,15 @@ public class SqlActionTable {
 		return 0;
 	}
 	
-	public static int TravelAllTablesForGeneratingClassCode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionTable> sqlactionTableList, int depth ) throws Exception {
-		StringBuilder		out = new StringBuilder() ; ;
+	public static int TravelAllTables( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionTable> sqlactionTableList, int depth ) throws Exception {
+		StringBuilder		out = new StringBuilder() ;
 		
 		for( SqlActionTable t : sqlactionTableList ) {
+			SqlActionColumn.TravelAllColumns( dbserverConf, sqlactionConf, t.columnList, depth+1, out );
+			
+			SqlActionIndex.TravelAllIndexes( dbserverConf, sqlactionConf, t.indexList, depth+1, out );
+			
+			/*
 			if( SqlActionUtil.wildcardMatch( sqlactionConf.table, t.tableName ) != 0 )
 				continue;
 			
@@ -100,6 +107,7 @@ public class SqlActionTable {
 			out.append( "}\n" );
 			
 			Files.write( Paths.get(sqlactionConf.javaFileName) , out.toString().getBytes() );
+			*/
 		}
 		
 		return 0;

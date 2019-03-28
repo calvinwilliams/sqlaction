@@ -1,17 +1,32 @@
 {
 	"database" : "calvindb" ,
-	"table" : "my_demo_table" ,
-	"sqlactions" : [
-		"SELECT name FROM my_demo_table WHERE code =" ,
-		"SELECT fname_cn,price FROM my_demo_table WHERE id < AND code =" ,
-		"SELECT * FROM my_demo_table" ,
-		"INSERT INTO my_demo_table" ,
-		"UPDATE my_demo_table SET fname_cn" ,
-		"UPDATE my_demo_table SET fname_cn WHERE code =" ,
-		"UPDATE my_demo_table SET name,fname_cn WHERE id >= AND code =" ,
-		"DELETE FROM my_demo_table" ,
-		"DELETE FROM my_demo_table WHERE code <>" ,
-		"DELETE FROM my_demo_table WHERE id <> AND code <>"
+	"tables" : [
+		{
+			"table" : "user" ,
+			"sqlactions" : [
+				"INSERT INTO user" ,
+				"SELECT * FROM user" ,
+				"SELECT * FROM user WHERE name=?" ,
+				"SELECT name,address,level FROM user WHERE age<? AND gender=?" ,
+				"UPDATE user SET level=?" ,
+				"UPDATE user SET level WHERE name=?" ,
+				"UPDATE user SET level WHERE age>=? AND gender=?" ,
+				"DELETE FROM user" ,
+				"DELETE FROM user WHERE name<>'calvin'" ,
+				"DELETE FROM user WHERE age<>? AND gender<>?"
+			]
+		} ,
+		{
+			"table" : "order" ,
+			"sqlactions" : [
+				"INSERT INTO order" ,
+				"SELECT * FROM order WHERE user_id=?" ,
+				"SELECT user.name,user.address,order.item_name,order.amount,order.total_price FROM user,order WHERE user.id=? AND user.id=order.user_id" ,
+				"SELECT u.name,u.address,o.item_name,o.amount,o.total_price FROM user u,order o WHERE u.id=? AND u.id=o.user_id" ,
+				"UPDATE order SET total_price WHERE id=?" ,
+				"DELETE FROM order WHERE id=?"
+			]
+		}
 	] ,
 	"javaPackage" : "xyz.calvinwilliams.sqlaction"
 }

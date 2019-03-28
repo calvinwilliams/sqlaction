@@ -113,4 +113,12 @@ public class SqlActionTable {
 		return 0;
 	}
 	
+	public static SqlActionTable FindTable( List<SqlActionTable> sqlactionTableList, String tableName ) throws Exception {
+		for( SqlActionTable t : sqlactionTableList ) {
+			if( t.tableName.equals(tableName) )
+				return t;
+		}
+		
+		return null;
+	}
 }

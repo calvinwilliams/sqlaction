@@ -147,7 +147,7 @@ public class SqlActionColumn {
 		return 0;
 	}
 	
-	private static SqlActionColumn FindColumn( List<SqlActionColumn> sqlactionColumnList, String columnName ) {
+	public static SqlActionColumn FindColumn( List<SqlActionColumn> sqlactionColumnList, String columnName ) {
 		for( SqlActionColumn c : sqlactionColumnList ) {
 			if( c.columnName.equals(columnName) )
 				return c; 

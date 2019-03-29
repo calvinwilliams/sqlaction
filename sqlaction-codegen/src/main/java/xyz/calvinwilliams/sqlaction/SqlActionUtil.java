@@ -55,4 +55,15 @@ public class SqlActionUtil {
 	public static int wildcardMatch( String wildcard, String str ) {
 		return wildcardMatchChar( wildcard.toCharArray(), 0, wildcard.length(), str.toCharArray(), 0, str.length() );
 	}
+	
+	public static String convertToUnderscoreExceptForLetterAndDigit( String str ) {
+		char[] charArray = str.toCharArray() ;
+		int	strLength = str.length() ;
+		for( int i = 0 ; i < strLength ; i++ ) {
+			if( ! Character.isLetterOrDigit(charArray[i]) ) {
+				charArray[i] = '_' ;
+			}
+		}
+		return new String( charArray );
+	}
 }

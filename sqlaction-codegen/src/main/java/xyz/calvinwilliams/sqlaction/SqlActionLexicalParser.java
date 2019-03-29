@@ -53,6 +53,7 @@ public class SqlActionLexicalParser {
 					return new String(sql,beginOffset,parserOffset-beginOffset);
 				}
 				
+				parserOffset++;
 				while( parserOffset < sqlLength ) {
 					if( sql[parserOffset] == sql[beginOffset] )
 						break;
@@ -60,6 +61,7 @@ public class SqlActionLexicalParser {
 				}
 				if( parserOffset >= sqlLength )
 					return null;
+				
 				parserOffset++;
 				return new String(sql,beginOffset,parserOffset-beginOffset);
 			} else if( sql[parserOffset] == '=' ) {
@@ -67,6 +69,7 @@ public class SqlActionLexicalParser {
 					return new String(sql,beginOffset,parserOffset-beginOffset);
 				}
 				
+				parserOffset++;
 				return new String(sql,beginOffset,1);
 			} else if( sql[parserOffset] == '<' ) {
 				if( parserOffset != beginOffset ) {

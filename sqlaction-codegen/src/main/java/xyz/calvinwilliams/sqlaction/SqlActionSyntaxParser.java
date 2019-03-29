@@ -77,7 +77,7 @@ public class SqlActionSyntaxParser {
 						String token3 = lexicalParser.GetSqlToken() ;
 						
 						selectColumnToken = new SqlActionSelectColumnToken() ;
-						selectColumnToken.tableName = token1 ;
+						selectColumnToken.tableAliasName = token1 ;
 						selectColumnToken.columnName = token3 ;
 						selectColumnTokenList.add(selectColumnToken);
 						
@@ -129,30 +129,22 @@ public class SqlActionSyntaxParser {
 					return -24;
 				}
 			} else if( token.equalsIgnoreCase("UPDATE") ) {
-				while(true) {
-					String token1 = lexicalParser.GetSqlToken() ;
-					if( token1 == null ) {
-						return -31;
-					}
-					String token2 = lexicalParser.GetSqlToken() ;
-					if( token2 == null ) {
-						// UPDATE table\0
-						fromTableToken = new SqlActionFromTableToken() ;
-						fromTableToken.tableName = token1 ;
-						fromTableTokenList.add(fromTableToken);
-						token = null ;
-						break;
-					}
-					if( token2.equalsIgnoreCase("SET") ) {
-						// UPDATE table SET
-						fromTableToken = new SqlActionFromTableToken() ;
-						fromTableToken.tableName = token1 ;
-						fromTableTokenList.add(fromTableToken);
-						token = token2 ;
-						break;
-					} else {
-						return -32;
-					}
+				String token1 = lexicalParser.GetSqlToken() ;
+				if( token1 == null ) {
+					return -31;
+				}
+				
+				String token2 = lexicalParser.GetSqlToken() ;
+				if( token2 == null ) {
+					// UPDATE table\0
+					return -32;
+				}
+				if( token2.equalsIgnoreCase("SET") ) {
+					// UPDATE table SET
+					updateTableName = token1 ;
+					token = token2 ;
+				} else {
+					return -32;
 				}
 			} else if( token.equalsIgnoreCase("DELETE") ) {
 				String token1 = lexicalParser.GetSqlToken() ;
@@ -168,7 +160,7 @@ public class SqlActionSyntaxParser {
 					return -43;
 				}
 				
-				insertTableName = token2 ;
+				deleteTableName = token2 ;
 				
 				String token3 = lexicalParser.GetSqlToken() ;
 				token = token3 ;
@@ -214,7 +206,7 @@ public class SqlActionSyntaxParser {
 						setColumnToken = new SqlActionSetColumnToken() ;
 						setColumnToken.columnName = token1 ;
 						if( ! token2.equals("=") ) {
-							return -443;
+							return -444;
 						}
 						setColumnToken.columnValue = token3 ;
 						setColumnTokenList.add(setColumnToken);
@@ -229,7 +221,7 @@ public class SqlActionSyntaxParser {
 					if( token6.equals(",") ) {
 						;
 					} else if( token6.equalsIgnoreCase("WHERE") ) {
-						// SET column WHERE
+						// SET column = ? WHERE
 						token = token6 ;
 						break;
 					} else {
@@ -316,7 +308,7 @@ public class SqlActionSyntaxParser {
 						}
 						
 						whereColumnToken = new SqlActionWhereColumnToken() ;
-						whereColumnToken.tableName = token1 ;
+						whereColumnToken.tableAliasName = token1 ;
 						whereColumnToken.columnName = token3 ;
 						whereColumnToken.operator = token4 ;
 						whereColumnToken.columnValue = token5 ;
@@ -353,4 +345,23 @@ public class SqlActionSyntaxParser {
 		return 0;
 	}
 	
+	public boolean isFromTableNameExist( String tableName ) {
+		for( SqlActionFromTableToken tt : fromTableTokenList ) {
+			if( tt.tableName.equalsIgnoreCase(tableName) ) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public String FindFromTableFromAliasName( String tableAliasName ) {
+		for( SqlActionFromTableToken tt : fromTableTokenList ) {
+			if( tt.tableAliasName.equalsIgnoreCase(tableAliasName) ) {
+				return tt.tableName;
+			}
+		}
+		
+		return null;
+	}
 }

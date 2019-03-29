@@ -139,6 +139,7 @@ public class SqlActionColumn {
 				System.out.println( "GetColumnFromResultSet failed["+nret+"] , database["+database.databaseName+"] table["+table.tableName+"] column["+column.columnName+"]" );
 				return nret;
 			}
+			column.javaPropertyName = SqlActionColumn.columnToJavaProperty( column.columnName ) ;
 			
 			table.columnList.add( column );
 		}
@@ -156,759 +157,58 @@ public class SqlActionColumn {
 		return null;
 	}
 	
-	private static int ParseSelectStatementForGeneratingMethodCode( List<SqlActionColumn> sqlactionColumnList, String selectOutputputColumnNames, List<SqlActionColumn> selectOutputputColumnList ) {
-		SqlActionColumn column ;
-		String[] sa = selectOutputputColumnNames.split( "," ) ;
+//	private static int ParseOtherStatementForGeneratingMethodCode( String[] sa, int index, StringBuilder sql, StringBuilder methodName ) {
+//		String		str ;
+//		while( index < sa.length ) {
+//			sql.append( " " + sa[index] );
+//			str = sa[index].replace(',','_') ;
+//			str = sa[index].replace('=','E') ;
+//			str = sa[index].replace("<>","NE") ;
+//			str = sa[index].replace(">","GT") ;
+//			str = sa[index].replace(">=","GE") ;
+//			str = sa[index].replace("<","LT") ;
+//			str = sa[index].replace("<=","LE") ;
+//			methodName.append( "_" + str );
+//			
+//			index++;
+//		}
+//		
+//		return index;
+//	}
+	
+	public static String operatorTo( String operator ) {
 		
-		for( String columnName : sa ) {
-			column = FindColumn( sqlactionColumnList , columnName ) ;
-			if( column == null ) {
-				System.out.println( "columnName["+columnName+"] not found" );
-				return -1;
-			}
-			selectOutputputColumnList.add( column );
+		switch( operator ) {
+			case "=" :
+				return "E";
+			case "<>" :
+				return "NE";
+			case ">" :
+				return "GT";
+			case ">=" :
+				return "GE";
+			case "<" :
+				return "LT";
+			case "<=" :
+				return "LE";
+			default :
+				return operator;
 		}
-		
-		return 0;
 	}
 	
-	private static int ParseWhereStatementForGeneratingMethodCode( List<SqlActionColumn> sqlactionColumnList, String[] sa, int index, List<SqlActionColumn> whereInputputColumnList, StringBuilder sql, StringBuilder methodName ) {
-		SqlActionColumn column ;
-		
-		while( index < sa.length ) {
-			sql.append( " " + sa[index] );
-			methodName.append( "_" + sa[index] );
-			
-			column = FindColumn( sqlactionColumnList , sa[index] ) ;
-			if( column == null ) {
-				System.out.println( "columnName["+sa[index]+"] not found" );
-				return -1;
-			}
-			whereInputputColumnList.add( column );
-			
-			index++;
-			if( index >= sa.length ) {
-				System.out.println( "sqlaction["+sa.toString()+"] invalid" );
-				return -1;
-			}
-			sql.append( sa[index] + "?" );
-			if( sa[index].equals("=") ) {
-				methodName.append( "_E" );
-			} else if( sa[index].equals("<>") ) {
-				methodName.append( "_NE" );
-			} else if( sa[index].equals(">") ) {
-				methodName.append( "_GT" );
-			} else if( sa[index].equals(">=") ) {
-				methodName.append( "_GE" );
-			} else if( sa[index].equals("<") ) {
-				methodName.append( "_LT" );
-			} else if( sa[index].equals("<=") ) {
-				methodName.append( "_LE" );
-			} else {
-				System.out.println( "word["+sa[index]+"] unexpected in ["+sa.toString()+"]" );
-				return -1;
-			}
-			
-			index++;
-			if( index >= sa.length )
-				break;
-			if( ! sa[index].equals("and") )
-				break;
-			sql.append( " AND" );
-			methodName.append( "_AND" );
-			
-			index++;
+	public static String columnToJavaProperty( String columnName ) {
+		String[] sa = columnName.split( "_" ) ;
+		StringBuilder javaPropertyNameBuilder = new StringBuilder() ;
+		for( String s : sa ) {
+			if( javaPropertyNameBuilder.length() == 0 )
+				javaPropertyNameBuilder.append( s.substring(0,1).toLowerCase(Locale.getDefault()) + s.substring(1) );
+			else
+				javaPropertyNameBuilder.append( s.substring(0,1).toUpperCase(Locale.getDefault()) + s.substring(1) );
 		}
-		
-		return index;
+		return javaPropertyNameBuilder.toString() ;
 	}
-	
-	private static int ParseOtherStatementForGeneratingMethodCode( String[] sa, int index, StringBuilder sql, StringBuilder methodName ) {
-		String		str ;
-		while( index < sa.length ) {
-			sql.append( " " + sa[index] );
-			str = sa[index].replace(',','_') ;
-			str = sa[index].replace('=','E') ;
-			str = sa[index].replace("<>","NE") ;
-			str = sa[index].replace(">","GT") ;
-			str = sa[index].replace(">=","GE") ;
-			str = sa[index].replace("<","LT") ;
-			str = sa[index].replace("<=","LE") ;
-			methodName.append( "_" + str );
-			
-			index++;
-		}
-		
-		return index;
-	}
-	
-//	public static int ParseSetInputColumnForGeneratingMethodCode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, int columnIndex, SqlActionColumn column, StringBuilder out ) {
-//
-//		switch( column.dataType ) {
-//			case SQLACTION_DATA_TYPE_BIT :
-//				out.append( "\t\t" + "prestmt.setBoolean( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_TINYINT :
-//				out.append( "\t\t" + "prestmt.setByte( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_SMALLINT :
-//				out.append( "\t\t" + "prestmt.setShort( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_MEDIUMINT :
-//				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_INTEGER :
-//				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_BIGINT :
-//				out.append( "\t\t" + "prestmt.setLong( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_REAL :
-//				out.append( "\t\t" + "prestmt.setFloat( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_FLOAT :
-//				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_DOUBLE :
-//				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_DECIMAL :
-//				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_NUMBERIC :
-//				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_CHAR :
-//				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_VARCHAR :
-//				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_DATE :
-//				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_TIME :
-//				out.append( "\t\t" + "prestmt.setTime( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_DATETIME :
-//				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_TIMESTAMP :
-//				out.append( "\t\t" + "prestmt.setTimestamp( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_YEAR :
-//				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_BINARY :
-//				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_VARBINARY :
-//				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_BLOB :
-//				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_TINYBLOB :
-//				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_MEDIUMBLOB :
-//				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_LONGBLOB :
-//				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			default :
-//				System.out.println( "dataType["+column.dataType+"] invalid" );
-//				return -1;
-//		}
-//		
-//		return 0;
-//	}
-//	
-//	public static int ParseWhereInputColumnForGeneratingMethodCode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, int columnIndex, SqlActionColumn column, StringBuilder out ) {
-//
-//		switch( column.dataType ) {
-//			case SQLACTION_DATA_TYPE_BIT :
-//				out.append( "\t\t" + "prestmt.setBoolean( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_TINYINT :
-//				out.append( "\t\t" + "prestmt.setByte( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_SMALLINT :
-//				out.append( "\t\t" + "prestmt.setShort( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_MEDIUMINT :
-//				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_INTEGER :
-//				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_BIGINT :
-//				out.append( "\t\t" + "prestmt.setLong( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_REAL :
-//				out.append( "\t\t" + "prestmt.setFloat( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_FLOAT :
-//				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_DOUBLE :
-//				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_DECIMAL :
-//				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_NUMBERIC :
-//				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_CHAR :
-//				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_VARCHAR :
-//				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_DATE :
-//				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_TIME :
-//				out.append( "\t\t" + "prestmt.setTime( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_DATETIME :
-//				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_TIMESTAMP :
-//				out.append( "\t\t" + "prestmt.setTimestamp( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_YEAR :
-//				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_BINARY :
-//				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_VARBINARY :
-//				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_BLOB :
-//				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_TINYBLOB :
-//				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_MEDIUMBLOB :
-//				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			case SQLACTION_DATA_TYPE_LONGBLOB :
-//				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-//				break;
-//			default :
-//				System.out.println( "dataType["+column.dataType+"] invalid" );
-//				return -1;
-//		}
-//		
-//		return 0;
-//	}
-//	
-//	public static int ParseSelectOutputColumnsForGeneratingMethodCode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionColumn> selectOutputputColumnList, StringBuilder out ) {
-//		int		n = 0 ;
-//		
-//		for( SqlActionColumn c : selectOutputputColumnList ) {
-//			n++;
-//			out.append( "\t\t\t" );
-//			switch( c.dataType ) {
-//				case SQLACTION_DATA_TYPE_BIT :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getBoolean( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_TINYINT :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getByte( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_SMALLINT :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getShort( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_MEDIUMINT :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getInt( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_INTEGER :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getInt( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_BIGINT :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getLong( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_REAL :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getFloat( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_FLOAT :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getDouble( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_DOUBLE :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getDouble( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_DECIMAL :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getBigDecimal( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_NUMBERIC :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getBigDecimal( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_CHAR :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getString( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_VARCHAR :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getString( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_DATE :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getDate( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_TIME :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getTime( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_DATETIME :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getTime( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_TIMESTAMP :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getTimestamp( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_YEAR :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getTime( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_BINARY :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getBytes( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_VARBINARY :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getBytes( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_BLOB :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getBytes( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_TINYBLOB :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getBytes( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_MEDIUMBLOB :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getBytes( "+n+" ) ;" );
-//					break;
-//				case SQLACTION_DATA_TYPE_LONGBLOB :
-//					out.append( "selectOutput."+c.javaPropertyName+" = rs.getBytes( "+n+" ) ;" );
-//					break;
-//				default :
-//					System.out.println( "dataType["+c.dataType+"] invalid" );
-//					return -1;
-//			}
-//			out.append( "\n" );
-//		}
-//		
-//		return 0;
-//	}
-//	
-//	public static int ParseSelectSqlForGeneratingMethodCode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionColumn> sqlactionColumnList, String sqlaction, String[] sa, StringBuilder out ) {
-//		
-//		StringBuilder			sql = new StringBuilder() ;
-//		StringBuilder			methodName = new StringBuilder() ;
-//		String					columnNames ;
-//		boolean					hasWHERE ;
-//		int						index ;
-//		List<SqlActionColumn>	selectOutputputColumnList = null ;
-//		List<SqlActionColumn>	whereInputputColumnList = null ;
-//		int						nret = 0 ;
-//		
-//		// sa[0]  sa[1] sa[2] sa[3]         sa[4]
-//		// SELECT name  FROM  my_demo_table WHERE id =
-//		// SELECT fname_cn,price FROM my_demo_table WHERE id < AND code <
-//		// SELECT * FROM my_demo_table WHERE code =
-//		sql.append( "SELECT " + sa[1].toString() + " FROM " + sa[3].toString() );
-//		columnNames = sa[1].toString().replace(',','_') ;
-//		if( columnNames.equals("*") ) {
-//			methodName.append( "SqlAction_SELECT_ALL_FROM_" + sa[3].toString() );
-//		} else {
-//			methodName.append( "SqlAction_SELECT_" + columnNames +"_FROM_" + sa[3].toString() );
-//		}
-//		
-//		if( sa[1].equals("*") ) {
-//			selectOutputputColumnList = null ;
-//		} else {
-//			selectOutputputColumnList = new LinkedList<SqlActionColumn>() ;
-//			
-//			nret = ParseSelectStatementForGeneratingMethodCode( sqlactionColumnList, sa[1], selectOutputputColumnList ) ;
-//			if( nret != 0 )
-//				return nret;
-//		}
-//		
-//		if( sa.length > 4 && sa[4].equals("where") ) {
-//			hasWHERE = true ;
-//			
-//			sql.append( " WHERE" );
-//			methodName.append( "_WHERE" );
-//			
-//			index = 5 ;
-//			
-//			whereInputputColumnList = new LinkedList<SqlActionColumn>() ;
-//			index = ParseWhereStatementForGeneratingMethodCode( sqlactionColumnList, sa, index, whereInputputColumnList, sql, methodName ) ;
-//			if( index < 0 ) {
-//				System.out.println( "ParseWhereSqlForGeneratingMethodCode["+sa.toString()+"] failed["+index+"]" );
-//				return index;
-//			}
-//			
-//			index = ParseOtherStatementForGeneratingMethodCode( sa, index, sql, methodName ) ;
-//			if( index < 0 ) {
-//				System.out.println( "ParseOtherSqlForGeneratingMethodCode["+sa.toString()+"] failed["+index+"]" );
-//				return index;
-//			}
-//		} else {
-//			hasWHERE = false ;
-//			
-//			index = 5 ;
-//			
-//			index = ParseOtherStatementForGeneratingMethodCode( sa, index, sql, methodName ) ;
-//			if( index < 0 ) {
-//				System.out.println( "ParseOtherSqlForGeneratingMethodCode["+sa.toString()+"] failed["+index+"]" );
-//				return index;
-//			}
-//		}
-//		
-//		out.append( "\n" );
-//		out.append( "\t" + "// "+sqlaction+"\n" );
-//		if( hasWHERE == true ) {
-//			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, List<" +sqlactionConf.javaClassName+ "> selectOutputList, " + sqlactionConf.javaClassName + " whereInput ) throws Exception {\n" );
-//			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
-//			int	columnIndex = 0 ;
-//			for( SqlActionColumn c : whereInputputColumnList ) {
-//				columnIndex++;
-//				nret = ParseWhereInputColumnForGeneratingMethodCode( dbserverConf, sqlactionConf, columnIndex, c, out ) ;
-//				if( nret != 0 ) {
-//					System.out.println( "ParseWhereInputColumnForGeneratingMethodCode["+sa.toString()+"] failed["+nret+"]" );
-//					return nret;
-//				}
-//			}
-//			out.append( "\t\t" + "ResultSet rs = prestmt.executeQuery() ;\n" );
-//		} else {
-//			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, List<" +sqlactionConf.javaClassName+ "> selectOutputList ) throws Exception {\n" );
-//			out.append( "\t\t" + "Statement stmt = conn.createStatement() ;\n" );
-//			out.append( "\t\t" + "ResultSet rs = stmt.executeQuery(\""+sql+"\") ;\n" );
-//		}
-//		out.append( "\t\t" + "while( rs.next() ) {\n" );
-//		out.append( "\t\t\t" + sqlactionConf.javaClassName + " selectOutput = new "+sqlactionConf.javaClassName+"() ;\n" );
-//		if( selectOutputputColumnList != null )
-//			nret = ParseSelectOutputColumnsForGeneratingMethodCode( dbserverConf, sqlactionConf, selectOutputputColumnList, out ) ;
-//		else
-//			nret = ParseSelectOutputColumnsForGeneratingMethodCode( dbserverConf, sqlactionConf, sqlactionColumnList, out ) ;
-//		if( nret != 0 ) {
-//			System.out.println( "ParseSelectOutputColumnsForGeneratingMethodCode["+sa.toString()+"] failed["+nret+"]" );
-//			return nret;
-//		}
-//		out.append( "\t\t\t" + "selectOutputList.add(selectOutput);\n" );
-//		out.append( "\t\t" + "}\n" );
-//		out.append( "\t\t" + "return selectOutputList.size();\n" );
-//		out.append( "\t" + "}\n" );
-//		
-//		return 0;
-//	}
-//	
-//	public static int ParseInsertSqlForGeneratingMethodCode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionColumn> sqlactionColumnList, String sqlaction, String[] sa, StringBuilder out ) {
-//		
-//		StringBuilder		sql = new StringBuilder() ;
-//		StringBuilder		methodName = new StringBuilder() ;
-//		int					nret = 0 ;
-//		
-//		// sa[0]  sa[1] sa[2]
-//		// INSERT INTO  my_demo_table
-//		sql.append( "INSERT INTO " + sa[2].toString() + " (" );
-//		methodName.append( "SqlAction_INSERT_INTO_" + sa[2].toString() );
-//		
-//		for( SqlActionColumn c : sqlactionColumnList ) {
-//			if( c.isAutoIncrement == false ) {
-//				if( c != sqlactionColumnList.get(1) )
-//					sql.append( "," );
-//				sql.append( c.columnName );
-//			}
-//		}
-//		
-//		sql.append( ") VALUES (" );
-//		
-//		for( SqlActionColumn c : sqlactionColumnList ) {
-//			if( c.isAutoIncrement == false ) {
-//				if( c != sqlactionColumnList.get(1) )
-//					sql.append( "," );
-//				sql.append( "?" );
-//			}
-//		}
-//		
-//		sql.append( ")" );
-//		
-//		out.append( "\n" );
-//		out.append( "\t" + "// "+sqlaction+"\n" );
-//		out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionConf.javaClassName + " whereInput ) throws Exception {\n" );
-//		out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
-//		int	columnIndex = 0 ;
-//		for( SqlActionColumn c : sqlactionColumnList ) {
-//			if( c.isAutoIncrement == false ) {
-//				columnIndex++;
-//				nret = ParseWhereInputColumnForGeneratingMethodCode( dbserverConf, sqlactionConf, columnIndex, c, out ) ;
-//				if( nret != 0 ) {
-//					System.out.println( "ParseWhereInputColumnForGeneratingMethodCode["+sa.toString()+"] failed["+nret+"]" );
-//					return nret;
-//				}
-//			}
-//		}
-//		out.append( "\t\t" + "return prestmt.executeUpdate() ;\n" );
-//		out.append( "\t" + "}\n" );
-//		
-//		return 0;
-//	}
-//	
-//	public static int ParseUpdateSqlForGeneratingMethodCode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionColumn> sqlactionColumnList, String sqlaction, String[] sa, StringBuilder out ) {
-//		
-//		StringBuilder			sql = new StringBuilder() ;
-//		StringBuilder			methodName = new StringBuilder() ;
-//		boolean					hasWHERE ;
-//		int						index ;
-//		List<SqlActionColumn>	setInputColumnList = null ;
-//		List<SqlActionColumn>	whereInputputColumnList = null ;
-//		int						nret = 0 ;
-//		
-//		// sa[0]  sa[1]         sa[2] sa[3] sa[4] sa[5] sa[6]
-//		// UPDATE my_demo_table SET   name  WHERE id    =
-//		sql.append( "UPDATE " + sa[1].toString() + " SET " );
-//		methodName.append( "SqlAction_UPDATE_" + sa[1].toString() + "_SET" );
-//		
-//		String[] sa2 = sa[3].split( "," ) ;
-//		setInputColumnList = new LinkedList<SqlActionColumn>() ;
-//		for( String s2 : sa2 ) {
-//			if( s2 != sa2[0] ) {
-//				sql.append( "," );
-//			}
-//			sql.append( s2 + "=?" );
-//			SqlActionColumn column = FindColumn( sqlactionColumnList, s2 ) ;
-//			if( column == null ) {
-//				System.out.println( "columnName["+s2+"] invalid in sqlaction["+sqlaction+"] invalid" );
-//				return -1;
-//			}
-//			setInputColumnList.add( column );
-//		}
-//		methodName.append( "_" + sa[3].toString().replace(',','_') );
-//		
-//		if( sa.length > 4 ) {
-//			if( sa[4].equals("where") ) {
-//				hasWHERE = true ;
-//				
-//				sql.append( " WHERE" );
-//				methodName.append( "_WHERE" );
-//				
-//				index = 5 ;
-//				
-//				whereInputputColumnList = new LinkedList<SqlActionColumn>() ;
-//				index = ParseWhereStatementForGeneratingMethodCode( sqlactionColumnList, sa, index, whereInputputColumnList, sql, methodName ) ;
-//				if( index < 0 ) {
-//					System.out.println( "ParseWhereSqlForGeneratingMethodCode["+sa.toString()+"] failed["+index+"]" );
-//					return index;
-//				}
-//				
-//				index = ParseOtherStatementForGeneratingMethodCode( sa, index, sql, methodName ) ;
-//				if( index < 0 ) {
-//					System.out.println( "ParseOtherSqlForGeneratingMethodCode["+sa.toString()+"] failed["+index+"]" );
-//					return index;
-//				}
-//			} else {
-//				System.out.println( "sqlaction["+sqlaction+"] invalid" );
-//				return -1;
-//			}
-//		} else {
-//			hasWHERE = false ;
-//		}
-//		
-//		out.append( "\n" );
-//		out.append( "\t" + "// "+sqlaction+"\n" );
-//		if( hasWHERE == true ) {
-//			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionConf.javaClassName + " setInput, " + sqlactionConf.javaClassName + " whereInput ) throws Exception {\n" );
-//			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
-//			int	columnIndex = 0 ;
-//			for( SqlActionColumn c : setInputColumnList ) {
-//				columnIndex++;
-//				nret = ParseSetInputColumnForGeneratingMethodCode( dbserverConf, sqlactionConf, columnIndex, c, out ) ;
-//				if( nret != 0 ) {
-//					System.out.println( "ParseWhereInputColumnForGeneratingMethodCode["+sa.toString()+"] failed["+nret+"]" );
-//					return nret;
-//				}
-//			}
-//			for( SqlActionColumn c : whereInputputColumnList ) {
-//				columnIndex++;
-//				nret = ParseWhereInputColumnForGeneratingMethodCode( dbserverConf, sqlactionConf, columnIndex, c, out ) ;
-//				if( nret != 0 ) {
-//					System.out.println( "ParseWhereInputColumnForGeneratingMethodCode["+sa.toString()+"] failed["+nret+"]" );
-//					return nret;
-//				}
-//			}
-//			out.append( "\t\t" + "return prestmt.executeUpdate() ;\n" );
-//		} else {
-//			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionConf.javaClassName + " setInput ) throws Exception {\n" );
-//			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
-//			int	columnIndex = 0 ;
-//			for( SqlActionColumn c : setInputColumnList ) {
-//				columnIndex++;
-//				nret = ParseSetInputColumnForGeneratingMethodCode( dbserverConf, sqlactionConf, columnIndex, c, out ) ;
-//				if( nret != 0 ) {
-//					System.out.println( "ParseWhereInputColumnForGeneratingMethodCode["+sa.toString()+"] failed["+nret+"]" );
-//					return nret;
-//				}
-//			}
-//			out.append( "\t\t" + "return prestmt.executeUpdate() ;\n" );
-//		}
-//		out.append( "\t" + "}\n" );
-//		
-//		return 0;
-//	}
-//	
-//	public static int ParseDeleteSqlForGeneratingMethodCode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionColumn> sqlactionColumnList, String sqlaction, String[] sa, StringBuilder out ) {
-//		
-//		StringBuilder			sql = new StringBuilder() ;
-//		StringBuilder			methodName = new StringBuilder() ;
-//		boolean					hasWHERE ;
-//		int						index ;
-//		List<SqlActionColumn>	whereInputputColumnList = null ;
-//		int						nret = 0 ;
-//		
-//		// sa[0]  sa[1] sa[2]         sa[3] sa[4]
-//		// DELETE FROM  my_demo_table WHERE id =
-//		sql.append( "DELETE FROM " + sa[2].toString() );
-//		methodName.append( "SqlAction_DELETE_FROM_" + sa[2].toString() );
-//		
-//		if( sa.length > 3 ) {
-//			if( sa[3].equals("where") ) {
-//				hasWHERE = true ;
-//				
-//				sql.append( " WHERE" );
-//				methodName.append( "_WHERE" );
-//				
-//				index = 4 ;
-//				
-//				whereInputputColumnList = new LinkedList<SqlActionColumn>() ;
-//				index = ParseWhereStatementForGeneratingMethodCode( sqlactionColumnList, sa, index, whereInputputColumnList, sql, methodName ) ;
-//				if( index < 0 ) {
-//					System.out.println( "ParseWhereSqlForGeneratingMethodCode["+sa.toString()+"] failed["+index+"]" );
-//					return index;
-//				}
-//				
-//				index = ParseOtherStatementForGeneratingMethodCode( sa, index, sql, methodName ) ;
-//				if( index < 0 ) {
-//					System.out.println( "ParseOtherSqlForGeneratingMethodCode["+sa.toString()+"] failed["+index+"]" );
-//					return index;
-//				}
-//			} else {
-//				System.out.println( "sqlaction["+sqlaction+"] invalid" );
-//				return -1;
-//			}
-//		} else {
-//			hasWHERE = false ;
-//		}
-//		
-//		out.append( "\n" );
-//		out.append( "\t" + "// "+sqlaction+"\n" );
-//		if( hasWHERE == true ) {
-//			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionConf.javaClassName + " whereInput ) throws Exception {\n" );
-//			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
-//			int	columnIndex = 0 ;
-//			for( SqlActionColumn c : whereInputputColumnList ) {
-//				columnIndex++;
-//				nret = ParseWhereInputColumnForGeneratingMethodCode( dbserverConf, sqlactionConf, columnIndex, c, out ) ;
-//				if( nret != 0 ) {
-//					System.out.println( "ParseWhereInputColumnForGeneratingMethodCode["+sa.toString()+"] failed["+nret+"]" );
-//					return nret;
-//				}
-//			}
-//			out.append( "\t\t" + "return prestmt.executeUpdate() ;\n" );
-//		} else {
-//			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn ) throws Exception {\n" );
-//			out.append( "\t\t" + "Statement stmt = conn.createStatement() ;\n" );
-//			out.append( "\t\t" + "return stmt.executeUpdate(\""+sql+"\") ;\n" );
-//		}
-//		out.append( "\t" + "}\n" );
-//		
-//		return 0;
-//	}
-//	
-//	private static int ParseDefinePropertyForGeneratingClassCode( SqlActionColumn c, StringBuilder out ) {
-//		
-//		switch( c.dataType ) {
-//			case SQLACTION_DATA_TYPE_BIT :
-//				out.append( "\t" + "boolean			"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_TINYINT :
-//				out.append( "\t" + "byte			"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_SMALLINT :
-//				out.append( "\t" + "short			"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_MEDIUMINT :
-//				out.append( "\t" + "int				"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_INTEGER :
-//				out.append( "\t" + "int				"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_BIGINT :
-//				out.append( "\t" + "long			"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_REAL :
-//				out.append( "\t" + "float			"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_FLOAT :
-//				out.append( "\t" + "double			"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_DOUBLE :
-//				out.append( "\t" + "double			"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_DECIMAL :
-//				out.append( "\t" + "BigDecimal		"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_NUMBERIC :
-//				out.append( "\t" + "BigDecimal		"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_CHAR :
-//				out.append( "\t" + "String			"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_VARCHAR :
-//				out.append( "\t" + "String			"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_DATE :
-//				out.append( "\t" + "java.sql.Date	"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_TIME :
-//				out.append( "\t" + "java.sql.Time	"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_DATETIME :
-//				out.append( "\t" + "java.sql.Date	"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_TIMESTAMP :
-//				out.append( "\t" + "Timestamp		"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_YEAR :
-//				out.append( "\t" + "java.sql.Date	"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_BINARY :
-//				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_VARBINARY :
-//				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_BLOB :
-//				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_TINYBLOB :
-//				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_MEDIUMBLOB :
-//				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
-//				break;
-//			case SQLACTION_DATA_TYPE_LONGBLOB :
-//				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
-//				break;
-//			default :
-//				out.append( "\t" + "String			"+c.javaPropertyName+" ;" );
-//				break;
-//		}
-//		
-//		out.append( " // "+c.columnComment+"\n" );
-//		
-//		return 0;
-//	}
 	
 	public static int TravelAllColumns( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionColumn> sqlactionColumnList, int depth, StringBuilder out ) throws Exception {
-		
 		int		nret = 0 ;
 		
 		// out.append( "\n" );
@@ -1005,4 +305,343 @@ public class SqlActionColumn {
 		
 		return 0;
 	}
+	
+	public static int DumpDefineProperty( SqlActionColumn c, StringBuilder out ) {
+	
+		switch( c.dataType ) {
+			case SQLACTION_DATA_TYPE_BIT :
+				out.append( "\t" + "boolean			"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_TINYINT :
+				out.append( "\t" + "byte			"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_SMALLINT :
+				out.append( "\t" + "short			"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_MEDIUMINT :
+				out.append( "\t" + "int				"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_INTEGER :
+				out.append( "\t" + "int				"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_BIGINT :
+				out.append( "\t" + "long			"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_REAL :
+				out.append( "\t" + "float			"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_FLOAT :
+				out.append( "\t" + "double			"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_DOUBLE :
+				out.append( "\t" + "double			"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_DECIMAL :
+				out.append( "\t" + "BigDecimal		"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_NUMBERIC :
+				out.append( "\t" + "BigDecimal		"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_CHAR :
+				out.append( "\t" + "String			"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_VARCHAR :
+				out.append( "\t" + "String			"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_DATE :
+				out.append( "\t" + "java.sql.Date	"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_TIME :
+				out.append( "\t" + "java.sql.Time	"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_DATETIME :
+				out.append( "\t" + "java.sql.Date	"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_TIMESTAMP :
+				out.append( "\t" + "Timestamp		"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_YEAR :
+				out.append( "\t" + "java.sql.Date	"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_BINARY :
+				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_VARBINARY :
+				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_BLOB :
+				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_TINYBLOB :
+				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_MEDIUMBLOB :
+				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
+				break;
+			case SQLACTION_DATA_TYPE_LONGBLOB :
+				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
+				break;
+			default :
+				out.append( "\t" + "String			"+c.javaPropertyName+" ;" );
+				break;
+		}
+		
+		if( c.columnComment != null && ! c.columnComment.isEmpty() ) {
+			out.append( " // "+c.columnComment+"\n" );
+		} else {
+			out.append( "\n" );
+		}
+		
+		return 0;
+	}
+	
+	public static int DumpSelectOutputColumn( int columnIndex, SqlActionColumn column, StringBuilder out ) {
+		switch( column.dataType ) {
+			case SQLACTION_DATA_TYPE_BIT :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBoolean( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_TINYINT :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getByte( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_SMALLINT :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getShort( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_MEDIUMINT :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getInt( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_INTEGER :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getInt( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_BIGINT :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getLong( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_REAL :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getFloat( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_FLOAT :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getDouble( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_DOUBLE :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getDouble( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_DECIMAL :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBigDecimal( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_NUMBERIC :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBigDecimal( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_CHAR :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getString( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_VARCHAR :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getString( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_DATE :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getDate( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_TIME :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getTime( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_DATETIME :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getTime( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_TIMESTAMP :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getTimestamp( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_YEAR :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getTime( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_BINARY :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_VARBINARY :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_BLOB :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_TINYBLOB :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_MEDIUMBLOB :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
+				break;
+			case SQLACTION_DATA_TYPE_LONGBLOB :
+				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
+				break;
+			default :
+				System.out.println( "dataType["+column.dataType+"] invalid" );
+				return -1;
+		}
+		
+		return 0;
+	}
+	
+	public static int DumpSetInputColumn( int columnIndex, SqlActionColumn column, String columnValue, StringBuilder out ) {
+
+		switch( column.dataType ) {
+			case SQLACTION_DATA_TYPE_BIT :
+				out.append( "\t\t" + "prestmt.setBoolean( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_TINYINT :
+				out.append( "\t\t" + "prestmt.setByte( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_SMALLINT :
+				out.append( "\t\t" + "prestmt.setShort( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_MEDIUMINT :
+				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_INTEGER :
+				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_BIGINT :
+				out.append( "\t\t" + "prestmt.setLong( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_REAL :
+				out.append( "\t\t" + "prestmt.setFloat( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_FLOAT :
+				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_DOUBLE :
+				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_DECIMAL :
+				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_NUMBERIC :
+				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_CHAR :
+				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_VARCHAR :
+				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_DATE :
+				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_TIME :
+				out.append( "\t\t" + "prestmt.setTime( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_DATETIME :
+				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_TIMESTAMP :
+				out.append( "\t\t" + "prestmt.setTimestamp( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_YEAR :
+				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_BINARY :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_VARBINARY :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_BLOB :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_TINYBLOB :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_MEDIUMBLOB :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_LONGBLOB :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			default :
+				System.out.println( "dataType["+column.dataType+"] invalid" );
+				return -1;
+		}
+		
+		return 0;
+	}
+	
+	public static int DumpWhereInputColumn( int columnIndex, SqlActionColumn column, String columnValue, StringBuilder out ) {
+
+		switch( column.dataType ) {
+			case SQLACTION_DATA_TYPE_BIT :
+				out.append( "\t\t" + "prestmt.setBoolean( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_TINYINT :
+				out.append( "\t\t" + "prestmt.setByte( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_SMALLINT :
+				out.append( "\t\t" + "prestmt.setShort( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_MEDIUMINT :
+				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_INTEGER :
+				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_BIGINT :
+				out.append( "\t\t" + "prestmt.setLong( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_REAL :
+				out.append( "\t\t" + "prestmt.setFloat( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_FLOAT :
+				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_DOUBLE :
+				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_DECIMAL :
+				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_NUMBERIC :
+				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_CHAR :
+				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_VARCHAR :
+				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_DATE :
+				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_TIME :
+				out.append( "\t\t" + "prestmt.setTime( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_DATETIME :
+				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_TIMESTAMP :
+				out.append( "\t\t" + "prestmt.setTimestamp( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_YEAR :
+				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_BINARY :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_VARBINARY :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_BLOB :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_TINYBLOB :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_MEDIUMBLOB :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			case SQLACTION_DATA_TYPE_LONGBLOB :
+				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				break;
+			default :
+				System.out.println( "dataType["+column.dataType+"] invalid" );
+				return -1;
+		}
+		
+		return 0;
+	}
+	
+	
 }

@@ -155,9 +155,16 @@ public class SqlActionGencode {
 				out.append( "\n" );
 				out.append( "public class "+sqlactionTableConf.javaClassName+" {\n" );
 				
+				out.append( "\n" );
+				for( SqlActionColumn c : table.columnList ) {
+					SqlActionColumn.DumpDefineProperty( c, out );
+				}
+				
 				// Parse sql actions and dump gencode
 				for( String sqlaction : sqlactionTableConf.sqlactions ) {
 					// Parse sql action
+					System.out.println( "--- parse sql action --- ["+sqlaction+"]" );
+					
 					SqlActionSyntaxParser parser = new SqlActionSyntaxParser() ;
 					nret = parser.ParseSyntax(sqlaction) ;
 					if( nret != 0 ) {
@@ -178,28 +185,183 @@ public class SqlActionGencode {
 						}
 					}
 					
+					// Postpro parser I
+					System.out.println( "--- postpro parser I --- ["+sqlaction+"]" );
+					
+					for( SqlActionSelectColumnToken ct : parser.selectColumnTokenList ) {
+						if( ct.column == null ) {
+							if( ct.tableAliasName != null ) {
+								if( parser.isFromTableNameExist(ct.tableAliasName) ) {
+									ct.tableName = ct.tableAliasName ;
+								} else {
+									ct.tableName = parser.FindFromTableFromAliasName(ct.tableAliasName) ;
+									if( ct.tableName == null ) {
+										System.out.println( "tableAliasName["+ct.tableAliasName+"] not found in sqlaction["+sqlaction+"] at SELECT" );
+										return;
+									}
+								}
+								
+								SqlActionTable otherTable = SqlActionTable.FindTable( database.tableList, ct.tableName ) ;
+								if( otherTable == null ) {
+									System.out.println( "otherTable["+ct.tableName+"] not found in database["+sqlactionConf.database+"] at SELECT" );
+									return;
+								}
+								
+								ct.column = SqlActionColumn.FindColumn( otherTable.columnList, ct.columnName ) ;
+								if( ct.column == null ) {
+									System.out.println( "column["+ct.columnName+"] not found in table["+ct.tableName+"] in sqlaction["+sqlaction+"] at SELECT" );
+									return;
+								}
+							} else {
+								ct.column = SqlActionColumn.FindColumn( table.columnList, ct.columnName ) ;
+								if( ct.column == null ) {
+									System.out.println( "column["+ct.columnName+"] not found in table["+table.tableName+"] in sqlaction["+sqlaction+"] at SELECT" );
+									return;
+								}
+							}
+						}
+					}
+					
+					for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
+						if( ct.column == null ) {
+							if( ct.tableAliasName != null ) {
+								if( parser.isFromTableNameExist(ct.tableAliasName) ) {
+									ct.tableName = ct.tableAliasName ;
+								} else {
+									ct.tableName = parser.FindFromTableFromAliasName(ct.tableAliasName) ;
+									if( ct.tableName == null ) {
+										System.out.println( "tableAliasName["+ct.tableAliasName+"] not found in sqlaction["+sqlaction+"] at WHERE" );
+										return;
+									}
+								}
+								
+								SqlActionTable otherTable = SqlActionTable.FindTable( database.tableList, ct.tableName ) ;
+								if( otherTable == null ) {
+									System.out.println( "otherTable["+ct.tableName+"] not found in database["+sqlactionConf.database+"] at WHERE" );
+									return;
+								}
+								
+								ct.column = SqlActionColumn.FindColumn( otherTable.columnList, ct.columnName ) ;
+								if( ct.column == null ) {
+									System.out.println( "column["+ct.columnName+"] not found in table["+ct.tableName+"] in sqlaction["+sqlaction+"] at WHERE" );
+									return;
+								}
+							} else {
+								ct.column = SqlActionColumn.FindColumn( table.columnList, ct.columnName ) ;
+								if( ct.column == null ) {
+									System.out.println( "column["+ct.columnName+"] not found in table["+table.tableName+"] in sqlaction["+sqlaction+"] at WHERE" );
+									return;
+								}
+							}
+						}
+					}
+					
 					// Show parser result
-					System.out.println( "--- parser ---" );
+					System.out.println( "--- show parser result --- ["+sqlaction+"]" );
+					
 					System.out.println( "selectAllColumn["+parser.selectAllColumn+"]" );
 					for( SqlActionSelectColumnToken ct : parser.selectColumnTokenList ) {
-						System.out.println( "selectColumnToken["+ct.columnName+"]" );
+						System.out.println( "selectColumnToken.tableName["+ct.tableName+"] .tableAliasName["+ct.tableAliasName+"] .columnName["+ct.columnName+"]" );
 					}
 					for( SqlActionFromTableToken ct : parser.fromTableTokenList ) {
-						System.out.println( "fromTableToken["+ct.tableName+"]" );
+						System.out.println( "fromTableToken.tableName["+ct.tableName+"] .tableAliasName["+ct.tableAliasName+"]" );
 					}
 					System.out.println( "insertTableName["+parser.insertTableName+"]" );
 					System.out.println( "updateTableName["+parser.updateTableName+"]" );
 					for( SqlActionSetColumnToken ct : parser.setColumnTokenList ) {
-						System.out.println( "setColumnToken["+ct.columnName+"]" );
+						System.out.println( "setColumnToken.tableName["+ct.tableName+"] .column["+ct.columnName+"] .columnValue["+ct.columnValue+"]" );
 					}
 					System.out.println( "deleteTableName["+parser.deleteTableName+"]" );
 					for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
-						System.out.println( "whereColumnToken["+ct.columnName+"]" );
+						System.out.println( "whereColumnToken.tableName["+ct.tableName+"] .columnName["+ct.columnName+"] .operator["+ct.operator+"] .columnValue["+ct.columnValue+"]" );
+					}
+					
+					// Postpro parser II
+					System.out.println( "--- postpro parser II --- ["+sqlaction+"]" );
+					
+					for( SqlActionSelectColumnToken ct : parser.selectColumnTokenList ) {
+						if( ct.column == null ) {
+							if( ct.tableName != null && ! ct.tableName.equalsIgnoreCase(table.tableName) ) {
+								SqlActionTable otherTable = SqlActionTable.FindTable( database.tableList, ct.tableName ) ;
+								if( otherTable == null ) {
+									System.out.println( "otherTable["+ct.tableName+"] not found in database["+sqlactionConf.database+"] at SELECT" );
+									return;
+								}
+								
+								ct.column = SqlActionColumn.FindColumn( otherTable.columnList, ct.columnName ) ;
+								if( ct.column == null ) {
+									System.out.println( "column["+ct.columnName+"] not found in table["+ct.tableName+"] in sqlaction["+sqlaction+"] at SELECT" );
+									return;
+								}
+							} else {
+								ct.column = SqlActionColumn.FindColumn( table.columnList, ct.columnName ) ;
+								if( ct.column == null ) {
+									System.out.println( "column["+ct.columnName+"] not found in table["+table.tableName+"] in sqlaction["+sqlaction+"] at SELECT" );
+									return;
+								}
+							}
+						}
+					}
+					
+					for( SqlActionSetColumnToken ct : parser.setColumnTokenList ) {
+						if( ct.column == null ) {
+							if( ct.tableName != null && ! ct.tableName.equalsIgnoreCase(table.tableName) ) {
+								SqlActionTable otherTable = SqlActionTable.FindTable( database.tableList, ct.tableName ) ;
+								if( otherTable == null ) {
+									System.out.println( "otherTable["+ct.tableName+"] not found in database["+sqlactionConf.database+"] at SET" );
+									return;
+								}
+								
+								ct.column = SqlActionColumn.FindColumn( otherTable.columnList, ct.columnName ) ;
+								if( ct.column == null ) {
+									System.out.println( "column["+ct.columnName+"] not found in table["+ct.tableName+"] in sqlaction["+sqlaction+"] at SET" );
+									return;
+								}
+							} else {
+								ct.column = SqlActionColumn.FindColumn( table.columnList, ct.columnName ) ;
+								if( ct.column == null ) {
+									System.out.println( "column["+ct.columnName+"] not found in table["+table.tableName+"] in sqlaction["+sqlaction+"] at SET" );
+									return;
+								}
+							}
+						}
+					}
+					
+					for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
+						if( ct.column == null ) {
+							if( ct.tableName != null && ! ct.tableName.equalsIgnoreCase(table.tableName) ) {
+								SqlActionTable otherTable = SqlActionTable.FindTable( database.tableList, ct.tableName ) ;
+								if( otherTable == null ) {
+									System.out.println( "otherTable["+ct.tableName+"] not found in database["+sqlactionConf.database+"] at WHERE" );
+									return;
+								}
+								
+								ct.column = SqlActionColumn.FindColumn( otherTable.columnList, ct.columnName ) ;
+								if( ct.column == null ) {
+									System.out.println( "column["+ct.columnName+"] not found in table["+ct.tableName+"] in sqlaction["+sqlaction+"] at WHERE" );
+									return;
+								}
+							} else {
+								ct.column = SqlActionColumn.FindColumn( table.columnList, ct.columnName ) ;
+								if( ct.column == null ) {
+									System.out.println( "column["+ct.columnName+"] not found in table["+table.tableName+"] in sqlaction["+sqlaction+"] at WHERE" );
+									return;
+								}
+							}
+						}
 					}
 					
 					// Dump gencode
+					System.out.println( "--- dump gencode --- ["+sqlaction+"]" );
+					
 					if( parser.selectColumnTokenList != null && parser.selectColumnTokenList.size() > 0 ) {
-						
+						nret = SelectSqlDumpGencode( dbserverConf, sqlactionConf, sqlactionTableConf, sqlaction, parser, database, table, out ) ;
+						if( nret != 0 ) {
+							System.out.println( "*** ERROR : SelectSqlDumpGencode failed["+nret+"]" );
+							return;
+						} else {
+							System.out.println( "SelectSqlDumpGencode ok" );
+						}
 					} else if( parser.insertTableName != null ) {
 						nret = InsertSqlDumpGencode( dbserverConf, sqlactionConf, sqlactionTableConf, sqlaction, parser, database, table, out ) ;
 						if( nret != 0 ) {
@@ -225,7 +387,7 @@ public class SqlActionGencode {
 							System.out.println( "DeleteSqlDumpGencode ok" );
 						}
 					} else {
-						System.out.println( "No action in ["+sqlaction+"]" );
+						System.out.println( "Action["+sqlaction+"] invalid" );
 						return;
 					}
 				}
@@ -239,254 +401,6 @@ public class SqlActionGencode {
 		}
 	}
 
-	public static int DumpSelectOutputColumn( int columnIndex, SqlActionColumn column, StringBuilder out ) {
-		switch( column.dataType ) {
-			case SQLACTION_DATA_TYPE_BIT :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBoolean( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_TINYINT :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getByte( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_SMALLINT :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getShort( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_MEDIUMINT :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getInt( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_INTEGER :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getInt( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_BIGINT :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getLong( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_REAL :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getFloat( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_FLOAT :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getDouble( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_DOUBLE :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getDouble( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_DECIMAL :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBigDecimal( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_NUMBERIC :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBigDecimal( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_CHAR :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getString( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_VARCHAR :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getString( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_DATE :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getDate( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_TIME :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getTime( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_DATETIME :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getTime( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_TIMESTAMP :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getTimestamp( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_YEAR :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getTime( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_BINARY :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_VARBINARY :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_BLOB :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_TINYBLOB :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_MEDIUMBLOB :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
-				break;
-			case SQLACTION_DATA_TYPE_LONGBLOB :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
-				break;
-			default :
-				System.out.println( "dataType["+column.dataType+"] invalid" );
-				return -1;
-		}
-		
-		return 0;
-	}
-	
-	public static int DumpSetInputColumn( int columnIndex, SqlActionColumn column, StringBuilder out ) {
-
-		switch( column.dataType ) {
-			case SQLACTION_DATA_TYPE_BIT :
-				out.append( "\t\t" + "prestmt.setBoolean( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_TINYINT :
-				out.append( "\t\t" + "prestmt.setByte( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_SMALLINT :
-				out.append( "\t\t" + "prestmt.setShort( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_MEDIUMINT :
-				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_INTEGER :
-				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_BIGINT :
-				out.append( "\t\t" + "prestmt.setLong( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_REAL :
-				out.append( "\t\t" + "prestmt.setFloat( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_FLOAT :
-				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_DOUBLE :
-				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_DECIMAL :
-				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_NUMBERIC :
-				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_CHAR :
-				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_VARCHAR :
-				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_DATE :
-				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_TIME :
-				out.append( "\t\t" + "prestmt.setTime( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_DATETIME :
-				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_TIMESTAMP :
-				out.append( "\t\t" + "prestmt.setTimestamp( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_YEAR :
-				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_BINARY :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_VARBINARY :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_BLOB :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_TINYBLOB :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_MEDIUMBLOB :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_LONGBLOB :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", setInput."+column.javaPropertyName+" );\n" );
-				break;
-			default :
-				System.out.println( "dataType["+column.dataType+"] invalid" );
-				return -1;
-		}
-		
-		return 0;
-	}
-	
-	public static int DumpWhereInputColumn( int columnIndex, SqlActionColumn column, StringBuilder out ) {
-
-		switch( column.dataType ) {
-			case SQLACTION_DATA_TYPE_BIT :
-				out.append( "\t\t" + "prestmt.setBoolean( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_TINYINT :
-				out.append( "\t\t" + "prestmt.setByte( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_SMALLINT :
-				out.append( "\t\t" + "prestmt.setShort( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_MEDIUMINT :
-				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_INTEGER :
-				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_BIGINT :
-				out.append( "\t\t" + "prestmt.setLong( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_REAL :
-				out.append( "\t\t" + "prestmt.setFloat( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_FLOAT :
-				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_DOUBLE :
-				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_DECIMAL :
-				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_NUMBERIC :
-				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_CHAR :
-				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_VARCHAR :
-				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_DATE :
-				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_TIME :
-				out.append( "\t\t" + "prestmt.setTime( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_DATETIME :
-				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_TIMESTAMP :
-				out.append( "\t\t" + "prestmt.setTimestamp( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_YEAR :
-				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_BINARY :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_VARBINARY :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_BLOB :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_TINYBLOB :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_MEDIUMBLOB :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			case SQLACTION_DATA_TYPE_LONGBLOB :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", whereInput."+column.javaPropertyName+" );\n" );
-				break;
-			default :
-				System.out.println( "dataType["+column.dataType+"] invalid" );
-				return -1;
-		}
-		
-		return 0;
-	}
-	
 	public static int SelectSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf, String sqlaction, SqlActionSyntaxParser parser, SqlActionDatabase database, SqlActionTable table, StringBuilder out ) {
 		
 		StringBuilder		sql = new StringBuilder() ;
@@ -495,30 +409,40 @@ public class SqlActionGencode {
 		
 		sql.append( "SELECT " );
 		if( parser.selectAllColumn ) {
-			methodName.append( "SqlAction_SELECT_ALL_FROM_" + table.tableName );
+			sql.append( "*" );
+			methodName.append( "SqlAction_SELECT_ALL" );
 		} else {
 			methodName.append( "SqlAction_SELECT_" );
 			
 			for( SqlActionSelectColumnToken ct : parser.selectColumnTokenList ) {
-				if( ct != parser.selectColumnTokenList.get(1) ) {
+				if( ct != parser.selectColumnTokenList.get(0) ) {
 					sql.append( "," );
+					methodName.append( "_j_" );
 				}
 				sql.append( ct.columnName );
+				methodName.append( ct.columnName );
 			}
-			methodName.append( "_" + table.tableName.replace(',','_') );
-			methodName.append( "_FROM_" + table.tableName );
 		}
 		
-		sql.append( " WHERE" );
-		methodName.append( "_WHERE" );
+		sql.append( " FROM " + table.tableName );
+		methodName.append( "_FROM_" + table.tableName.replace(',','_') );
 		
-		for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
-			if( ct != parser.whereColumnTokenList.get(1) ) {
-				sql.append( "," );
+		if( parser.whereColumnTokenList.size() > 0 ) {
+			sql.append( " WHERE " );
+			methodName.append( "_WHERE_" );
+			
+			for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
+				if( ct != parser.whereColumnTokenList.get(0) ) {
+					sql.append( " AND " );
+					methodName.append( "_AND_" );
+				}
+				sql.append( ct.columnName + "=?" );
+				methodName.append( ct.columnName + "_" + SqlActionColumn.operatorTo(ct.operator) );
+				if( ! ct.columnValue.equals("?") ) {
+					methodName.append( "_" + SqlActionUtil.convertToUnderscoreExceptForLetterAndDigit(ct.columnValue) );
+				}
 			}
-			sql.append( ct.columnName + "=?" );
 		}
-		methodName.append( "_" + table.tableName.replace(',','_') );
 		
 		out.append( "\n" );
 		out.append( "\t" + "// "+sqlaction+"\n" );
@@ -528,7 +452,11 @@ public class SqlActionGencode {
 			int	columnIndex = 0 ;
 			for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
 				columnIndex++;
-				nret = DumpWhereInputColumn( columnIndex, ct.column, out ) ;
+				if( ct.columnValue.equals("?") ) {
+					nret = SqlActionColumn.DumpWhereInputColumn( columnIndex, ct.column, "whereInput."+ct.column.javaPropertyName, out ) ;
+				} else {
+					nret = SqlActionColumn.DumpWhereInputColumn( columnIndex, ct.column, ct.columnValue.replace('\'','"'), out ) ;
+				}
 				if( nret != 0 ) {
 					System.out.println( "DumpWhereInputColumn["+table.tableName+"]["+ct.columnName+"] failed["+nret+"]" );
 					return nret;
@@ -546,7 +474,7 @@ public class SqlActionGencode {
 			int	columnIndex = 0 ;
 			for( SqlActionSelectColumnToken ct : parser.selectColumnTokenList ) {
 				columnIndex++;
-				nret = DumpSelectOutputColumn( columnIndex, ct.column, out ) ;
+				nret = SqlActionColumn.DumpSelectOutputColumn( columnIndex, ct.column, out ) ;
 				if( nret != 0 ) {
 					System.out.println( "DumpSelectOutputColumn["+table.tableName+"]["+ct.columnName+"] failed["+nret+"]" );
 					return nret;
@@ -565,14 +493,17 @@ public class SqlActionGencode {
 		
 		StringBuilder		sql = new StringBuilder() ;
 		StringBuilder		methodName = new StringBuilder() ;
+		int					columnIndex ;
 		int					nret = 0 ;
 		
 		sql.append( "INSERT INTO " + table.tableName + " (" );
 		methodName.append( "SqlAction_INSERT_INTO_" + table.tableName );
 		
+		columnIndex = 0 ;
 		for( SqlActionColumn c : table.columnList ) {
 			if( c.isAutoIncrement == false ) {
-				if( c != table.columnList.get(1) )
+				columnIndex++;
+				if( columnIndex > 0 )
 					sql.append( "," );
 				sql.append( c.columnName );
 			}
@@ -580,9 +511,11 @@ public class SqlActionGencode {
 		
 		sql.append( ") VALUES (" );
 		
+		columnIndex = 0 ;
 		for( SqlActionColumn c : table.columnList ) {
 			if( c.isAutoIncrement == false ) {
-				if( c != table.columnList.get(1) )
+				columnIndex++;
+				if( columnIndex > 0 )
 					sql.append( "," );
 				sql.append( "?" );
 			}
@@ -594,11 +527,11 @@ public class SqlActionGencode {
 		out.append( "\t" + "// "+sqlaction+"\n" );
 		out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionTableConf.javaClassName + " whereInput ) throws Exception {\n" );
 		out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
-		int	columnIndex = 0 ;
+		columnIndex = 0 ;
 		for( SqlActionColumn c : table.columnList ) {
 			if( c.isAutoIncrement == false ) {
 				columnIndex++;
-				nret = DumpWhereInputColumn( columnIndex, c, out ) ;
+				nret = SqlActionColumn.DumpWhereInputColumn( columnIndex, c, "whereInput."+c.javaPropertyName, out ) ;
 				if( nret != 0 ) {
 					System.out.println( "DumpWhereInputColumn["+table.tableName+"]["+c.columnName+"] failed["+nret+"]" );
 					return nret;
@@ -621,23 +554,33 @@ public class SqlActionGencode {
 		methodName.append( "SqlAction_UPDATE_" + table.tableName + "_SET" );
 		
 		for( SqlActionSetColumnToken ct : parser.setColumnTokenList ) {
-			if( ct != parser.setColumnTokenList.get(1) ) {
+			if( ct != parser.setColumnTokenList.get(0) ) {
 				sql.append( "," );
+				methodName.append( "_j" );
 			}
 			sql.append( ct.columnName + "=?" );
-		}
-		methodName.append( "_" + table.tableName.replace(',','_') );
-		
-		sql.append( " WHERE" );
-		methodName.append( "_WHERE" );
-		
-		for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
-			if( ct != parser.whereColumnTokenList.get(1) ) {
-				sql.append( "," );
+			methodName.append( "_" + ct.columnName + "_E" );
+			if( ! ct.columnValue.equals("?") ) {
+				methodName.append( "_" + SqlActionUtil.convertToUnderscoreExceptForLetterAndDigit(ct.columnValue) );
 			}
-			sql.append( ct.columnName + "=?" );
 		}
-		methodName.append( "_" + table.tableName.replace(',','_') );
+		
+		if( parser.whereColumnTokenList.size() > 0 ) {
+			sql.append( " WHERE " );
+			methodName.append( "_WHERE_" );
+			
+			for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
+				if( ct != parser.whereColumnTokenList.get(0) ) {
+					sql.append( " AND " );
+					methodName.append( "_AND_" );
+				}
+				sql.append( ct.columnName + "=?" );
+				methodName.append( ct.columnName + "_" + SqlActionColumn.operatorTo(ct.operator) );
+				if( ! ct.columnValue.equals("?") ) {
+					methodName.append( "_" + SqlActionUtil.convertToUnderscoreExceptForLetterAndDigit(ct.columnValue) );
+				}
+			}
+		}
 		
 		out.append( "\n" );
 		out.append( "\t" + "// "+sqlaction+"\n" );
@@ -645,33 +588,27 @@ public class SqlActionGencode {
 			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionTableConf.javaClassName + " setInput, " + sqlactionTableConf.javaClassName + " whereInput ) throws Exception {\n" );
 			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
 			int	columnIndex = 0 ;
-			for( SqlActionSetColumnToken c : parser.setColumnTokenList ) {
+			for( SqlActionSetColumnToken ct : parser.setColumnTokenList ) {
 				columnIndex++;
-				if( c.column == null ) {
-					c.column = SqlActionColumn.FindColumn( table.columnList, c.columnName ) ;
-					if( c.column == null ) {
-						System.out.println( "column["+c.columnName+"] not found in table["+table.tableName+"]" );
-						return -1;
-					}
+				if( ct.columnValue.equals("?") ) {
+					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, "setInput."+ct.column.javaPropertyName, out ) ;
+				} else {
+					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, ct.columnValue.replace('\'','"'), out ) ;
 				}
-				nret = DumpSetInputColumn( columnIndex, c.column, out ) ;
 				if( nret != 0 ) {
-					System.out.println( "DumpSetInputColumn[\"+table.tableName+\"][\"+c.columnName+\"] failed["+nret+"]" );
+					System.out.println( "DumpSetInputColumn[\"+table.tableName+\"][\"+ct.columnName+\"] failed["+nret+"]" );
 					return nret;
 				}
 			}
-			for( SqlActionWhereColumnToken c : parser.whereColumnTokenList ) {
+			for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
 				columnIndex++;
-				if( c.column == null ) {
-					c.column = SqlActionColumn.FindColumn( table.columnList, c.columnName ) ;
-					if( c.column == null ) {
-						System.out.println( "column["+c.columnName+"] not found in table["+table.tableName+"]" );
-						return -1;
-					}
+				if( ct.columnValue.equals("?") ) {
+					nret = SqlActionColumn.DumpWhereInputColumn( columnIndex, ct.column, "whereInput."+ct.column.javaPropertyName, out ) ;
+				} else {
+					nret = SqlActionColumn.DumpWhereInputColumn( columnIndex, ct.column, ct.columnValue.replace('\'','"'), out ) ;
 				}
-				nret = DumpWhereInputColumn( columnIndex, c.column, out ) ;
 				if( nret != 0 ) {
-					System.out.println( "DumpWhereInputColumn[\"+table.tableName+\"][\"+c.columnName+\"] failed["+nret+"]" );
+					System.out.println( "DumpWhereInputColumn[\"+table.tableName+\"][\"+ct.columnName+\"] failed["+nret+"]" );
 					return nret;
 				}
 			}
@@ -680,18 +617,15 @@ public class SqlActionGencode {
 			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionTableConf.javaClassName + " setInput ) throws Exception {\n" );
 			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
 			int	columnIndex = 0 ;
-			for( SqlActionSetColumnToken c : parser.setColumnTokenList ) {
+			for( SqlActionSetColumnToken ct : parser.setColumnTokenList ) {
 				columnIndex++;
-				if( c.column == null ) {
-					c.column = SqlActionColumn.FindColumn( table.columnList, c.columnName ) ;
-					if( c.column == null ) {
-						System.out.println( "column["+c.columnName+"] not found in table["+table.tableName+"]" );
-						return -1;
-					}
+				if( ct.columnValue.equals("?") ) {
+					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, "setInput."+ct.column.javaPropertyName, out ) ;
+				} else {
+					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, ct.columnValue.replace('\'','"'), out ) ;
 				}
-				nret = DumpSetInputColumn( columnIndex, c.column, out ) ;
 				if( nret != 0 ) {
-					System.out.println( "DumpSetInputColumn[\"+table.tableName+\"][\"+c.columnName+\"] failed["+nret+"]" );
+					System.out.println( "DumpSetInputColumn[\"+table.tableName+\"][\"+ct.columnName+\"] failed["+nret+"]" );
 					return nret;
 				}
 			}
@@ -708,16 +642,25 @@ public class SqlActionGencode {
 		StringBuilder			methodName = new StringBuilder() ;
 		int						nret = 0 ;
 		
-		sql.append( "DELETE FROM " + table.tableName + " WHERE" );
-		methodName.append( "SqlAction_DELETE_FROM_" + table.tableName + "_WHERE" );
+		sql.append( "DELETE FROM " + table.tableName );
+		methodName.append( "SqlAction_DELETE_FROM_" + table.tableName );
 		
-		for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
-			if( ct != parser.whereColumnTokenList.get(1) ) {
-				sql.append( "," );
+		if( parser.whereColumnTokenList.size() > 0 ) {
+			sql.append( " WHERE " );
+			methodName.append( "_WHERE_" );
+			
+			for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
+				if( ct != parser.whereColumnTokenList.get(0) ) {
+					sql.append( " AND " );
+					methodName.append( "_AND_" );
+				}
+				sql.append( ct.columnName + "=?" );
+				methodName.append( ct.columnName + "_" + SqlActionColumn.operatorTo(ct.operator) );
+				if( ! ct.columnValue.equals("?") ) {
+					methodName.append( "_" + SqlActionUtil.convertToUnderscoreExceptForLetterAndDigit(ct.columnValue) );
+				}
 			}
-			sql.append( ct.columnName + "=?" );
 		}
-		methodName.append( "_" + table.tableName.replace(',','_') );
 		
 		out.append( "\n" );
 		out.append( "\t" + "// "+sqlaction+"\n" );
@@ -725,33 +668,15 @@ public class SqlActionGencode {
 			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionTableConf.javaClassName + " setInput, " + sqlactionTableConf.javaClassName + " whereInput ) throws Exception {\n" );
 			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
 			int	columnIndex = 0 ;
-			for( SqlActionSetColumnToken c : parser.setColumnTokenList ) {
+			for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
 				columnIndex++;
-				if( c.column == null ) {
-					c.column = SqlActionColumn.FindColumn( table.columnList, c.columnName ) ;
-					if( c.column == null ) {
-						System.out.println( "column["+c.columnName+"] not found in table["+table.tableName+"]" );
-						return -1;
-					}
+				if( ct.columnValue.equals("?") ) {
+					nret = SqlActionColumn.DumpWhereInputColumn( columnIndex, ct.column, "whereInput."+ct.column.javaPropertyName, out ) ;
+				} else {
+					nret = SqlActionColumn.DumpWhereInputColumn( columnIndex, ct.column, ct.columnValue.replace('\'','"'), out ) ;
 				}
-				nret = DumpSetInputColumn( columnIndex, c.column, out ) ;
 				if( nret != 0 ) {
-					System.out.println( "DumpSetInputColumn[\"+table.tableName+\"][\"+c.columnName+\"] failed["+nret+"]" );
-					return nret;
-				}
-			}
-			for( SqlActionWhereColumnToken c : parser.whereColumnTokenList ) {
-				columnIndex++;
-				if( c.column == null ) {
-					c.column = SqlActionColumn.FindColumn( table.columnList, c.columnName ) ;
-					if( c.column == null ) {
-						System.out.println( "column["+c.columnName+"] not found in table["+table.tableName+"]" );
-						return -1;
-					}
-				}
-				nret = DumpWhereInputColumn( columnIndex, c.column, out ) ;
-				if( nret != 0 ) {
-					System.out.println( "DumpWhereInputColumn[\"+table.tableName+\"][\"+c.columnName+\"] failed["+nret+"]" );
+					System.out.println( "DumpWhereInputColumn[\"+table.tableName+\"][\"+ct.columnName+\"] failed["+nret+"]" );
 					return nret;
 				}
 			}
@@ -760,18 +685,15 @@ public class SqlActionGencode {
 			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionTableConf.javaClassName + " setInput ) throws Exception {\n" );
 			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
 			int	columnIndex = 0 ;
-			for( SqlActionSetColumnToken c : parser.setColumnTokenList ) {
+			for( SqlActionSetColumnToken ct : parser.setColumnTokenList ) {
 				columnIndex++;
-				if( c.column == null ) {
-					c.column = SqlActionColumn.FindColumn( table.columnList, c.columnName ) ;
-					if( c.column == null ) {
-						System.out.println( "column["+c.columnName+"] not found in table["+table.tableName+"]" );
-						return -1;
-					}
+				if( ct.columnValue.equals("?") ) {
+					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, "setInput."+ct.column.javaPropertyName, out ) ;
+				} else {
+					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, ct.columnValue.replace('\'','"'), out ) ;
 				}
-				nret = DumpSetInputColumn( columnIndex, c.column, out ) ;
 				if( nret != 0 ) {
-					System.out.println( "DumpSetInputColumn[\"+table.tableName+\"][\"+c.columnName+\"] failed["+nret+"]" );
+					System.out.println( "DumpWhereInputColumn[\"+table.tableName+\"][\"+ct.columnName+\"] failed["+nret+"]" );
 					return nret;
 				}
 			}

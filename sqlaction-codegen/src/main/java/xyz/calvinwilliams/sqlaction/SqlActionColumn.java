@@ -157,25 +157,6 @@ public class SqlActionColumn {
 		return null;
 	}
 	
-//	private static int ParseOtherStatementForGeneratingMethodCode( String[] sa, int index, StringBuilder sql, StringBuilder methodName ) {
-//		String		str ;
-//		while( index < sa.length ) {
-//			sql.append( " " + sa[index] );
-//			str = sa[index].replace(',','_') ;
-//			str = sa[index].replace('=','E') ;
-//			str = sa[index].replace("<>","NE") ;
-//			str = sa[index].replace(">","GT") ;
-//			str = sa[index].replace(">=","GE") ;
-//			str = sa[index].replace("<","LT") ;
-//			str = sa[index].replace("<=","LE") ;
-//			methodName.append( "_" + str );
-//			
-//			index++;
-//		}
-//		
-//		return index;
-//	}
-	
 	public static String operatorTo( String operator ) {
 		
 		switch( operator ) {
@@ -211,97 +192,11 @@ public class SqlActionColumn {
 	public static int TravelAllColumns( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionColumn> sqlactionColumnList, int depth, StringBuilder out ) throws Exception {
 		int		nret = 0 ;
 		
-		// out.append( "\n" );
 		for( SqlActionColumn c : sqlactionColumnList ) {
 			for( int n = 0 ; n < depth ; n++ )
 				System.out.print( "\t" );
 			System.out.println( "columnName["+c.columnName+"] columnDefault["+c.columnDefault+"] isNullable["+c.isNullable+"] DataType["+c.dataType+"] columnLength["+c.columnMaximumLength+"] numericPrecision["+c.numericPrecision+"] numericScale["+c.numericScale+"] isPrimaryKey["+c.isPrimaryKey+"] isAutoIncrement["+c.isAutoIncrement+"] columnComment["+c.columnComment+"]" );
-			
-			/*
-			String[] sa = c.columnName.split( "_" ) ;
-			StringBuilder javaPropertyNameBuilder = new StringBuilder() ;
-			for( String s : sa ) {
-				if( javaPropertyNameBuilder.length() == 0 )
-					javaPropertyNameBuilder.append( s.substring(0,1).toLowerCase(Locale.getDefault()) + s.substring(1) );
-				else
-					javaPropertyNameBuilder.append( s.substring(0,1).toUpperCase(Locale.getDefault()) + s.substring(1) );
-			}
-			c.javaPropertyName = javaPropertyNameBuilder.toString() ;
-			
-			ParseDefinePropertyForGeneratingClassCode( c, out );
-			*/
 		}
-		
-		/*
-		for( String s : sqlactionConf.sqlactions ) {
-			SqlActionSyntaxParser parser = new SqlActionSyntaxParser() ;
-			nret = parser.ParseSyntax(s) ;
-			if( nret != 0 ) {
-				System.out.println( "SqlActionSyntaxParser.ParseSyntax failed["+nret+"]" );
-				return nret;
-			}
-			
-			if( parser.selectAllColumn == true ) {
-				for( SqlActionFromTableToken tt : parser.fromTableTokenList ) {
-					SqlActionSelectColumnToken ct = new SqlActionSelectColumnToken() ;
-					ct.tableName = tt.tableName ;
-					ct.tableAliasName = tt.tableAliasName ;
-					
-				}
-			}
-			
-			if( parser.fromTableTokenList.size() > 0 ) {
-				
-			} else if( parser.insertTableName != null ) {
-				
-			} else if( parser.updateTableName != null ) {
-				
-			} else if( parser.deleteTableName != null ) {
-				
-			} else {
-				System.out.println( "sqlaction["+s+"] invalid" );
-				return -1;
-			}
-			
-			
-			
-			
-			
-			
-			s = s.toLowerCase() ;
-			String[] sa = s.split( " |\t|\r|\n" ) ;
-			if( sa[0].equals("select") && sa[2].equals("from") && sa[3].equals(sqlactionConf.javaTableName) ) {
-				nret = ParseSelectSqlForGeneratingMethodCode( dbserverConf, sqlactionConf, sqlactionColumnList, s, sa, out ) ;
-				if( nret != 0 ) {
-					System.out.println( "ParseSelectSqlForGeneratingMethodCode["+s+"] failed["+nret+"]" );
-					return nret;
-				}
-			} else if( sa[0].equals("insert") && sa[1].equals("into") && sa[2].equals(sqlactionConf.javaTableName) ) {
-				nret = ParseInsertSqlForGeneratingMethodCode( dbserverConf, sqlactionConf, sqlactionColumnList, s, sa, out ) ;
-				if( nret != 0 ) {
-					System.out.println( "ParseInsertSqlForGeneratingMethodCode["+s+"] failed["+nret+"]" );
-					return nret;
-				}
-			} else if( sa[0].equals("update") && sa[1].equals(sqlactionConf.javaTableName) && sa[2].equals("set") ) {
-				nret = ParseUpdateSqlForGeneratingMethodCode( dbserverConf, sqlactionConf, sqlactionColumnList, s, sa, out ) ;
-				if( nret != 0 ) {
-					System.out.println( "ParseUpdateSqlForGeneratingMethodCode["+s+"] failed["+nret+"]" );
-					return nret;
-				}
-			} else if( sa[0].equals("delete") && sa[1].equals("from") && sa[2].equals(sqlactionConf.javaTableName) ) {
-				nret = ParseDeleteSqlForGeneratingMethodCode( dbserverConf, sqlactionConf, sqlactionColumnList, s, sa, out ) ;
-				if( nret != 0 ) {
-					System.out.println( "ParseDeleteSqlForGeneratingMethodCode["+s+"] failed["+nret+"]" );
-					return nret;
-				}
-			} else {
-				System.out.println( "sqlaction["+sa[0]+"] invalid" );
-				return -1;
-			}
-		}
-		
-		out.append( "\n" );
-		*/
 		
 		return 0;
 	}
@@ -310,164 +205,164 @@ public class SqlActionColumn {
 	
 		switch( c.dataType ) {
 			case SQLACTION_DATA_TYPE_BIT :
-				out.append( "\t" + "boolean			"+c.javaPropertyName+" ;" );
+				out.append("\t").append("boolean			").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_TINYINT :
-				out.append( "\t" + "byte			"+c.javaPropertyName+" ;" );
+				out.append("\t").append("byte			").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_SMALLINT :
-				out.append( "\t" + "short			"+c.javaPropertyName+" ;" );
+				out.append("\t").append("short			").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_MEDIUMINT :
-				out.append( "\t" + "int				"+c.javaPropertyName+" ;" );
+				out.append("\t").append("int				").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_INTEGER :
-				out.append( "\t" + "int				"+c.javaPropertyName+" ;" );
+				out.append("\t").append("int				").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_BIGINT :
-				out.append( "\t" + "long			"+c.javaPropertyName+" ;" );
+				out.append("\t").append("long			").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_REAL :
-				out.append( "\t" + "float			"+c.javaPropertyName+" ;" );
+				out.append("\t").append("float			").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_FLOAT :
-				out.append( "\t" + "double			"+c.javaPropertyName+" ;" );
+				out.append("\t").append("double			").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_DOUBLE :
-				out.append( "\t" + "double			"+c.javaPropertyName+" ;" );
+				out.append("\t").append("double			").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_DECIMAL :
-				out.append( "\t" + "BigDecimal		"+c.javaPropertyName+" ;" );
+				out.append("\t").append("BigDecimal		").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_NUMBERIC :
-				out.append( "\t" + "BigDecimal		"+c.javaPropertyName+" ;" );
+				out.append("\t").append("BigDecimal		").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_CHAR :
-				out.append( "\t" + "String			"+c.javaPropertyName+" ;" );
+				out.append("\t").append("String			").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_VARCHAR :
-				out.append( "\t" + "String			"+c.javaPropertyName+" ;" );
+				out.append("\t").append("String			").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_DATE :
-				out.append( "\t" + "java.sql.Date	"+c.javaPropertyName+" ;" );
+				out.append("\t").append("java.sql.Date	").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_TIME :
-				out.append( "\t" + "java.sql.Time	"+c.javaPropertyName+" ;" );
+				out.append("\t").append("java.sql.Time	").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_DATETIME :
-				out.append( "\t" + "java.sql.Date	"+c.javaPropertyName+" ;" );
+				out.append("\t").append("java.sql.Date	").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_TIMESTAMP :
-				out.append( "\t" + "Timestamp		"+c.javaPropertyName+" ;" );
+				out.append("\t").append("Timestamp		").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_YEAR :
-				out.append( "\t" + "java.sql.Date	"+c.javaPropertyName+" ;" );
+				out.append("\t").append("java.sql.Date	").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_BINARY :
-				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
+				out.append("\t").append("byte[]			").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_VARBINARY :
-				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
+				out.append("\t").append("byte[]			").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_BLOB :
-				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
+				out.append("\t").append("byte[]			").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_TINYBLOB :
-				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
+				out.append("\t").append("byte[]			").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_MEDIUMBLOB :
-				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
+				out.append("\t").append("byte[]			").append(c.javaPropertyName).append(" ;");
 				break;
 			case SQLACTION_DATA_TYPE_LONGBLOB :
-				out.append( "\t" + "byte[]			"+c.javaPropertyName+" ;" );
+				out.append("\t").append("byte[]			").append(c.javaPropertyName).append(" ;");
 				break;
 			default :
-				out.append( "\t" + "String			"+c.javaPropertyName+" ;" );
+				out.append("\t").append("String			").append(c.javaPropertyName).append(" ;");
 				break;
 		}
 		
 		if( c.columnComment != null && ! c.columnComment.isEmpty() ) {
-			out.append( " // "+c.columnComment+"\n" );
+			out.append(" // ").append(c.columnComment).append("\n");
 		} else {
-			out.append( "\n" );
+			out.append("\n");
 		}
 		
 		return 0;
 	}
 	
-	public static int DumpSelectOutputColumn( int columnIndex, SqlActionColumn column, StringBuilder out ) {
+	public static int DumpSelectOutputColumn( int columnIndex, SqlActionColumn column, String columnValue, StringBuilder out ) {
 		switch( column.dataType ) {
 			case SQLACTION_DATA_TYPE_BIT :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBoolean( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getBoolean( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_TINYINT :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getByte( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getByte( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_SMALLINT :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getShort( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getShort( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_MEDIUMINT :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getInt( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getInt( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_INTEGER :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getInt( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getInt( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_BIGINT :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getLong( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getLong( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_REAL :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getFloat( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getFloat( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_FLOAT :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getDouble( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getDouble( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_DOUBLE :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getDouble( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getDouble( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_DECIMAL :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBigDecimal( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getBigDecimal( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_NUMBERIC :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBigDecimal( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getBigDecimal( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_CHAR :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getString( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getString( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_VARCHAR :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getString( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getString( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_DATE :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getDate( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getDate( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_TIME :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getTime( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getTime( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_DATETIME :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getTime( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getTime( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_TIMESTAMP :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getTimestamp( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getTimestamp( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_YEAR :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getTime( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getTime( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_BINARY :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getBytes( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_VARBINARY :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getBytes( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_BLOB :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getBytes( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_TINYBLOB :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getBytes( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_MEDIUMBLOB :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getBytes( "+columnIndex+" ) ;\n" );
 				break;
 			case SQLACTION_DATA_TYPE_LONGBLOB :
-				out.append( "\t\t\t" + "selectOutput."+column.javaPropertyName+" = rs.getBytes( "+columnIndex+" ) ;\n" );
+				out.append("\t\t\t").append(columnValue).append(" = rs.getBytes( "+columnIndex+" ) ;\n" );
 				break;
 			default :
 				System.out.println( "dataType["+column.dataType+"] invalid" );
@@ -481,76 +376,76 @@ public class SqlActionColumn {
 
 		switch( column.dataType ) {
 			case SQLACTION_DATA_TYPE_BIT :
-				out.append( "\t\t" + "prestmt.setBoolean( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBoolean( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_TINYINT :
-				out.append( "\t\t" + "prestmt.setByte( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setByte( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_SMALLINT :
-				out.append( "\t\t" + "prestmt.setShort( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setShort( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_MEDIUMINT :
-				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setInt( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_INTEGER :
-				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setInt( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_BIGINT :
-				out.append( "\t\t" + "prestmt.setLong( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setLong( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_REAL :
-				out.append( "\t\t" + "prestmt.setFloat( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setFloat( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_FLOAT :
-				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setDouble( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_DOUBLE :
-				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setDouble( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_DECIMAL :
-				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBigDecimal( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_NUMBERIC :
-				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBigDecimal( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_CHAR :
-				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setString( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_VARCHAR :
-				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setString( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_DATE :
-				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setDate( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_TIME :
-				out.append( "\t\t" + "prestmt.setTime( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setTime( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_DATETIME :
-				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setDate( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_TIMESTAMP :
-				out.append( "\t\t" + "prestmt.setTimestamp( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setTimestamp( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_YEAR :
-				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setDate( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_BINARY :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBytes( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_VARBINARY :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBytes( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_BLOB :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBytes( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_TINYBLOB :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBytes( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_MEDIUMBLOB :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBytes( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_LONGBLOB :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBytes( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			default :
 				System.out.println( "dataType["+column.dataType+"] invalid" );
@@ -564,76 +459,76 @@ public class SqlActionColumn {
 
 		switch( column.dataType ) {
 			case SQLACTION_DATA_TYPE_BIT :
-				out.append( "\t\t" + "prestmt.setBoolean( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBoolean( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_TINYINT :
-				out.append( "\t\t" + "prestmt.setByte( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setByte( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_SMALLINT :
-				out.append( "\t\t" + "prestmt.setShort( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setShort( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_MEDIUMINT :
-				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setInt( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_INTEGER :
-				out.append( "\t\t" + "prestmt.setInt( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setInt( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_BIGINT :
-				out.append( "\t\t" + "prestmt.setLong( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setLong( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_REAL :
-				out.append( "\t\t" + "prestmt.setFloat( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setFloat( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_FLOAT :
-				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setDouble( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_DOUBLE :
-				out.append( "\t\t" + "prestmt.setDouble( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setDouble( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_DECIMAL :
-				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBigDecimal( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_NUMBERIC :
-				out.append( "\t\t" + "prestmt.setBigDecimal( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBigDecimal( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_CHAR :
-				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setString( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_VARCHAR :
-				out.append( "\t\t" + "prestmt.setString( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setString( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_DATE :
-				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setDate( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_TIME :
-				out.append( "\t\t" + "prestmt.setTime( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setTime( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_DATETIME :
-				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setDate( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_TIMESTAMP :
-				out.append( "\t\t" + "prestmt.setTimestamp( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setTimestamp( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_YEAR :
-				out.append( "\t\t" + "prestmt.setDate( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setDate( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_BINARY :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBytes( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_VARBINARY :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBytes( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_BLOB :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBytes( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_TINYBLOB :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBytes( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_MEDIUMBLOB :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBytes( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			case SQLACTION_DATA_TYPE_LONGBLOB :
-				out.append( "\t\t" + "prestmt.setBytes( "+columnIndex+", "+columnValue+" );\n" );
+				out.append("\t\t").append("prestmt.setBytes( ").append(columnIndex).append(", ").append(columnValue).append(" );\n");
 				break;
 			default :
 				System.out.println( "dataType["+column.dataType+"] invalid" );

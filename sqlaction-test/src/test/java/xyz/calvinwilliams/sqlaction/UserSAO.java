@@ -19,88 +19,85 @@ public class UserSAO {
 	int				level ; // 级别
 
 	// SELECT * FROM user
-	public static int SqlAction_SELECT_ALL_FROM_useruser( Connection conn, List<UserSAO> userSAOList, List<UserSAO> userSAO ) throws Exception {
+	public static int SqlAction_SELECT_ALL_FROM_user( Connection conn, List<UserSAO> userListForSelectOutput, UserSAO userForWhereInput ) throws Exception {
 		Statement stmt = conn.createStatement() ;
 		ResultSet rs = stmt.executeQuery("SELECT * FROM user") ;
 		while( rs.next() ) {
-			UserSAO userSAO = new UserSAO() ;
-			selectOutput.id = rs.getInt( 1 ) ;
-			selectOutput.name = rs.getString( 2 ) ;
-			selectOutput.gender = rs.getString( 3 ) ;
-			selectOutput.age = rs.getShort( 4 ) ;
-			selectOutput.address = rs.getString( 5 ) ;
-			selectOutput.level = rs.getInt( 6 ) ;
-			selectOutputList.add(selectOutput);
+			UserSAO user = new UserSAO() ;
+			user.id = rs.getInt( 1 ) ;
+			user.name = rs.getString( 2 ) ;
+			user.gender = rs.getString( 3 ) ;
+			user.age = rs.getShort( 4 ) ;
+			user.address = rs.getString( 5 ) ;
+			user.level = rs.getInt( 6 ) ;
+			userListForSelectOutput.add(user) ;
 		}
-		return selectOutputList.size();
+		return userListForSelectOutput.size();
 	}
 
 	// SELECT * FROM user WHERE name=?
-	public static int SqlAction_SELECT_ALL_FROM_useruser_WHERE_name_E( Connection conn, List<UserSAO> userSAOList, List<UserSAO> userSAO ) throws Exception {
+	public static int SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__( Connection conn, List<UserSAO> userListForSelectOutput, UserSAO userForWhereInput ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement("SELECT * FROM user WHERE name=?") ;
-		prestmt.setString( 1, whereInput.name );
+		prestmt.setString( 1, userForWhereInput.name );
 		ResultSet rs = prestmt.executeQuery() ;
 		while( rs.next() ) {
-			UserSAO userSAO = new UserSAO() ;
-			selectOutput.id = rs.getInt( 1 ) ;
-			selectOutput.name = rs.getString( 2 ) ;
-			selectOutput.gender = rs.getString( 3 ) ;
-			selectOutput.age = rs.getShort( 4 ) ;
-			selectOutput.address = rs.getString( 5 ) ;
-			selectOutput.level = rs.getInt( 6 ) ;
-			selectOutputList.add(selectOutput);
+			UserSAO user = new UserSAO() ;
+			user.id = rs.getInt( 1 ) ;
+			user.name = rs.getString( 2 ) ;
+			user.gender = rs.getString( 3 ) ;
+			user.age = rs.getShort( 4 ) ;
+			user.address = rs.getString( 5 ) ;
+			user.level = rs.getInt( 6 ) ;
+			userListForSelectOutput.add(user) ;
 		}
-		return selectOutputList.size();
+		return userListForSelectOutput.size();
 	}
 
-	// SELECT name,address FROM user WHERE age<? AND gender=?
-	public static int SqlAction_SELECT_name_j_address_FROM_useruser_WHERE_age_LT_AND_gender_E( Connection conn, List<UserSAO> userSAOList, List<UserSAO> userSAO ) throws Exception {
-		PreparedStatement prestmt = conn.prepareStatement("SELECT name,address FROM user WHERE age=? AND gender=?") ;
-		prestmt.setShort( 1, whereInput.age );
-		prestmt.setString( 2, whereInput.gender );
+	// SELECT name,address FROM user WHERE age<=? AND gender=?
+	public static int SqlAction_SELECT_name_J_address_FROM_user_WHERE_age_LE___AND_gender_E__( Connection conn, List<UserSAO> userListForSelectOutput, UserSAO userForWhereInput ) throws Exception {
+		PreparedStatement prestmt = conn.prepareStatement("SELECT name,address FROM user WHERE age<=? AND gender=?") ;
+		prestmt.setShort( 1, userForWhereInput.age );
+		prestmt.setString( 2, userForWhereInput.gender );
 		ResultSet rs = prestmt.executeQuery() ;
 		while( rs.next() ) {
-			UserSAO userSAO = new UserSAO() ;
-			selectOutput.name = rs.getString( 1 ) ;
-			selectOutput.address = rs.getString( 2 ) ;
-			selectOutputList.add(selectOutput);
+			UserSAO user = new UserSAO() ;
+			user.name = rs.getString( 1 ) ;
+			user.address = rs.getString( 2 ) ;
+			userListForSelectOutput.add(user) ;
 		}
-		return selectOutputList.size();
+		return userListForSelectOutput.size();
 	}
 
 	// INSERT INTO user
-	public static int SqlAction_INSERT_INTO_user( Connection conn, UserSAO userSAO ) throws Exception {
-		PreparedStatement prestmt = conn.prepareStatement("INSERT INTO user (,name,gender,age,address,level) VALUES (,?,?,?,?,?)") ;
-		prestmt.setString( 1, whereInput.name );
-		prestmt.setString( 2, whereInput.gender );
-		prestmt.setShort( 3, whereInput.age );
-		prestmt.setString( 4, whereInput.address );
-		prestmt.setInt( 5, whereInput.level );
+	public static int SqlAction_INSERT_INTO_user( Connection conn, UserSAO user ) throws Exception {
+		PreparedStatement prestmt = conn.prepareStatement("INSERT INTO user (name,gender,age,address,level) VALUES (?,?,?,?,?)") ;
+		prestmt.setString( 1, user.name );
+		prestmt.setString( 2, user.gender );
+		prestmt.setShort( 3, user.age );
+		prestmt.setString( 4, user.address );
+		prestmt.setInt( 5, user.level );
 		return prestmt.executeUpdate() ;
 	}
 
 	// UPDATE user SET level=?
-	public static int SqlAction_UPDATE_user_SET_level_E( Connection conn, UserSAO userSAOForSetInput  ) throws Exception {
+	public static int SqlAction_UPDATE_user_SET_level_E__( Connection conn, UserSAO userForSetInput  ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement("UPDATE user SET level=?") ;
-		prestmt.setInt( 1, userSAOForSetInput.level );
+		prestmt.setInt( 1, userForSetInput.level );
 		return prestmt.executeUpdate() ;
 	}
 
-	// UPDATE user SET name='vincal',level=3 WHERE name='calvin'
-	public static int SqlAction_UPDATE_user_SET_name_E__vincal__j_level_E_3_WHERE_name_E__calvin_( Connection conn, UserSAO userSAOForSetInput, UserSAO userSAOForWhereInput ) throws Exception {
-		PreparedStatement prestmt = conn.prepareStatement("UPDATE user SET name=?,level=? WHERE name=?") ;
-		prestmt.setString( 1, "vincal" );
-		prestmt.setInt( 2, 3 );
-		prestmt.setString( 3, "calvin" );
+	// UPDATE user SET address='calvin address',level=10 WHERE name='Calvin'
+	public static int SqlAction_UPDATE_user_SET_address_E__calvin_address__j_level_E_10_WHERE_name_E__Calvin_( Connection conn, UserSAO userForSetInput, UserSAO userForWhereInput ) throws Exception {
+		PreparedStatement prestmt = conn.prepareStatement("UPDATE user SET address='calvin address',level=10 WHERE name='Calvin'") ;
 		return prestmt.executeUpdate() ;
 	}
 
-	// UPDATE user SET level=? WHERE age>=? AND gender=?
-	public static int SqlAction_UPDATE_user_SET_level_E_WHERE_age_GE_AND_gender_E( Connection conn, UserSAO userSAOForSetInput, UserSAO userSAOForWhereInput ) throws Exception {
-		PreparedStatement prestmt = conn.prepareStatement("UPDATE user SET level=? WHERE age=? AND gender=?") ;
-		prestmt.setInt( 1, userSAOForSetInput.level );
-		prestmt.setShort( 2, userSAOForWhereInput.age );
-		prestmt.setString( 3, userSAOForWhereInput.gender );
+	// UPDATE user SET level=? WHERE age>? AND gender=?
+	public static int SqlAction_UPDATE_user_SET_level_E___WHERE_age_GT___AND__gender_E__( Connection conn, UserSAO userForSetInput, UserSAO userForWhereInput ) throws Exception {
+		PreparedStatement prestmt = conn.prepareStatement("UPDATE user SET level=? WHERE age>? AND gender=?") ;
+		prestmt.setInt( 1, userForSetInput.level );
+		prestmt.setShort( 2, userForWhereInput.age );
+		prestmt.setString( 3, userForWhereInput.gender );
 		return prestmt.executeUpdate() ;
 	}
 
@@ -110,18 +107,17 @@ public class UserSAO {
 		return prestmt.executeUpdate() ;
 	}
 
-	// DELETE FROM user WHERE name<>'calvin'
-	public static int SqlAction_DELETE_FROM_user_WHERE_name_NE__calvin_( Connection conn, UserSAO userSAOForWhereInput ) throws Exception {
-		PreparedStatement prestmt = conn.prepareStatement("DELETE FROM user WHERE name=?") ;
-		prestmt.setString( 1, "calvin" );
+	// DELETE FROM user WHERE name='Calvin'
+	public static int SqlAction_DELETE_FROM_user_WHERE_name_E__Calvin_( Connection conn, UserSAO userForWhereInput ) throws Exception {
+		PreparedStatement prestmt = conn.prepareStatement("DELETE FROM user WHERE name='Calvin'") ;
 		return prestmt.executeUpdate() ;
 	}
 
 	// DELETE FROM user WHERE age<>? AND gender<>?
-	public static int SqlAction_DELETE_FROM_user_WHERE_age_NE_AND_gender_NE( Connection conn, UserSAO userSAOForWhereInput ) throws Exception {
-		PreparedStatement prestmt = conn.prepareStatement("DELETE FROM user WHERE age=? AND gender=?") ;
-		prestmt.setShort( 1, userSAOForWhereInput.age );
-		prestmt.setString( 2, userSAOForWhereInput.gender );
+	public static int SqlAction_DELETE_FROM_user_WHERE_age_NE___AND__gender_NE__( Connection conn, UserSAO userForWhereInput ) throws Exception {
+		PreparedStatement prestmt = conn.prepareStatement("DELETE FROM user WHERE age<>? AND  gender<>?") ;
+		prestmt.setShort( 1, userForWhereInput.age );
+		prestmt.setString( 2, userForWhereInput.gender );
 		return prestmt.executeUpdate() ;
 	}
 }

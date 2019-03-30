@@ -22,6 +22,7 @@ public class SqlActionSyntaxParser {
 		SqlActionFromTableToken		fromTableToken = null ;
 		SqlActionSetColumnToken		setColumnToken = null ;
 		SqlActionWhereColumnToken	whereColumnToken = null ;
+		String						token9 = null ;
 		
 		SqlActionLexicalParser lexicalParser = new SqlActionLexicalParser() ;
 		lexicalParser.SetSqlString(sql);
@@ -297,42 +298,103 @@ public class SqlActionSyntaxParser {
 					}
 					
 					if( token2.equals(".") ) {
-						// table.column = ?
+						// table.column
 						String token4 = lexicalParser.GetSqlToken() ;
 						if( token4 == null ) {
 							return -641;
 						}
+						
 						String token5 = lexicalParser.GetSqlToken() ;
 						if( token5 == null ) {
 							return -642;
 						}
 						
-						whereColumnToken = new SqlActionWhereColumnToken() ;
-						whereColumnToken.tableAliasName = token1 ;
-						whereColumnToken.columnName = token3 ;
-						whereColumnToken.operator = token4 ;
-						whereColumnToken.columnValue = token5 ;
-						whereColumnTokenList.add(whereColumnToken);
+						String token6 = lexicalParser.GetSqlToken() ;
+						if( token6 == null ) {
+							return -642;
+						}
+						
+						if( token6.equals(".") ) {
+							String token7 = lexicalParser.GetSqlToken() ;
+							if( token7 == null ) {
+								return -6431;
+							}
+							
+							// table.column = table2.column2
+							whereColumnToken = new SqlActionWhereColumnToken() ;
+							whereColumnToken.tableAliasName = token1 ;
+							whereColumnToken.columnName = token3 ;
+							whereColumnToken.operator = token4 ;
+							whereColumnToken.tableAliasName2 = token5 ;
+							whereColumnToken.columnName2 = token7 ;
+							whereColumnTokenList.add(whereColumnToken);
+							
+							token9 = lexicalParser.GetSqlToken() ;
+							if( token9 == null ) {
+								token = null ;
+								break;
+							}
+							
+						} else {
+							// table.column = column2
+							whereColumnToken = new SqlActionWhereColumnToken() ;
+							whereColumnToken.tableAliasName = token1 ;
+							whereColumnToken.columnName = token3 ;
+							whereColumnToken.operator = token4 ;
+							whereColumnToken.columnName2 = token5 ;
+							whereColumnTokenList.add(whereColumnToken);
+							
+							token9 = token6 ;
+						}
 					} else {
-						// column = ?
-						whereColumnToken = new SqlActionWhereColumnToken() ;
-						whereColumnToken.columnName = token1 ;
-						whereColumnToken.operator = token2 ;
-						whereColumnToken.columnValue = token3 ;
-						whereColumnTokenList.add(whereColumnToken);
+						// column = x
+						String token4 = lexicalParser.GetSqlToken() ;
+						if( token4 == null ) {
+							whereColumnToken = new SqlActionWhereColumnToken() ;
+							whereColumnToken.columnName = token1 ;
+							whereColumnToken.operator = token2 ;
+							whereColumnToken.columnName2 = token3 ;
+							whereColumnTokenList.add(whereColumnToken);
+							token = null ;
+							break;
+						}
+						
+						if( token4.equals(".") ) {
+							// column1 = table2.column2
+							String token5 = lexicalParser.GetSqlToken() ;
+							if( token5 == null ) {
+								return -6441;
+							}
+							
+							whereColumnToken = new SqlActionWhereColumnToken() ;
+							whereColumnToken.columnName = token1 ;
+							whereColumnToken.operator = token2 ;
+							whereColumnToken.tableName2 = token3 ;
+							whereColumnToken.columnName2 = token5 ;
+							whereColumnTokenList.add(whereColumnToken);
+							
+							token9 = lexicalParser.GetSqlToken() ;
+							if( token9 == null ) {
+								token = null ;
+								break;
+							}
+						} else {
+							// column1 = column2
+							whereColumnToken = new SqlActionWhereColumnToken() ;
+							whereColumnToken.columnName = token1 ;
+							whereColumnToken.operator = token2 ;
+							whereColumnToken.columnName2 = token3 ;
+							whereColumnTokenList.add(whereColumnToken);
+							
+							token9 = token4 ;
+						}
 					}
 					
-					String token6 = lexicalParser.GetSqlToken() ;
-					if( token6 == null ) {
-						// WHERE column = ?\0
-						token = token6 ;
-						break;
-					}
-					if( token6.equalsIgnoreCase("AND") ) {
+					if( token9.equalsIgnoreCase("AND") ) {
 						;
 					} else {
 						// WHERE ... others
-						token = null ;
+						token = token9 ;
 						break;
 					}
 				}

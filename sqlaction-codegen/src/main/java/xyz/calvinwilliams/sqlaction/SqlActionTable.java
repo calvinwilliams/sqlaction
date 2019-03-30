@@ -10,7 +10,8 @@ public class SqlActionTable {
 	List<SqlActionIndex>	indexList ;
 
 	String					javaClassName ;
-	String					javaVarName ;
+	String					javaObjectName ;
+	// String					javaOutputListNodeName ;
 	String					javaFileName ;
 	
 	public static int GetAllTablesInDatabase( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database ) throws Exception {
@@ -60,7 +61,8 @@ public class SqlActionTable {
 				sb.append( s.substring(0,1).toUpperCase(Locale.getDefault()) + s.substring(1) );
 			}
 			t.javaClassName = sb.toString() + "SAO" ;
-			t.javaVarName = t.javaClassName.substring(0,1).toLowerCase(Locale.getDefault()) + t.javaClassName.substring(1) ;
+			t.javaObjectName = sb.toString().substring(0,1).toLowerCase(Locale.getDefault()) + sb.toString().substring(1) ;
+			// t.javaOutputListNodeName = sb.toString() ;
 			t.javaFileName = t.javaClassName + ".java" ;
 		}
 		

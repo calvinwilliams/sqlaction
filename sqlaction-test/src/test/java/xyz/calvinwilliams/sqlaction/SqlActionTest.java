@@ -12,209 +12,365 @@ import java.util.*;
 
 public class SqlActionTest {
 
-	public static int TestSelectTable( Connection conn ) throws Exception {
-		
-		List<MyDemoTableSAO>	selectOutputList = null ;
-		MyDemoTableSAO			whereInput ;
-		int						nret = 0 ;
-		
+	public static int TestSelectTable( Connection conn ) {
+
+		List<UserSAO>		userList = null ;
+		UserSAO				user = null ;
+		List<UserSAO>		userListForSelectOutput = null ;
+		List<UserOrderSAO>	userOrderListForSelectOutput = null ;
+		UserSAO				userForWhereInput = null ;
+		int					nret = 0 ;
+
 		try {
-			selectOutputList = new LinkedList<MyDemoTableSAO>() ;
-			nret = MyDemoTableSAO.SqlAction_SELECT_ALL_FROM_my_demo_table( conn, selectOutputList ) ;
+			userList = new LinkedList<UserSAO>() ;
+			nret = UserSAO.SqlAction_SELECT_ALL_FROM_user( conn, userList, null ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_my_demo_table failed["+nret+"]" );
+				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user failed["+nret+"]" );
 				return -1;
 			} else {
-				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_my_demo_table ok" );
+				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user ok , ["+userList.size()+"]records" );
 			}
-			
-			for( MyDemoTableSAO t : selectOutputList ) {
-				System.out.println( "\t\t" + "id["+t.id+"] code["+t.code+"] name["+t.name+"] fnameCn["+t.fnameCn+"] price["+t.price+"] createDate["+t.createDate+"] createTime["+t.createTime+"] createTimestamp["+t.createTimestamp+"]" );
+
+			for( UserSAO u : userList ) {
+				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"]" );
 			}
-			
-			selectOutputList = new LinkedList<MyDemoTableSAO>() ;
-			whereInput = new MyDemoTableSAO() ;
-			whereInput.code = "my_code_2" ;
-			nret = MyDemoTableSAO.SqlAction_SELECT_name_FROM_my_demo_table_WHERE_code_E( conn, selectOutputList, whereInput ) ;
+
+			userList = new LinkedList<UserSAO>() ;
+			user = new UserSAO() ;
+			user.name = "Calvin" ;
+			nret = UserSAO.SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__( conn, userList, user ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_SELECT_name_FROM_my_demo_table_WHERE_code_E failed["+nret+"]" );
+				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ failed["+nret+"]" );
 				return -1;
 			} else {
-				System.out.println( "\t" + "SqlAction_SELECT_name_FROM_my_demo_table_WHERE_code_E ok" );
+				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ ok , ["+userList.size()+"]records" );
 			}
-			
-			for( MyDemoTableSAO t : selectOutputList ) {
-				System.out.println( "\t\t" + "name["+t.name+"]" );
+
+			for( UserSAO u : userList ) {
+				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"]" );
+			}
+
+			userList = new LinkedList<UserSAO>() ;
+			user = new UserSAO() ;
+			user.age = 3 ;
+			user.gender = "M" ;
+			nret = UserSAO.SqlAction_SELECT_name_J_address_FROM_user_WHERE_age_LE___AND_gender_E__( conn, userList, user ) ;
+			if( nret < 0 ) {
+				System.out.println( "\t" + "SqlAction_SELECT_name_J_address_FROM_user_WHERE_age_LE___AND_gender_E__ failed["+nret+"]" );
+				return -1;
+			} else {
+				System.out.println( "\t" + "SqlAction_SELECT_name_J_address_FROM_user_WHERE_age_LE___AND_gender_E__ ok , ["+userList.size()+"]records" );
+			}
+
+			for( UserSAO u : userList ) {
+				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"]" );
+			}
+
+			userListForSelectOutput = new LinkedList<UserSAO>() ;
+			userOrderListForSelectOutput = new LinkedList<UserOrderSAO>() ;
+			userForWhereInput = new UserSAO() ;
+			userForWhereInput.name = "Calvin" ;
+			nret = UserOrderSAO.SqlAction_SELECT_user_O_name_J_user_O_address_J_user_order_O_item_name_J_user_order_O_amount_J_user_order_O_total_price_FROM_user_J_user_order_WHERE_user_O_name_E___AND_user_O_id_E_user_order_O_user_id( conn, userListForSelectOutput, userOrderListForSelectOutput, userForWhereInput, null ) ;
+			if( nret < 0 ) {
+				System.out.println( "\t" + "SqlAction_SELECT_user_O_name_J_user_O_address_J_user_order_O_item_name_J_user_order_O_amount_J_user_order_O_total_price_FROM_user_J_user_order_WHERE_user_O_name_E___AND_user_O_id_E_user_order_O_user_id failed["+nret+"]" );
+				return -1;
+			} else {
+				System.out.println( "\t" + "SqlAction_SELECT_user_O_name_J_user_O_address_J_user_order_O_item_name_J_user_order_O_amount_J_user_order_O_total_price_FROM_user_J_user_order_WHERE_user_O_name_E___AND_user_O_id_E_user_order_O_user_id ok , ["+userListForSelectOutput.size()+"]records" );
+			}
+
+			for( UserSAO u : userListForSelectOutput ) {
+				System.out.print( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"]" );
+			}
+			for( UserOrderSAO o : userOrderListForSelectOutput ) {
+				System.out.println( " | " + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
+			}
+
+			userListForSelectOutput = new LinkedList<UserSAO>() ;
+			userOrderListForSelectOutput = new LinkedList<UserOrderSAO>() ;
+			userForWhereInput = new UserSAO() ;
+			userForWhereInput.name = "Calvin" ;
+			nret = UserOrderSAO.SqlAction_SELECT_u_O_name_J_u_O_address_J_o_O_item_name_J_o_O_amount_J_o_O_total_price_FROM_user_u_J_user_order_o_WHERE_u_O_name_E___AND_u_O_id_E_o_O_user_id( conn, userListForSelectOutput, userOrderListForSelectOutput, userForWhereInput, null ) ;
+			if( nret < 0 ) {
+				System.out.println( "\t" + "SqlAction_SELECT_u_O_name_J_u_O_address_J_o_O_item_name_J_o_O_amount_J_o_O_total_price_FROM_user_u_J_user_order_o_WHERE_u_O_name_E___AND_u_O_id_E_o_O_user_id failed["+nret+"]" );
+				return -1;
+			} else {
+				System.out.println( "\t" + "SqlAction_SELECT_u_O_name_J_u_O_address_J_o_O_item_name_J_o_O_amount_J_o_O_total_price_FROM_user_u_J_user_order_o_WHERE_u_O_name_E___AND_u_O_id_E_o_O_user_id ok , ["+userListForSelectOutput.size()+"]records" );
+			}
+
+			for( UserSAO u : userListForSelectOutput ) {
+				System.out.print( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"]" );
+			}
+			for( UserOrderSAO o : userOrderListForSelectOutput ) {
+				System.out.println( " | " + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
 			}
 		} catch (Exception e) {
-			throw e;
+			return -1;
 		}
-		
+
 		return 0;
 	}
-	
-	public static int TestInsertTable( Connection conn ) throws Exception {
-		
-		MyDemoTableSAO			valuesInput ;
-		int						nret = 0 ;
-		
+
+	public static int TestInsertTable( Connection conn ) {
+
+		UserSAO			user = null ;
+		List<UserSAO>	userList = null ;
+		UserOrderSAO	userOrder = null ;
+		int				nret = 0 ;
+
 		try {
-			valuesInput = new MyDemoTableSAO() ;
-			valuesInput.code = "my_code_1" ;
-			valuesInput.name = "my_name_1" ;
-			valuesInput.fnameCn = "我的中文名字1" ;
-			valuesInput.price = new BigDecimal(100000000.00) ;
-			valuesInput.createDate = new java.sql.Date(new java.util.Date().getTime()) ;
-			valuesInput.createTime = new java.sql.Time(new java.util.Date().getTime()) ;
-			valuesInput.createTimestamp = new java.sql.Timestamp(new java.util.Date().getTime()) ;
-			nret = MyDemoTableSAO.SqlAction_INSERT_INTO_my_demo_table( conn, valuesInput ) ;
+			user = new UserSAO() ;
+			user.name = "Calvin" ;
+			user.gender = "M" ;
+			user.age = 30 ;
+			user.address = "Calvin address" ;
+			user.level = 8 ;
+			nret = UserSAO.SqlAction_INSERT_INTO_user( conn, user ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_INSERT_INTO_my_demo_table failed["+nret+"]" );
+				System.out.println( "\t" + "SqlAction_INSERT_INTO_user failed["+nret+"]" );
 				return -1;
 			} else {
-				System.out.println( "\t" + "SqlAction_INSERT_INTO_my_demo_table ok" );
+				System.out.println( "\t" + "SqlAction_INSERT_INTO_user ok , rows["+nret+"] effected" );
 			}
-			
-			valuesInput = new MyDemoTableSAO() ;
-			valuesInput.code = "my_code_2" ;
-			valuesInput.name = "my_name_2" ;
-			valuesInput.fnameCn = "我的中文名字2" ;
-			valuesInput.price = new BigDecimal(100000000.00) ;
-			valuesInput.createDate = new java.sql.Date(new java.util.Date().getTime()) ;
-			valuesInput.createTime = new java.sql.Time(new java.util.Date().getTime()) ;
-			valuesInput.createTimestamp = new java.sql.Timestamp(new java.util.Date().getTime()) ;
-			nret = MyDemoTableSAO.SqlAction_INSERT_INTO_my_demo_table( conn, valuesInput ) ;
+
+			user = new UserSAO() ;
+			user.name = "Dozimoyi" ;
+			user.gender = "F" ;
+			user.age = 20 ;
+			user.address = "Dozimoyi address" ;
+			user.level = 7 ;
+			nret = UserSAO.SqlAction_INSERT_INTO_user( conn, user ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_INSERT_INTO_my_demo_table failed["+nret+"]" );
+				System.out.println( "\t" + "SqlAction_INSERT_INTO_user failed["+nret+"]" );
 				return -1;
 			} else {
-				System.out.println( "\t" + "SqlAction_INSERT_INTO_my_demo_table ok" );
+				System.out.println( "\t" + "SqlAction_INSERT_INTO_user ok , rows["+nret+"] effected" );
 			}
-			
-			valuesInput = new MyDemoTableSAO() ;
-			valuesInput.code = "my_code_3" ;
-			valuesInput.name = "my_name_3" ;
-			valuesInput.fnameCn = "我的中文名字3" ;
-			valuesInput.price = new BigDecimal(100000000.00) ;
-			valuesInput.createDate = new java.sql.Date(new java.util.Date().getTime()) ;
-			valuesInput.createTime = new java.sql.Time(new java.util.Date().getTime()) ;
-			valuesInput.createTimestamp = new java.sql.Timestamp(new java.util.Date().getTime()) ;
-			nret = MyDemoTableSAO.SqlAction_INSERT_INTO_my_demo_table( conn, valuesInput ) ;
+
+			user = new UserSAO() ;
+			user.name = "Mark" ;
+			user.gender = "M" ;
+			user.age = 3 ;
+			user.address = "Mark address" ;
+			user.level = 2 ;
+			nret = UserSAO.SqlAction_INSERT_INTO_user( conn, user ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_INSERT_INTO_my_demo_table failed["+nret+"]" );
+				System.out.println( "\t" + "SqlAction_INSERT_INTO_user failed["+nret+"]" );
 				return -1;
 			} else {
-				System.out.println( "\t" + "SqlAction_INSERT_INTO_my_demo_table ok" );
+				System.out.println( "\t" + "SqlAction_INSERT_INTO_user ok , rows["+nret+"] effected" );
 			}
-			
+
+			userList = new LinkedList<UserSAO>() ;
+			user = new UserSAO() ;
+			user.name = "Calvin" ;
+			nret = UserSAO.SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__( conn, userList, user ) ;
+			if( nret < 0 ) {
+				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ failed["+nret+"]" );
+				return -1;
+			} else {
+				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ ok , count["+nret+"]" );
+			}
+
+			if( userList.size() < 1 ) {
+				System.out.println("*** ERROR : Record not found about 'Calvin'");
+				return -1;
+			}
+
+			userOrder = new UserOrderSAO() ;
+			userOrder.userId = userList.get(0).id ;
+			userOrder.itemName = "我的商品" ;
+			userOrder.amount = 100 ;
+			userOrder.totalPrice = new BigDecimal(1000.00) ;
+			nret = UserOrderSAO.SqlAction_INSERT_INTO_user_order( conn, userOrder ) ;
+			if( nret < 0 ) {
+				System.out.println( "\t" + "SqlAction_INSERT_INTO_user_order failed["+nret+"]" );
+				return -1;
+			} else {
+				System.out.println( "\t" + "SqlAction_INSERT_INTO_user_order ok , rows["+nret+"] effected" );
+			}
+
 			conn.commit();
 		} catch (Exception e) {
-			conn.rollback();
-			throw e;
+			try {
+				conn.rollback();
+			} catch (Exception e2) {
+				return -11;
+			}
+			return -1;
 		}
-		
+
 		return 0;
 	}
-	
-	public static int TestUpdateTable( Connection conn ) throws Exception {
-		
-		MyDemoTableSAO			setInput ;
-		MyDemoTableSAO			whereInput ;
-		int						nret = 0 ;
-		
+
+	public static int TestUpdateTable( Connection conn ) {
+
+		UserSAO			userForSetInput = null ;
+		UserSAO			userForWhereInput = null ;
+		UserOrderSAO	userOrderForSetInput = null ;
+		UserOrderSAO	userOrderForWhereInput = null ;
+		UserSAO			user = null ;
+		List<UserSAO>	userList = null ;
+		int				nret = 0 ;
+
 		try {
-			setInput = new MyDemoTableSAO() ;
-			setInput.fnameCn = "我的中文名字*" ;
-			nret = MyDemoTableSAO.SqlAction_UPDATE_my_demo_table_SET_fname_cn( conn, setInput ) ;
+			userForSetInput = new UserSAO() ;
+			userForSetInput.level = 6 ;
+			nret = UserSAO.SqlAction_UPDATE_user_SET_level_E__( conn, userForSetInput ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_UPDATE_my_demo_table_SET_fname_cn failed["+nret+"]" );
+				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_level_E__ failed["+nret+"]" );
 				return -1;
 			} else {
-				System.out.println( "\t" + "SqlAction_UPDATE_my_demo_table_SET_fname_cn ok" );
+				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_level_E__ ok , rows["+nret+"] effected" );
 			}
-			
-			setInput = new MyDemoTableSAO() ;
-			setInput.fnameCn = "我的中文名字22" ;
-			whereInput = new MyDemoTableSAO() ;
-			whereInput.code = "my_code_2" ;
-			nret = MyDemoTableSAO.SqlAction_UPDATE_my_demo_table_SET_fname_cn_WHERE_code_E( conn, setInput, whereInput ) ;
+
+			nret = UserSAO.SqlAction_UPDATE_user_SET_address_E__calvin_address__j_level_E_10_WHERE_name_E__Calvin_( conn, null, null ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_UPDATE_my_demo_table_SET_fname_cn_WHERE_code_E failed["+nret+"]" );
+				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_address_E__calvin_address__j_level_E_10_WHERE_name_E__Calvin_ failed["+nret+"]" );
 				return -1;
 			} else {
-				System.out.println( "\t" + "SqlAction_UPDATE_my_demo_table_SET_fname_cn_WHERE_code_E ok" );
+				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_address_E__calvin_address__j_level_E_10_WHERE_name_E__Calvin_ ok , rows["+nret+"] effected" );
 			}
-			
+
+			userForSetInput = new UserSAO() ;
+			userForSetInput.level = 8 ;
+			userForWhereInput = new UserSAO() ;
+			userForWhereInput.age = 19 ;
+			userForWhereInput.gender = "F" ;
+			nret = UserSAO.SqlAction_UPDATE_user_SET_level_E___WHERE_age_GT___AND__gender_E__( conn, userForSetInput, userForWhereInput ) ;
+			if( nret < 0 ) {
+				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_level_E___WHERE_age_GT___AND__gender_E__ failed["+nret+"]" );
+				return -1;
+			} else {
+				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_level_E___WHERE_age_GT___AND__gender_E__ ok , rows["+nret+"] effected" );
+			}
+
+			userList = new LinkedList<UserSAO>() ;
+			user = new UserSAO() ;
+			user.name = "Calvin" ;
+			nret = UserSAO.SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__( conn, userList, user ) ;
+			if( nret < 0 ) {
+				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ failed["+nret+"]" );
+				return -1;
+			} else {
+				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ ok , ["+nret+"]records" );
+			}
+
+			if( userList.size() < 1 ) {
+				System.out.println("*** ERROR : Record not found about 'Calvin'");
+				return -1;
+			}
+
+			userOrderForSetInput = new UserOrderSAO() ;
+			userOrderForSetInput.totalPrice = new BigDecimal(10000.00) ;
+			userOrderForWhereInput = new UserOrderSAO() ;
+			userOrderForWhereInput.userId = userList.get(0).id ;
+			nret = UserOrderSAO.SqlAction_UPDATE_user_order_SET_total_price_E___WHERE_user_id_E__( conn, userOrderForSetInput, userOrderForWhereInput ) ;
+			if( nret < 0 ) {
+				System.out.println( "\t" + "SqlAction_UPDATE_user_order_SET_total_price_E___WHERE_user_id_E__ failed["+nret+"]" );
+				return -1;
+			} else {
+				System.out.println( "\t" + "SqlAction_UPDATE_user_order_SET_total_price_E___WHERE_user_id_E__ ok , rows["+nret+"] effected" );
+			}
+
 			conn.commit();
 		} catch (Exception e) {
-			conn.rollback();
-			throw e;
+			try {
+				conn.rollback();
+			} catch (Exception e2) {
+				return -11;
+			}
+			return -1;
 		}
-		
+
 		return 0;
 	}
-	
-	public static int TestDeleteTable1( Connection conn ) throws Exception {
-		
-		MyDemoTableSAO			whereInput ;
-		int						nret = 0 ;
-		
+
+	public static int TestDeleteTable1( Connection conn ) {
+
+		UserSAO			user ;
+		int				nret = 0 ;
+
 		try {
-			whereInput = new MyDemoTableSAO() ;
-			whereInput.code = "my_code_2" ;
-			nret = MyDemoTableSAO.SqlAction_DELETE_FROM_my_demo_table_WHERE_code_NE( conn, whereInput ) ;
+			nret = UserSAO.SqlAction_DELETE_FROM_user_WHERE_name_E__Calvin_( conn, null ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_DELETE_FROM_my_demo_table_WHERE_code_NE failed["+nret+"]" );
+				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_WHERE_name_E__Calvin_ failed["+nret+"]" );
 				return -1;
 			} else {
-				System.out.println( "\t" + "SqlAction_DELETE_FROM_my_demo_table_WHERE_code_NE ok" );
+				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_WHERE_name_E__Calvin_ ok , rows["+nret+"] effected" );
 			}
-			
-			conn.commit();
-		} catch (Exception e) {
-			conn.rollback();
-			throw e;
-		}
-		
-		return 0;
-	}
-	
-	public static int TestDeleteTable2( Connection conn ) throws Exception {
-		
-		int						nret = 0 ;
-		
-		try {
-			nret = MyDemoTableSAO.SqlAction_DELETE_FROM_my_demo_table( conn ) ;
+
+			user = new UserSAO() ;
+			user.age = 3 ;
+			user.gender = "M" ;
+			nret = UserSAO.SqlAction_DELETE_FROM_user_WHERE_age_NE___AND__gender_NE__( conn, user ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_DELETE_FROM_my_demo_table failed["+nret+"]" );
+				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_WHERE_age_NE___AND__gender_NE__ failed["+nret+"]" );
 				return -1;
 			} else {
-				System.out.println( "\t" + "SqlAction_DELETE_FROM_my_demo_table ok" );
+				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_WHERE_age_NE___AND__gender_NE__ ok , rows["+nret+"] effected" );
 			}
-			
+
 			conn.commit();
 		} catch (Exception e) {
-			conn.rollback();
-			throw e;
+			try {
+				conn.rollback();
+			} catch (Exception e2) {
+				return -11;
+			}
+			return -1;
 		}
-		
+
 		return 0;
 	}
-	
+
+	public static int TestDeleteTable2( Connection conn ) {
+
+		int						nret = 0 ;
+
+		try {
+			nret = UserSAO.SqlAction_DELETE_FROM_user( conn ) ;
+			if( nret < 0 ) {
+				System.out.println( "\t" + "SqlAction_DELETE_FROM_user failed["+nret+"]" );
+				return -1;
+			} else {
+				System.out.println( "\t" + "SqlAction_DELETE_FROM_user ok , rows["+nret+"] effected" );
+			}
+
+			nret = UserOrderSAO.SqlAction_DELETE_FROM_user_order( conn ) ;
+			if( nret < 0 ) {
+				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_order failed["+nret+"]" );
+				return -1;
+			} else {
+				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_order ok , rows["+nret+"] effected" );
+			}
+
+			conn.commit();
+		} catch (Exception e) {
+			try {
+				conn.rollback();
+			} catch (Exception e2) {
+				return -11;
+			}
+			return -1;
+		}
+
+		return 0;
+	}
+
 	public static void main(String[] args) {
-		
+
 		Path					currentPath ;
 		Path					dbserverConfJsonFilePath ;
 		String					dbserverConfJsonFileContent ;
 		DbServerConf			dbserverConf ;
-		
+
 		Connection				conn = null ;
-		
+
 		int						nret = 0 ;
-		
+
 		// load dbserver.conf.json
 		currentPath = Paths.get(System.getProperty("user.dir")) ;
-		
+
 		while( true ) {
 			try {
 				dbserverConfJsonFilePath = Paths.get(currentPath.toString(),"dbserver.conf.json") ;
@@ -228,29 +384,29 @@ public class SqlActionTest {
 				}
 			}
 		}
-		
+
 		dbserverConf = OKJSON.stringToObject( dbserverConfJsonFileContent, DbServerConf.class, OKJSON.OKJSON_OTIONS_DIRECT_ACCESS_PROPERTY_ENABLE ) ;
 		if( dbserverConf == null ) {
 			System.out.println(dbserverConfJsonFilePath+" content invalid");
 			return;
 		}
-		
+
 		if( dbserverConf.dbms == null ) {
 			String[] sa = dbserverConf.url.split( ":" ) ;
 			if( sa.length < 3 ) {
 				System.out.println( "dbserverConf.url["+dbserverConf.dbms+"] invalid" );
 				return;
 			}
-			
+
 			dbserverConf.dbms = sa[1] ;
 		}
-		
+
 		if( ! dbserverConf.dbms.equals("mysql") ) {
 			System.out.println( "dbserverConf.dbms["+dbserverConf.dbms+"] not support" );
 			return;
 		}
-		
-		// query database metadata
+
+		// connect to database
 		try {
 			Class.forName( dbserverConf.driver );
 			conn = DriverManager.getConnection( dbserverConf.url, dbserverConf.user, dbserverConf.pwd ) ;
@@ -259,103 +415,104 @@ public class SqlActionTest {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 		// test all cases
 		try {
 			conn.setAutoCommit(false);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
-		try {
-			System.out.println( "TestSelectTable ..." );
-			nret = TestSelectTable( conn ) ;
-			System.out.println( "TestSelectTable ok" );
-		} catch (Exception e1) {
-			System.out.println( "TestSelectTable failed["+nret+"]" );
-			e1.printStackTrace();
-			return;
-		}
-		
-		try {
-			System.out.println( "TestInsertTable ..." );
-			nret = TestInsertTable( conn ) ;
-			System.out.println( "TestInsertTable ok" );
-		} catch (Exception e) {
-			System.out.println( "TestInsertTable failed["+nret+"]" );
-			e.printStackTrace();
-			return;
-		}
-		
-		try {
-			System.out.println( "TestSelectTable ..." );
-			nret = TestSelectTable( conn ) ;
-			System.out.println( "TestSelectTable ok" );
-		} catch (Exception e1) {
-			System.out.println( "TestSelectTable failed["+nret+"]" );
-			e1.printStackTrace();
-			return;
-		}
-		
-		try {
-			System.out.println( "TestUpdateTable ..." );
-			nret = TestUpdateTable( conn ) ;
-			System.out.println( "TestUpdateTable ok" );
-		} catch (Exception e) {
-			System.out.println( "TestUpdateTable failed["+nret+"]" );
-			e.printStackTrace();
-			return;
-		}
-		
-		try {
-			System.out.println( "TestSelectTable ..." );
-			nret = TestSelectTable( conn ) ;
-			System.out.println( "TestSelectTable ok" );
-		} catch (Exception e1) {
-			System.out.println( "TestSelectTable failed["+nret+"]" );
-			e1.printStackTrace();
-			return;
-		}
-		
-		try {
-			System.out.println( "TestDeleteTable ..." );
-			nret = TestDeleteTable1( conn ) ;
-			System.out.println( "TestDeleteTable ok" );
-		} catch (Exception e) {
-			System.out.println( "TestDeleteTable failed["+nret+"]" );
-			e.printStackTrace();
-			return;
-		}
-		
-		try {
-			System.out.println( "TestSelectTable ..." );
-			nret = TestSelectTable( conn ) ;
-			System.out.println( "TestSelectTable ok" );
-		} catch (Exception e1) {
-			System.out.println( "TestSelectTable failed["+nret+"]" );
-			e1.printStackTrace();
-			return;
-		}
-		
-		try {
-			System.out.println( "TestDeleteTable ..." );
-			nret = TestDeleteTable2( conn ) ;
-			System.out.println( "TestDeleteTable ok" );
-		} catch (Exception e) {
-			System.out.println( "TestDeleteTable failed["+nret+"]" );
-			e.printStackTrace();
-			return;
-		}
-		
-		try {
-			System.out.println( "TestSelectTable ..." );
-			nret = TestSelectTable( conn ) ;
-			System.out.println( "TestSelectTable ok" );
-		} catch (Exception e1) {
-			System.out.println( "TestSelectTable failed["+nret+"]" );
-			e1.printStackTrace();
-			return;
-		}
-	}
 
+		System.out.println( "TestDeleteTable2 ..." );
+		nret = TestDeleteTable2( conn ) ;
+		if( nret != 0 ) {
+			System.out.println( "TestDeleteTable2 failed" );
+			return;
+		} else {
+			System.out.println( "TestDeleteTable2 ok" );
+		}
+
+		System.out.println( "TestSelectTable ..." );
+		nret = TestSelectTable( conn ) ;
+		if( nret != 0 ) {
+			System.out.println( "TestSelectTable failed" );
+			return;
+		} else {
+			System.out.println( "TestSelectTable ok" );
+		}
+
+		System.out.println( "TestInsertTable ..." );
+		nret = TestInsertTable( conn ) ;
+		if( nret != 0 ) {
+			System.out.println( "TestInsertTable failed" );
+			return;
+		} else {
+			System.out.println( "TestInsertTable ok" );
+		}
+
+		System.out.println( "TestSelectTable ..." );
+		nret = TestSelectTable( conn ) ;
+		if( nret != 0 ) {
+			System.out.println( "TestSelectTable failed" );
+			return;
+		} else {
+			System.out.println( "TestSelectTable ok" );
+		}
+
+		System.out.println( "TestUpdateTable ..." );
+		nret = TestUpdateTable( conn ) ;
+		if( nret != 0 ) {
+			System.out.println( "TestUpdateTable failed" );
+			return;
+		} else {
+			System.out.println( "TestUpdateTable ok" );
+		}
+
+		System.out.println( "TestSelectTable ..." );
+		nret = TestSelectTable( conn ) ;
+		if( nret != 0 ) {
+			System.out.println( "TestSelectTable failed" );
+			return;
+		} else {
+			System.out.println( "TestSelectTable ok" );
+		}
+
+		System.out.println( "TestDeleteTable ..." );
+		nret = TestDeleteTable1( conn ) ;
+		if( nret != 0 ) {
+			System.out.println( "TestDeleteTable1 failed" );
+			return;
+		} else {
+			System.out.println( "TestDeleteTable1 ok" );
+		}
+
+		System.out.println( "TestSelectTable ..." );
+		nret = TestSelectTable( conn ) ;
+		if( nret != 0 ) {
+			System.out.println( "TestSelectTable failed" );
+			return;
+		} else {
+			System.out.println( "TestSelectTable ok" );
+		}
+
+		System.out.println( "TestDeleteTable2 ..." );
+		nret = TestDeleteTable2( conn ) ;
+		if( nret != 0 ) {
+			System.out.println( "TestDeleteTable2 failed" );
+			return;
+		} else {
+			System.out.println( "TestDeleteTable2 ok" );
+		}
+
+		System.out.println( "TestSelectTable ..." );
+		nret = TestSelectTable( conn ) ;
+		if( nret != 0 ) {
+			System.out.println( "TestSelectTable failed" );
+			return;
+		} else {
+			System.out.println( "TestSelectTable ok" );
+		}
+		
+		return;
+	}
 }

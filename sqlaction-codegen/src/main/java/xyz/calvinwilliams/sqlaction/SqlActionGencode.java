@@ -125,20 +125,12 @@ public class SqlActionGencode {
 			}
 			
 			// Generate class code
-			for( SqlActionTableConf sqlactionTableConf : sqlactionConf.tables ) {
-				String[] sa = sqlactionTableConf.table.split( "_" ) ;
-				StringBuilder sb = new StringBuilder() ;
-				for( String s : sa ) {
-					sb.append( s.substring(0,1).toUpperCase(Locale.getDefault()) + s.substring(1) );
-				}
-				sqlactionTableConf.javaClassName = sb.toString() + "SAO" ;
-				sqlactionTableConf.javaFileName = sqlactionTableConf.javaClassName + ".java" ;
-				
+			for( SqlActionTableConf tc : sqlactionConf.tables ) {
 				StringBuilder out = new StringBuilder() ;
 				
-				SqlActionTable table = SqlActionTable.FindTable( database.tableList, sqlactionTableConf.table ) ;
+				SqlActionTable table = SqlActionTable.FindTable( database.tableList, tc.table ) ;
 				if( table == null ) {
-					System.out.println( "table["+sqlactionTableConf.table+"] not found in database["+sqlactionConf.database+"]" );
+					System.out.println( "table["+tc.table+"] not found in database["+sqlactionConf.database+"]" );
 					return;
 				}
 				
@@ -153,7 +145,7 @@ public class SqlActionGencode {
 				out.append( "import java.sql.PreparedStatement;\n" );
 				out.append( "import java.sql.ResultSet;\n" );
 				out.append( "\n" );
-				out.append( "public class "+sqlactionTableConf.javaClassName+" {\n" );
+				out.append( "public class "+table.javaClassName+" {\n" );
 				
 				out.append( "\n" );
 				for( SqlActionColumn c : table.columnList ) {
@@ -161,7 +153,7 @@ public class SqlActionGencode {
 				}
 				
 				// Parse sql actions and dump gencode
-				for( String sqlaction : sqlactionTableConf.sqlactions ) {
+				for( String sqlaction : tc.sqlactions ) {
 					// Parse sql action
 					System.out.println( "--- parse sql action --- ["+sqlaction+"]" );
 					
@@ -327,6 +319,16 @@ public class SqlActionGencode {
 						}
 					}
 					
+					for( SqlActionFromTableToken ct : parser.fromTableTokenList ) {
+						if( ct.table == null ) {
+							ct.table = SqlActionTable.FindTable( database.tableList, ct.tableName ) ;
+							if( ct.table == null ) {
+								System.out.println( "table["+ct.tableName+"] not found in database["+sqlactionConf.database+"] at FROM" );
+								return;
+							}
+						}
+					}
+					
 					for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
 						if( ct.column == null ) {
 							if( ct.tableName != null && ! ct.tableName.equalsIgnoreCase(table.tableName) ) {
@@ -355,7 +357,7 @@ public class SqlActionGencode {
 					System.out.println( "--- dump gencode --- ["+sqlaction+"]" );
 					
 					if( parser.selectColumnTokenList != null && parser.selectColumnTokenList.size() > 0 ) {
-						nret = SelectSqlDumpGencode( dbserverConf, sqlactionConf, sqlactionTableConf, sqlaction, parser, database, table, out ) ;
+						nret = SelectSqlDumpGencode( dbserverConf, sqlactionConf, tc, sqlaction, parser, database, table, out ) ;
 						if( nret != 0 ) {
 							System.out.println( "*** ERROR : SelectSqlDumpGencode failed["+nret+"]" );
 							return;
@@ -363,7 +365,7 @@ public class SqlActionGencode {
 							System.out.println( "SelectSqlDumpGencode ok" );
 						}
 					} else if( parser.insertTableName != null ) {
-						nret = InsertSqlDumpGencode( dbserverConf, sqlactionConf, sqlactionTableConf, sqlaction, parser, database, table, out ) ;
+						nret = InsertSqlDumpGencode( dbserverConf, sqlactionConf, tc, sqlaction, parser, database, table, out ) ;
 						if( nret != 0 ) {
 							System.out.println( "*** ERROR : InsertSqlDumpGencode failed["+nret+"]" );
 							return;
@@ -371,7 +373,7 @@ public class SqlActionGencode {
 							System.out.println( "InsertSqlDumpGencode ok" );
 						}
 					} else if( parser.updateTableName != null ) {
-						nret = UpdateSqlDumpGencode( dbserverConf, sqlactionConf, sqlactionTableConf, sqlaction, parser, database, table, out ) ;
+						nret = UpdateSqlDumpGencode( dbserverConf, sqlactionConf, tc, sqlaction, parser, database, table, out ) ;
 						if( nret != 0 ) {
 							System.out.println( "*** ERROR : UpdateSqlDumpGencode failed["+nret+"]" );
 							return;
@@ -379,7 +381,7 @@ public class SqlActionGencode {
 							System.out.println( "UpdateSqlDumpGencode ok" );
 						}
 					} else if( parser.deleteTableName != null ) {
-						nret = DeleteSqlDumpGencode( dbserverConf, sqlactionConf, sqlactionTableConf, sqlaction, parser, database, table, out ) ;
+						nret = DeleteSqlDumpGencode( dbserverConf, sqlactionConf, tc, sqlaction, parser, database, table, out ) ;
 						if( nret != 0 ) {
 							System.out.println( "*** ERROR : DeleteSqlDumpGencode failed["+nret+"]" );
 							return;
@@ -394,7 +396,7 @@ public class SqlActionGencode {
 				
 				out.append( "}\n" );
 				
-				Files.write( Paths.get(sqlactionTableConf.javaFileName) , out.toString().getBytes() );
+				Files.write( Paths.get(table.javaFileName) , out.toString().getBytes() );
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -405,6 +407,7 @@ public class SqlActionGencode {
 		
 		StringBuilder		sql = new StringBuilder() ;
 		StringBuilder		methodName = new StringBuilder() ;
+		StringBuilder		methodParameters = new StringBuilder() ;
 		int					nret = 0 ;
 		
 		sql.append( "SELECT " );
@@ -424,8 +427,24 @@ public class SqlActionGencode {
 			}
 		}
 		
-		sql.append( " FROM " + table.tableName );
+		sql.append( " FROM " );
 		methodName.append( "_FROM_" + table.tableName.replace(',','_') );
+		for( SqlActionFromTableToken ct : parser.fromTableTokenList ) {
+			if( ct != parser.fromTableTokenList.get(0) ) {
+				sql.append( "," );
+				methodName.append( "_j_" );
+			}
+			sql.append( ct.tableName );
+			methodName.append( ct.tableName );
+		}
+		
+		methodParameters.append( "Connection conn" );
+		for( SqlActionFromTableToken ct : parser.fromTableTokenList ) {
+			methodParameters.append( ", List<"+ct.table.javaClassName+"> "+ct.table.javaVarName+"List" );
+		}
+		for( SqlActionFromTableToken ct : parser.fromTableTokenList ) {
+			methodParameters.append( ", List<"+ct.table.javaClassName+"> "+ct.table.javaVarName );
+		}
 		
 		if( parser.whereColumnTokenList.size() > 0 ) {
 			sql.append( " WHERE " );
@@ -447,7 +466,7 @@ public class SqlActionGencode {
 		out.append( "\n" );
 		out.append( "\t" + "// "+sqlaction+"\n" );
 		if( parser.whereColumnTokenList.size() > 0 ) {
-			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, List<" +sqlactionTableConf.javaClassName+ "> selectOutputList, " + sqlactionTableConf.javaClassName + " whereInput ) throws Exception {\n" );
+			out.append( "\t" + "public static int " + methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
 			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
 			int	columnIndex = 0 ;
 			for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
@@ -464,12 +483,14 @@ public class SqlActionGencode {
 			}
 			out.append( "\t\t" + "ResultSet rs = prestmt.executeQuery() ;\n" );
 		} else {
-			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, List<" +sqlactionTableConf.javaClassName+ "> selectOutputList ) throws Exception {\n" );
+			out.append( "\t" + "public static int " + methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
 			out.append( "\t\t" + "Statement stmt = conn.createStatement() ;\n" );
 			out.append( "\t\t" + "ResultSet rs = stmt.executeQuery(\""+sql+"\") ;\n" );
 		}
 		out.append( "\t\t" + "while( rs.next() ) {\n" );
-		out.append( "\t\t\t" + sqlactionTableConf.javaClassName + " selectOutput = new "+sqlactionTableConf.javaClassName+"() ;\n" );
+		for( SqlActionFromTableToken ct : parser.fromTableTokenList ) {
+			out.append( "\t\t\t" + ct.table.javaClassName + " "+ct.table.javaVarName+" = new "+ct.table.javaClassName+"() ;\n" );
+		}
 		if( parser.selectColumnTokenList.size() > 0 ) {
 			int	columnIndex = 0 ;
 			for( SqlActionSelectColumnToken ct : parser.selectColumnTokenList ) {
@@ -493,6 +514,7 @@ public class SqlActionGencode {
 		
 		StringBuilder		sql = new StringBuilder() ;
 		StringBuilder		methodName = new StringBuilder() ;
+		StringBuilder		methodParameters = new StringBuilder() ;
 		int					columnIndex ;
 		int					nret = 0 ;
 		
@@ -523,9 +545,11 @@ public class SqlActionGencode {
 		
 		sql.append( ")" );
 		
+		methodParameters.append( "Connection conn, " + table.javaClassName + " " + table.javaVarName );
+		
 		out.append( "\n" );
 		out.append( "\t" + "// "+sqlaction+"\n" );
-		out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionTableConf.javaClassName + " whereInput ) throws Exception {\n" );
+		out.append( "\t" + "public static int " + methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
 		out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
 		columnIndex = 0 ;
 		for( SqlActionColumn c : table.columnList ) {
@@ -546,9 +570,10 @@ public class SqlActionGencode {
 	
 	public static int UpdateSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf, String sqlaction, SqlActionSyntaxParser parser, SqlActionDatabase database, SqlActionTable table, StringBuilder out ) {
 		
-		StringBuilder			sql = new StringBuilder() ;
-		StringBuilder			methodName = new StringBuilder() ;
-		int						nret = 0 ;
+		StringBuilder		sql = new StringBuilder() ;
+		StringBuilder		methodName = new StringBuilder() ;
+		StringBuilder		methodParameters = new StringBuilder() ;
+		int					nret = 0 ;
 		
 		sql.append( "UPDATE " + table.tableName + " SET " );
 		methodName.append( "SqlAction_UPDATE_" + table.tableName + "_SET" );
@@ -582,16 +607,22 @@ public class SqlActionGencode {
 			}
 		}
 		
+		if( parser.whereColumnTokenList.size() > 0 ) {
+			methodParameters.append( "Connection conn, " + table.javaClassName + " " + table.javaVarName + "ForSetInput, " + table.javaClassName + " " + table.javaVarName + "ForWhereInput" );
+		} else {
+			methodParameters.append( "Connection conn, " + table.javaClassName + " " + table.javaVarName + "ForSetInput " );
+		}
+		
 		out.append( "\n" );
 		out.append( "\t" + "// "+sqlaction+"\n" );
 		if( parser.whereColumnTokenList.size() > 0 ) {
-			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionTableConf.javaClassName + " setInput, " + sqlactionTableConf.javaClassName + " whereInput ) throws Exception {\n" );
+			out.append( "\t" + "public static int " + methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
 			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
 			int	columnIndex = 0 ;
 			for( SqlActionSetColumnToken ct : parser.setColumnTokenList ) {
 				columnIndex++;
 				if( ct.columnValue.equals("?") ) {
-					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, "setInput."+ct.column.javaPropertyName, out ) ;
+					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, table.javaVarName+"ForSetInput."+ct.column.javaPropertyName, out ) ;
 				} else {
 					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, ct.columnValue.replace('\'','"'), out ) ;
 				}
@@ -603,7 +634,7 @@ public class SqlActionGencode {
 			for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
 				columnIndex++;
 				if( ct.columnValue.equals("?") ) {
-					nret = SqlActionColumn.DumpWhereInputColumn( columnIndex, ct.column, "whereInput."+ct.column.javaPropertyName, out ) ;
+					nret = SqlActionColumn.DumpWhereInputColumn( columnIndex, ct.column, table.javaVarName+"ForWhereInput."+ct.column.javaPropertyName, out ) ;
 				} else {
 					nret = SqlActionColumn.DumpWhereInputColumn( columnIndex, ct.column, ct.columnValue.replace('\'','"'), out ) ;
 				}
@@ -614,13 +645,13 @@ public class SqlActionGencode {
 			}
 			out.append( "\t\t" + "return prestmt.executeUpdate() ;\n" );
 		} else {
-			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionTableConf.javaClassName + " setInput ) throws Exception {\n" );
+			out.append( "\t" + "public static int " + methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
 			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
 			int	columnIndex = 0 ;
 			for( SqlActionSetColumnToken ct : parser.setColumnTokenList ) {
 				columnIndex++;
 				if( ct.columnValue.equals("?") ) {
-					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, "setInput."+ct.column.javaPropertyName, out ) ;
+					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, table.javaVarName+"ForSetInput."+ct.column.javaPropertyName, out ) ;
 				} else {
 					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, ct.columnValue.replace('\'','"'), out ) ;
 				}
@@ -638,9 +669,10 @@ public class SqlActionGencode {
 	
 	public static int DeleteSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf, String sqlaction, SqlActionSyntaxParser parser, SqlActionDatabase database, SqlActionTable table, StringBuilder out ) {
 		
-		StringBuilder			sql = new StringBuilder() ;
-		StringBuilder			methodName = new StringBuilder() ;
-		int						nret = 0 ;
+		StringBuilder		sql = new StringBuilder() ;
+		StringBuilder		methodName = new StringBuilder() ;
+		StringBuilder		methodParameters = new StringBuilder() ;
+		int					nret = 0 ;
 		
 		sql.append( "DELETE FROM " + table.tableName );
 		methodName.append( "SqlAction_DELETE_FROM_" + table.tableName );
@@ -662,16 +694,22 @@ public class SqlActionGencode {
 			}
 		}
 		
+		if( parser.whereColumnTokenList.size() > 0 ) {
+			methodParameters.append( "Connection conn, " + table.javaClassName + " " + table.javaVarName + "ForWhereInput" );
+		} else {
+			methodParameters.append( "Connection conn" );
+		}
+		
 		out.append( "\n" );
 		out.append( "\t" + "// "+sqlaction+"\n" );
 		if( parser.whereColumnTokenList.size() > 0 ) {
-			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionTableConf.javaClassName + " setInput, " + sqlactionTableConf.javaClassName + " whereInput ) throws Exception {\n" );
+			out.append( "\t" + "public static int " + methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
 			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
 			int	columnIndex = 0 ;
 			for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
 				columnIndex++;
 				if( ct.columnValue.equals("?") ) {
-					nret = SqlActionColumn.DumpWhereInputColumn( columnIndex, ct.column, "whereInput."+ct.column.javaPropertyName, out ) ;
+					nret = SqlActionColumn.DumpWhereInputColumn( columnIndex, ct.column, table.javaVarName+"ForWhereInput."+ct.column.javaPropertyName, out ) ;
 				} else {
 					nret = SqlActionColumn.DumpWhereInputColumn( columnIndex, ct.column, ct.columnValue.replace('\'','"'), out ) ;
 				}
@@ -682,13 +720,13 @@ public class SqlActionGencode {
 			}
 			out.append( "\t\t" + "return prestmt.executeUpdate() ;\n" );
 		} else {
-			out.append( "\t" + "public static int " + methodName.toString() + "( Connection conn, " + sqlactionTableConf.javaClassName + " setInput ) throws Exception {\n" );
+			out.append( "\t" + "public static int " + methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
 			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
 			int	columnIndex = 0 ;
 			for( SqlActionSetColumnToken ct : parser.setColumnTokenList ) {
 				columnIndex++;
 				if( ct.columnValue.equals("?") ) {
-					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, "setInput."+ct.column.javaPropertyName, out ) ;
+					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, table.javaVarName+"ForSetInput."+ct.column.javaPropertyName, out ) ;
 				} else {
 					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, ct.columnValue.replace('\'','"'), out ) ;
 				}

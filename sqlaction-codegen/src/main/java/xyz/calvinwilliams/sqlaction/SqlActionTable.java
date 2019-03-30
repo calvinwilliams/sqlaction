@@ -9,6 +9,10 @@ public class SqlActionTable {
 	List<SqlActionColumn>	columnList ;
 	List<SqlActionIndex>	indexList ;
 
+	String					javaClassName ;
+	String					javaVarName ;
+	String					javaFileName ;
+	
 	public static int GetAllTablesInDatabase( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database ) throws Exception {
 		PreparedStatement	prestmt = null ;
 		ResultSet			rs ;
@@ -27,10 +31,6 @@ public class SqlActionTable {
 			table = new SqlActionTable() ;
 			
 			table.tableName = rs.getString(1) ;
-			/*
-			if( ! table.tableName.equals(sqlactionConf.table) )
-				continue;
-			*/
 			tableType = rs.getString(2) ;
 			if( ! tableType.equals("BASE TABLE") )
 				continue;
@@ -51,6 +51,17 @@ public class SqlActionTable {
 				System.out.println( "GetAllIndexesInTable failed["+nret+"] , database["+database.databaseName+"] table["+t.tableName+"]" );
 				return nret;
 			}
+		}
+		
+		for( SqlActionTable t : database.tableList ) {
+			String[] sa = t.tableName.split( "_" ) ;
+			StringBuilder sb = new StringBuilder() ;
+			for( String s : sa ) {
+				sb.append( s.substring(0,1).toUpperCase(Locale.getDefault()) + s.substring(1) );
+			}
+			t.javaClassName = sb.toString() + "SAO" ;
+			t.javaVarName = t.javaClassName.substring(0,1).toLowerCase(Locale.getDefault()) + t.javaClassName.substring(1) ;
+			t.javaFileName = t.javaClassName + ".java" ;
 		}
 		
 		return 0;

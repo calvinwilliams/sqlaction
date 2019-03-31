@@ -1,4 +1,4 @@
-package xyz.calvinwilliams.sqlaction;
+package xyz.calvinwilliams.test;
 
 public class DbServerConf {
 	String			dbms ;

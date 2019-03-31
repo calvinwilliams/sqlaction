@@ -1,9 +1,17 @@
 package xyz.calvinwilliams.sqlaction;
 
+import java.util.*;
+
 public class DbServerConf {
-	String			dbms ;
-	String			driver ;
-	String			url ;
-	String			user ;
-	String			pwd ;
+	public String							dbms ;
+	public String							driver ;
+	public String							url ;
+	public String							user ;
+	public String							pwd ;
+	public LinkedList<UserDefineDataTypes>	userDefineDataTypes ;
+}
+
+class UserDefineDataTypes {
+	public String		source ;
+	public String		redefine ;
 }

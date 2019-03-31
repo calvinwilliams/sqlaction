@@ -16,15 +16,44 @@ public class SqlActionColumn {
 	String					columnComment ;
 	
 	String					javaPropertyName ;
-
+	
+	public static String GetUserDefineDataType( DbServerConf dbserverConf, String sourceDataTypeAndLength ) {
+		for( UserDefineDataTypes t : dbserverConf.userDefineDataTypes ) {
+			if( SqlActionUtil.wildcardMatch( t.source, sourceDataTypeAndLength ) == 0 )
+				return t.redefine;
+		}
+		
+		return null;
+	}
+	
 	public static int GetColumnFromResultSet( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionDatabase database, SqlActionTable table, SqlActionColumn column, ResultSet rs ) throws Exception {
+		String		sourceDataType ;
+		String		sourceDataTypeAndLength ;
+		String		userDefineDataTypeAndLength ;
+		
 		column.columnName = rs.getString(1) ;
 		column.columnDefault = rs.getString(2) ;
 		if( rs.getString(3).equals("NO") )
 			column.isNullable = false ;
 		else
 			column.isNullable = true ;
-		switch( rs.getString(4) ) {
+		sourceDataType = rs.getString(4) ;
+		column.columnMaximumLength = rs.getLong(5);
+		column.numericPrecision = rs.getInt(6) ;
+		column.numericScale = rs.getInt(7) ;
+		sourceDataTypeAndLength = sourceDataType+","+column.columnMaximumLength+","+column.numericPrecision+","+column.numericScale ;
+		userDefineDataTypeAndLength = GetUserDefineDataType( dbserverConf, sourceDataTypeAndLength ) ;
+		if( userDefineDataTypeAndLength != null ) {
+			String[] sa = userDefineDataTypeAndLength.split(",") ;
+			sourceDataType = sa[0] ;
+			if( ! sa[1].equals("*") )
+				column.columnMaximumLength = Long.parseLong(sa[1]) ;
+			if( ! sa[2].equals("*") )
+				column.numericPrecision = Integer.parseInt(sa[2]) ;
+			if( ! sa[3].equals("*") )
+				column.numericScale = Integer.parseInt(sa[3]) ;
+		}
+		switch( sourceDataType ) {
 			case "bit" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_BIT ;
 				break;
@@ -101,9 +130,6 @@ public class SqlActionColumn {
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_VARCHAR ;
 				break;
 		}
-		column.columnMaximumLength = rs.getLong(5);
-		column.numericPrecision = rs.getInt(6) ;
-		column.numericScale = rs.getInt(7) ;
 		if( rs.getString(8).equals("PRI") )
 			column.isPrimaryKey = true ;
 		else

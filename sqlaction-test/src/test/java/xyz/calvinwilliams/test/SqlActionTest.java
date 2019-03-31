@@ -1,7 +1,6 @@
-package xyz.calvinwilliams.sqlaction;
+package xyz.calvinwilliams.test;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -206,7 +205,7 @@ public class SqlActionTest {
 			userOrder.userId = userList.get(0).id ;
 			userOrder.itemName = "我的商品" ;
 			userOrder.amount = 100 ;
-			userOrder.totalPrice = new BigDecimal(1000.00) ;
+			userOrder.totalPrice = 1000.00 ;
 			nret = UserOrderSAO.SqlAction_INSERT_INTO_user_order( conn, userOrder ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_INSERT_INTO_user_order failed["+nret+"]" );
@@ -287,7 +286,7 @@ public class SqlActionTest {
 			}
 
 			userOrderForSetInput = new UserOrderSAO() ;
-			userOrderForSetInput.totalPrice = new BigDecimal(10000.00) ;
+			userOrderForSetInput.totalPrice = 10000.00 ;
 			userOrderForWhereInput = new UserOrderSAO() ;
 			userOrderForWhereInput.userId = userList.get(0).id ;
 			nret = UserOrderSAO.SqlAction_UPDATE_user_order_SET_total_price_E___WHERE_user_id_E__( conn, userOrderForSetInput, userOrderForWhereInput ) ;

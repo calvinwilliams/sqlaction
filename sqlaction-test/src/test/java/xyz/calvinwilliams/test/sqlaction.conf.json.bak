@@ -31,5 +31,5 @@
 			]
 		}
 	] ,
-	"javaPackage" : "xyz.calvinwilliams.sqlaction"
+	"javaPackage" : "xyz.calvinwilliams.test"
 }

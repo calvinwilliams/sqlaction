@@ -1,4 +1,4 @@
-package xyz.calvinwilliams.sqlaction;
+package xyz.calvinwilliams.test;
 
 import java.util.*;
 import java.lang.reflect.*;

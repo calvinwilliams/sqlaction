@@ -1,1 +1,2 @@
-* 暂不支持函数、子查询
+* 暂不支持函数（除了COUNT(*)）、子查询
+* 目前只支持MySQL，后面还要增加PostgrelSQL、Oracle等

@@ -3,7 +3,7 @@ package xyz.calvinwilliams.sqlaction;
 import java.util.*;
 
 public class SqlActionConf {
-	String							database ;
-	LinkedList<SqlActionTableConf>	tables ;
-	String							javaPackage ;
+	public String							database ;
+	public LinkedList<SqlActionTableConf>	tables ;
+	public String							javaPackage ;
 }

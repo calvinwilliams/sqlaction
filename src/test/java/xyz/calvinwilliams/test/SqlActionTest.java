@@ -1,9 +1,5 @@
 package xyz.calvinwilliams.test;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -383,58 +379,14 @@ public class SqlActionTest {
 	}
 
 	public static void main(String[] args) {
-
-		Path					currentPath ;
-		Path					dbserverConfJsonFilePath ;
-		String					dbserverConfJsonFileContent ;
-		DbServerConf			dbserverConf ;
-
 		Connection				conn = null ;
 
 		int						nret = 0 ;
 
-		// load dbserver.conf.json
-		currentPath = Paths.get(System.getProperty("user.dir")) ;
-
-		while( true ) {
-			try {
-				dbserverConfJsonFilePath = Paths.get(currentPath.toString(),"dbserver.conf.json") ;
-				dbserverConfJsonFileContent = new String(Files.readAllBytes(dbserverConfJsonFilePath)) ;
-				break;
-			} catch (IOException e) {
-				currentPath = currentPath.getParent() ;
-				if( currentPath == null ) {
-					System.out.println( "*** ERROR : sqlaction.conf.json not found" );
-					return;
-				}
-			}
-		}
-
-		dbserverConf = OKJSON.stringToObject( dbserverConfJsonFileContent, DbServerConf.class, OKJSON.OKJSON_OTIONS_DIRECT_ACCESS_PROPERTY_ENABLE ) ;
-		if( dbserverConf == null ) {
-			System.out.println(dbserverConfJsonFilePath+" content invalid");
-			return;
-		}
-
-		if( dbserverConf.dbms == null ) {
-			String[] sa = dbserverConf.url.split( ":" ) ;
-			if( sa.length < 3 ) {
-				System.out.println( "dbserverConf.url["+dbserverConf.dbms+"] invalid" );
-				return;
-			}
-
-			dbserverConf.dbms = sa[1] ;
-		}
-
-		if( ! dbserverConf.dbms.equals("mysql") ) {
-			System.out.println( "dbserverConf.dbms["+dbserverConf.dbms+"] not support" );
-			return;
-		}
-
 		// connect to database
 		try {
-			Class.forName( dbserverConf.driver );
-			conn = DriverManager.getConnection( dbserverConf.url, dbserverConf.user, dbserverConf.pwd ) ;
+			Class.forName( "com.mysql.jdbc.Driver" );
+			conn = DriverManager.getConnection( "jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT", "calvin", "calvin" ) ;
 		} catch (ClassNotFoundException e1) {
 			e1.printStackTrace();
 		} catch (SQLException e) {

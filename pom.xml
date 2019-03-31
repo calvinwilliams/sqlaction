@@ -2,10 +2,5 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>xyz.calvinwilliams.sqlaction</groupId>
   <artifactId>sqlaction</artifactId>
-  <version>0.2.0</version>
-  <packaging>pom</packaging>
-  <modules>
-  	<module>sqlaction-gencode</module>
-  	<module>sqlaction-test</module>
-  </modules>
+  <version>0.0.1-SNAPSHOT</version>
 </project>

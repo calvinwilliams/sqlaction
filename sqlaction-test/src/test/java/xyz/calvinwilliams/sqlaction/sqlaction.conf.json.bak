@@ -7,6 +7,8 @@
 				"SELECT * FROM user" ,
 				"SELECT * FROM user WHERE name=?" ,
 				"SELECT name,address FROM user WHERE age<=? AND gender=?" ,
+				"SELECT * FROM user ORDER BY name DESC" ,
+				"SELECT gender,count(*) FROM user GROUP BY gender" ,
 				"INSERT INTO user" ,
 				"UPDATE user SET level=?" ,
 				"UPDATE user SET address='calvin address',level=10 WHERE name='Calvin'" ,

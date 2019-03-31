@@ -17,6 +17,8 @@ public class SqlActionSyntaxParser {
 	
 	public List<SqlActionWhereColumnToken>	whereColumnTokenList = null ;
 	
+	public String							otherTokens = null ;
+	
 	public int ParseSyntax( String sql ) {
 		SqlActionSelectColumnToken	selectColumnToken = null ;
 		SqlActionFromTableToken		fromTableToken = null ;
@@ -237,6 +239,7 @@ public class SqlActionSyntaxParser {
 					}
 					String token2 = lexicalParser.GetSqlToken() ;
 					if( token2 == null ) {
+						//      1
 						// FROM table\0
 						fromTableToken = new SqlActionFromTableToken() ;
 						fromTableToken.tableName = token1 ;
@@ -245,6 +248,7 @@ public class SqlActionSyntaxParser {
 						break;
 					}
 					if( token2.equalsIgnoreCase("WHERE") ) {
+						//      1     2
 						// FROM table WHERE
 						fromTableToken = new SqlActionFromTableToken() ;
 						fromTableToken.tableName = token1 ;
@@ -252,31 +256,45 @@ public class SqlActionSyntaxParser {
 						token = token2 ;
 						break;
 					} else if( token2.equals(",") ) {
+						//      1     2
 						// FROM table1,
 						fromTableToken = new SqlActionFromTableToken() ;
 						fromTableToken.tableName = token1 ;
 						fromTableTokenList.add(fromTableToken);
 					} else {
-						// FROM table1 t1
-						fromTableToken = new SqlActionFromTableToken() ;
-						fromTableToken.tableName = token1 ;
-						fromTableToken.tableAliasName = token2 ;
-						fromTableTokenList.add(fromTableToken);
-						
-						String token3 = lexicalParser.GetSqlToken() ;
-						if( token3 == null ) {
-							// FROM table1 t1\0
-							token = null ;
+						if( token2.equalsIgnoreCase("WHERE") || token2.equalsIgnoreCase("GROUP") || token2.equalsIgnoreCase("ORDER") || token2.equalsIgnoreCase("HAVING") ) {
+							//      1      2
+							// FROM table1 (WHERE|ORDER|HAVING)
+							fromTableToken = new SqlActionFromTableToken() ;
+							fromTableToken.tableName = token1 ;
+							fromTableTokenList.add(fromTableToken);
+							
+							token = token2 ;
 							break;
-						}
-						if(  token3.equalsIgnoreCase("WHERE") ) {
-							// FROM table1 t1 WHERE
-							token = token3 ;
-							break;
-						} else if( token3.equals(",") ) {
-							// FROM table1 t1,
 						} else {
-							return -52;
+							//      1      2
+							// FROM table1 t1
+							fromTableToken = new SqlActionFromTableToken() ;
+							fromTableToken.tableName = token1 ;
+							fromTableToken.tableAliasName = token2 ;
+							fromTableTokenList.add(fromTableToken);
+							
+							String token3 = lexicalParser.GetSqlToken() ;
+							if( token3 == null ) {
+								//      1      2 3
+								// FROM table1 t1\0
+								token = null ;
+								break;
+							}
+							if( token3.equals(",") ) {
+								//      1      2 3
+								// FROM table1 t1,
+							} else {
+								//      1      2  3
+								// FROM table1 t1 ...
+								token = token3 ;
+								break;
+							}
 						}
 					}
 				}
@@ -398,6 +416,10 @@ public class SqlActionSyntaxParser {
 						break;
 					}
 				}
+			} else if( token.equalsIgnoreCase("GROUP") || token.equalsIgnoreCase("ORDER") || token.equalsIgnoreCase("HAVING") ) {
+				otherTokens = " " + token + lexicalParser.GetRemainSqlToken() ;
+				token = null ;
+				break;
 			} else {
 				System.out.println( "token["+token+"] invalid" );
 				return -9;

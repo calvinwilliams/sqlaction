@@ -26,7 +26,7 @@ public class SqlActionTest {
 			nret = UserSAO.SqlAction_SELECT_ALL_FROM_user( conn, userList, null ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user failed["+nret+"]" );
-				return -1;
+				return -11;
 			} else {
 				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user ok , ["+userList.size()+"]records" );
 			}
@@ -41,7 +41,7 @@ public class SqlActionTest {
 			nret = UserSAO.SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__( conn, userList, user ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ failed["+nret+"]" );
-				return -1;
+				return -12;
 			} else {
 				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ ok , ["+userList.size()+"]records" );
 			}
@@ -57,7 +57,7 @@ public class SqlActionTest {
 			nret = UserSAO.SqlAction_SELECT_name_J_address_FROM_user_WHERE_age_LE___AND_gender_E__( conn, userList, user ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_SELECT_name_J_address_FROM_user_WHERE_age_LE___AND_gender_E__ failed["+nret+"]" );
-				return -1;
+				return -13;
 			} else {
 				System.out.println( "\t" + "SqlAction_SELECT_name_J_address_FROM_user_WHERE_age_LE___AND_gender_E__ ok , ["+userList.size()+"]records" );
 			}
@@ -66,6 +66,32 @@ public class SqlActionTest {
 				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"]" );
 			}
 
+			userList = new LinkedList<UserSAO>() ;
+			nret = UserSAO.SqlAction_SELECT_ALL_FROM_user_ORDER_BY_name_DESC( conn, userList, user ) ;
+			if( nret < 0 ) {
+				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_ORDER_BY_name_DESC failed["+nret+"]" );
+				return -14;
+			} else {
+				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_ORDER_BY_name_DESC ok , ["+userList.size()+"]records" );
+			}
+			
+			for( UserSAO u : userList ) {
+				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"] count___["+u.count___+"]" );
+			}
+			
+			userList = new LinkedList<UserSAO>() ;
+			nret = UserSAO.SqlAction_SELECT_gender_J_count____FROM_user_GROUP_BY_gender( conn, userList, user ) ;
+			if( nret < 0 ) {
+				System.out.println( "\t" + "SqlAction_SELECT_gender_J_count____FROM_user_GROUP_BY_gender failed["+nret+"]" );
+				return -14;
+			} else {
+				System.out.println( "\t" + "SqlAction_SELECT_gender_J_count____FROM_user_GROUP_BY_gender ok , ["+userList.size()+"]records" );
+			}
+			
+			for( UserSAO u : userList ) {
+				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"] count___["+u.count___+"]" );
+			}
+			
 			userListForSelectOutput = new LinkedList<UserSAO>() ;
 			userOrderListForSelectOutput = new LinkedList<UserOrderSAO>() ;
 			userForWhereInput = new UserSAO() ;
@@ -73,7 +99,7 @@ public class SqlActionTest {
 			nret = UserOrderSAO.SqlAction_SELECT_user_O_name_J_user_O_address_J_user_order_O_item_name_J_user_order_O_amount_J_user_order_O_total_price_FROM_user_J_user_order_WHERE_user_O_name_E___AND_user_O_id_E_user_order_O_user_id( conn, userListForSelectOutput, userOrderListForSelectOutput, userForWhereInput, null ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_SELECT_user_O_name_J_user_O_address_J_user_order_O_item_name_J_user_order_O_amount_J_user_order_O_total_price_FROM_user_J_user_order_WHERE_user_O_name_E___AND_user_O_id_E_user_order_O_user_id failed["+nret+"]" );
-				return -1;
+				return -21;
 			} else {
 				System.out.println( "\t" + "SqlAction_SELECT_user_O_name_J_user_O_address_J_user_order_O_item_name_J_user_order_O_amount_J_user_order_O_total_price_FROM_user_J_user_order_WHERE_user_O_name_E___AND_user_O_id_E_user_order_O_user_id ok , ["+userListForSelectOutput.size()+"]records" );
 			}
@@ -92,7 +118,7 @@ public class SqlActionTest {
 			nret = UserOrderSAO.SqlAction_SELECT_u_O_name_J_u_O_address_J_o_O_item_name_J_o_O_amount_J_o_O_total_price_FROM_user_u_J_user_order_o_WHERE_u_O_name_E___AND_u_O_id_E_o_O_user_id( conn, userListForSelectOutput, userOrderListForSelectOutput, userForWhereInput, null ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_SELECT_u_O_name_J_u_O_address_J_o_O_item_name_J_o_O_amount_J_o_O_total_price_FROM_user_u_J_user_order_o_WHERE_u_O_name_E___AND_u_O_id_E_o_O_user_id failed["+nret+"]" );
-				return -1;
+				return -22;
 			} else {
 				System.out.println( "\t" + "SqlAction_SELECT_u_O_name_J_u_O_address_J_o_O_item_name_J_o_O_amount_J_o_O_total_price_FROM_user_u_J_user_order_o_WHERE_u_O_name_E___AND_u_O_id_E_o_O_user_id ok , ["+userListForSelectOutput.size()+"]records" );
 			}
@@ -127,7 +153,7 @@ public class SqlActionTest {
 			nret = UserSAO.SqlAction_INSERT_INTO_user( conn, user ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_INSERT_INTO_user failed["+nret+"]" );
-				return -1;
+				return -11;
 			} else {
 				System.out.println( "\t" + "SqlAction_INSERT_INTO_user ok , rows["+nret+"] effected" );
 			}
@@ -141,7 +167,7 @@ public class SqlActionTest {
 			nret = UserSAO.SqlAction_INSERT_INTO_user( conn, user ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_INSERT_INTO_user failed["+nret+"]" );
-				return -1;
+				return -12;
 			} else {
 				System.out.println( "\t" + "SqlAction_INSERT_INTO_user ok , rows["+nret+"] effected" );
 			}
@@ -155,7 +181,7 @@ public class SqlActionTest {
 			nret = UserSAO.SqlAction_INSERT_INTO_user( conn, user ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_INSERT_INTO_user failed["+nret+"]" );
-				return -1;
+				return -13;
 			} else {
 				System.out.println( "\t" + "SqlAction_INSERT_INTO_user ok , rows["+nret+"] effected" );
 			}
@@ -166,7 +192,7 @@ public class SqlActionTest {
 			nret = UserSAO.SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__( conn, userList, user ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ failed["+nret+"]" );
-				return -1;
+				return -14;
 			} else {
 				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ ok , count["+nret+"]" );
 			}
@@ -184,7 +210,7 @@ public class SqlActionTest {
 			nret = UserOrderSAO.SqlAction_INSERT_INTO_user_order( conn, userOrder ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_INSERT_INTO_user_order failed["+nret+"]" );
-				return -1;
+				return -21;
 			} else {
 				System.out.println( "\t" + "SqlAction_INSERT_INTO_user_order ok , rows["+nret+"] effected" );
 			}
@@ -194,7 +220,7 @@ public class SqlActionTest {
 			try {
 				conn.rollback();
 			} catch (Exception e2) {
-				return -11;
+				return -2;
 			}
 			return -1;
 		}
@@ -218,7 +244,7 @@ public class SqlActionTest {
 			nret = UserSAO.SqlAction_UPDATE_user_SET_level_E__( conn, userForSetInput ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_level_E__ failed["+nret+"]" );
-				return -1;
+				return -11;
 			} else {
 				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_level_E__ ok , rows["+nret+"] effected" );
 			}
@@ -226,7 +252,7 @@ public class SqlActionTest {
 			nret = UserSAO.SqlAction_UPDATE_user_SET_address_E__calvin_address__j_level_E_10_WHERE_name_E__Calvin_( conn, null, null ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_address_E__calvin_address__j_level_E_10_WHERE_name_E__Calvin_ failed["+nret+"]" );
-				return -1;
+				return -12;
 			} else {
 				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_address_E__calvin_address__j_level_E_10_WHERE_name_E__Calvin_ ok , rows["+nret+"] effected" );
 			}
@@ -239,7 +265,7 @@ public class SqlActionTest {
 			nret = UserSAO.SqlAction_UPDATE_user_SET_level_E___WHERE_age_GT___AND__gender_E__( conn, userForSetInput, userForWhereInput ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_level_E___WHERE_age_GT___AND__gender_E__ failed["+nret+"]" );
-				return -1;
+				return -21;
 			} else {
 				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_level_E___WHERE_age_GT___AND__gender_E__ ok , rows["+nret+"] effected" );
 			}
@@ -250,7 +276,7 @@ public class SqlActionTest {
 			nret = UserSAO.SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__( conn, userList, user ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ failed["+nret+"]" );
-				return -1;
+				return -22;
 			} else {
 				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ ok , ["+nret+"]records" );
 			}
@@ -267,7 +293,7 @@ public class SqlActionTest {
 			nret = UserOrderSAO.SqlAction_UPDATE_user_order_SET_total_price_E___WHERE_user_id_E__( conn, userOrderForSetInput, userOrderForWhereInput ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_UPDATE_user_order_SET_total_price_E___WHERE_user_id_E__ failed["+nret+"]" );
-				return -1;
+				return -23;
 			} else {
 				System.out.println( "\t" + "SqlAction_UPDATE_user_order_SET_total_price_E___WHERE_user_id_E__ ok , rows["+nret+"] effected" );
 			}
@@ -277,7 +303,7 @@ public class SqlActionTest {
 			try {
 				conn.rollback();
 			} catch (Exception e2) {
-				return -11;
+				return -2;
 			}
 			return -1;
 		}
@@ -294,7 +320,7 @@ public class SqlActionTest {
 			nret = UserSAO.SqlAction_DELETE_FROM_user_WHERE_name_E__Calvin_( conn, null ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_WHERE_name_E__Calvin_ failed["+nret+"]" );
-				return -1;
+				return -11;
 			} else {
 				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_WHERE_name_E__Calvin_ ok , rows["+nret+"] effected" );
 			}
@@ -305,7 +331,7 @@ public class SqlActionTest {
 			nret = UserSAO.SqlAction_DELETE_FROM_user_WHERE_age_NE___AND__gender_NE__( conn, user ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_WHERE_age_NE___AND__gender_NE__ failed["+nret+"]" );
-				return -1;
+				return -12;
 			} else {
 				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_WHERE_age_NE___AND__gender_NE__ ok , rows["+nret+"] effected" );
 			}
@@ -315,7 +341,7 @@ public class SqlActionTest {
 			try {
 				conn.rollback();
 			} catch (Exception e2) {
-				return -11;
+				return -2;
 			}
 			return -1;
 		}
@@ -331,7 +357,7 @@ public class SqlActionTest {
 			nret = UserSAO.SqlAction_DELETE_FROM_user( conn ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_DELETE_FROM_user failed["+nret+"]" );
-				return -1;
+				return -11;
 			} else {
 				System.out.println( "\t" + "SqlAction_DELETE_FROM_user ok , rows["+nret+"] effected" );
 			}
@@ -339,7 +365,7 @@ public class SqlActionTest {
 			nret = UserOrderSAO.SqlAction_DELETE_FROM_user_order( conn ) ;
 			if( nret < 0 ) {
 				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_order failed["+nret+"]" );
-				return -1;
+				return -21;
 			} else {
 				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_order ok , rows["+nret+"] effected" );
 			}
@@ -349,7 +375,7 @@ public class SqlActionTest {
 			try {
 				conn.rollback();
 			} catch (Exception e2) {
-				return -11;
+				return -2;
 			}
 			return -1;
 		}
@@ -435,7 +461,7 @@ public class SqlActionTest {
 		System.out.println( "TestSelectTable ..." );
 		nret = TestSelectTable( conn ) ;
 		if( nret != 0 ) {
-			System.out.println( "TestSelectTable failed" );
+			System.out.println( "TestSelectTable failed["+nret+"]" );
 			return;
 		} else {
 			System.out.println( "TestSelectTable ok" );
@@ -444,7 +470,7 @@ public class SqlActionTest {
 		System.out.println( "TestInsertTable ..." );
 		nret = TestInsertTable( conn ) ;
 		if( nret != 0 ) {
-			System.out.println( "TestInsertTable failed" );
+			System.out.println( "TestInsertTable failed["+nret+"]" );
 			return;
 		} else {
 			System.out.println( "TestInsertTable ok" );
@@ -453,7 +479,7 @@ public class SqlActionTest {
 		System.out.println( "TestSelectTable ..." );
 		nret = TestSelectTable( conn ) ;
 		if( nret != 0 ) {
-			System.out.println( "TestSelectTable failed" );
+			System.out.println( "TestSelectTable failed["+nret+"]" );
 			return;
 		} else {
 			System.out.println( "TestSelectTable ok" );
@@ -462,7 +488,7 @@ public class SqlActionTest {
 		System.out.println( "TestUpdateTable ..." );
 		nret = TestUpdateTable( conn ) ;
 		if( nret != 0 ) {
-			System.out.println( "TestUpdateTable failed" );
+			System.out.println( "TestUpdateTable failed["+nret+"]" );
 			return;
 		} else {
 			System.out.println( "TestUpdateTable ok" );
@@ -471,7 +497,7 @@ public class SqlActionTest {
 		System.out.println( "TestSelectTable ..." );
 		nret = TestSelectTable( conn ) ;
 		if( nret != 0 ) {
-			System.out.println( "TestSelectTable failed" );
+			System.out.println( "TestSelectTable failed["+nret+"]" );
 			return;
 		} else {
 			System.out.println( "TestSelectTable ok" );
@@ -480,7 +506,7 @@ public class SqlActionTest {
 		System.out.println( "TestDeleteTable ..." );
 		nret = TestDeleteTable1( conn ) ;
 		if( nret != 0 ) {
-			System.out.println( "TestDeleteTable1 failed" );
+			System.out.println( "TestDeleteTable1 failed["+nret+"]" );
 			return;
 		} else {
 			System.out.println( "TestDeleteTable1 ok" );
@@ -489,7 +515,7 @@ public class SqlActionTest {
 		System.out.println( "TestSelectTable ..." );
 		nret = TestSelectTable( conn ) ;
 		if( nret != 0 ) {
-			System.out.println( "TestSelectTable failed" );
+			System.out.println( "TestSelectTable failed["+nret+"]" );
 			return;
 		} else {
 			System.out.println( "TestSelectTable ok" );
@@ -498,7 +524,7 @@ public class SqlActionTest {
 		System.out.println( "TestDeleteTable2 ..." );
 		nret = TestDeleteTable2( conn ) ;
 		if( nret != 0 ) {
-			System.out.println( "TestDeleteTable2 failed" );
+			System.out.println( "TestDeleteTable2 failed["+nret+"]" );
 			return;
 		} else {
 			System.out.println( "TestDeleteTable2 ok" );
@@ -507,7 +533,7 @@ public class SqlActionTest {
 		System.out.println( "TestSelectTable ..." );
 		nret = TestSelectTable( conn ) ;
 		if( nret != 0 ) {
-			System.out.println( "TestSelectTable failed" );
+			System.out.println( "TestSelectTable failed["+nret+"]" );
 			return;
 		} else {
 			System.out.println( "TestSelectTable ok" );

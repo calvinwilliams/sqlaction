@@ -11,7 +11,6 @@ public class SqlActionTable {
 
 	String					javaClassName ;
 	String					javaObjectName ;
-	// String					javaOutputListNodeName ;
 	String					javaFileName ;
 	
 	public static int GetAllTablesInDatabase( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database ) throws Exception {
@@ -62,7 +61,6 @@ public class SqlActionTable {
 			}
 			t.javaClassName = sb.toString() + "SAO" ;
 			t.javaObjectName = sb.toString().substring(0,1).toLowerCase(Locale.getDefault()) + sb.toString().substring(1) ;
-			// t.javaOutputListNodeName = sb.toString() ;
 			t.javaFileName = t.javaClassName + ".java" ;
 		}
 		
@@ -80,51 +78,6 @@ public class SqlActionTable {
 			SqlActionColumn.TravelAllColumns( dbserverConf, sqlactionConf, t.columnList, depth+1, out );
 			
 			SqlActionIndex.TravelAllIndexes( dbserverConf, sqlactionConf, t.indexList, depth+1, out );
-			
-			/*
-			if( SqlActionUtil.wildcardMatch( sqlactionConf.table, t.tableName ) != 0 )
-				continue;
-			
-			sqlactionConf.javaTableName = new String(t.tableName) ;
-			
-			if( sqlactionConf.javaClassName == null ) {
-				String[] sa = sqlactionConf.table.split( "_" ) ;
-				StringBuilder sb = new StringBuilder() ;
-				for( String s : sa ) {
-					sb.append( s.substring(0,1).toUpperCase(Locale.getDefault()) + s.substring(1) );
-				}
-				sqlactionConf.javaClassName = sb.toString() + "SAO" ;
-			}
-			
-			if( sqlactionConf.javaFileName == null ) {
-				sqlactionConf.javaFileName = sqlactionConf.javaClassName + ".java" ;
-			}
-			
-			for( int n = 0 ; n < depth ; n++ )
-				System.out.print( "\t" );
-			System.out.println( "tableName["+t.tableName+"]" );
-			
-			out.append( "package "+sqlactionConf.javaPackage+";\n" );
-			out.append( "\n" );
-			out.append( "import java.math.*;\n" );
-			out.append( "import java.util.*;\n" );
-			out.append( "import java.sql.Time;\n" );
-			out.append( "import java.sql.Timestamp;\n" );
-			out.append( "import java.sql.Connection;\n" );
-			out.append( "import java.sql.Statement;\n" );
-			out.append( "import java.sql.PreparedStatement;\n" );
-			out.append( "import java.sql.ResultSet;\n" );
-			out.append( "\n" );
-			out.append( "public class "+sqlactionConf.javaClassName+" {\n" );
-			
-			SqlActionColumn.TravelAllColumnsForGeneratingClassCode( dbserverConf, sqlactionConf, t.columnList, depth+1, out );
-			
-			SqlActionIndex.TravelAllIndexesForGeneratingClassCode( dbserverConf, sqlactionConf, t.indexList, depth+1, out );
-			
-			out.append( "}\n" );
-			
-			Files.write( Paths.get(sqlactionConf.javaFileName) , out.toString().getBytes() );
-			*/
 		}
 		
 		return 0;

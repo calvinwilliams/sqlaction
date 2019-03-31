@@ -110,4 +110,8 @@ public class SqlActionLexicalParser {
 			return null;
 		}
 	}
+	
+	public String GetRemainSqlToken() {
+		return new String( sql, parserOffset, sqlLength-parserOffset );
+	}
 }

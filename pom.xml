@@ -5,7 +5,7 @@
   <version>0.2.0</version>
   <packaging>pom</packaging>
   <modules>
-  	<module>sqlaction-codegen</module>
+  	<module>sqlaction-gencode</module>
   	<module>sqlaction-test</module>
   </modules>
 </project>

@@ -1,9 +1,0 @@
-{
-	"driver" : "com.mysql.jdbc.Driver" ,
-	"url" : "jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" ,
-	"user" : "root" ,
-	"pwd" : "root" ,
-	"userDefineDataTypes" : [
-		{ "source":"decimal,*,12,2" , "redefine":"double,*,14,*" }
-	]
-}

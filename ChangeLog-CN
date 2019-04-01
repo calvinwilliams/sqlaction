@@ -1,21 +1,21 @@
-0.5.0		2019-03-31		calvin
+0.0.5.0		2019-03-31		calvin
 			* 支持在dbserver.conf.json中用户自定义数据类型
 			  ，比如MySQL的"decimal(12,2)"对应jdbc的"SQLACTION_DATA_TYPE_DECIMAL"
 			  通过配置可转定义为jdbc的"SQLACTION_DATA_TYPE_DOUBLE"，自动生成JAVA实体属性类型为"double"
 
-0.4.0		2019-03-31		calvin
+0.0.4.0		2019-03-31		calvin
 			* SELECT后支持COUNT(*)
 			* FROM后支持GROUP、HAVING、ORDER
 
-0.3.0		2019-03-30		calvin
+0.0.3.0		2019-03-30		calvin
 			* 调整了增删改查方法名和原型
 			* 支持SELECT多表连接查询
 			* 支持表别名功能
 			* 支持单个目录里同时生成多个表实体类
 			* 支持SET和WHERE直接写值常量
 
-0.2.0		2019-03-26		calvin
+0.0.2.0		2019-03-26		calvin
 			* 实现单表的增删改查jdbc代码自动生成
 
-0.1.0		2019-03-23		calvin
+0.0.1.0		2019-03-23		calvin
 			* 创建

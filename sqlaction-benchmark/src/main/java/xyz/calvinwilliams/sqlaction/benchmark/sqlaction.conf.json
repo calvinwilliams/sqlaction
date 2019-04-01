@@ -1,0 +1,13 @@
+{
+	"database" : "calvindb" ,
+	"tables" : [
+		{
+			"table" : "sqlaction_benchmark" ,
+			"sqlactions" : [
+				"SELECT * FROM sqlaction_benchmark" ,
+				"INSERT INTO sqlaction_benchmark"
+			]
+		}
+	] ,
+	"javaPackage" : "xyz.calvinwilliams.sqlaction.benchmark"
+}

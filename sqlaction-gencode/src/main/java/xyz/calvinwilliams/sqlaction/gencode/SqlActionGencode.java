@@ -6,7 +6,7 @@ import java.sql.*;
 
 public class SqlActionGencode {
 
-	final private static String				SQLACTION_VERSION = "0.0.5.0" ;
+	final private static String				SQLACTION_VERSION = "0.0.6.0" ;
 	
 	final private static String				SELECT_COUNT___ = "count(*)" ;
 	final private static String				COUNT___ = "count___" ;

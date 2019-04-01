@@ -2,12 +2,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>xyz.calvinwilliams.sqlaction</groupId>
   <artifactId>sqlaction</artifactId>
-  <version>0.0.5.0</version>
+  <version>0.0.6.0</version>
   <packaging>pom</packaging>
   <modules>
   	<module>sqlaction-gencode</module>
   	<module>sqlaction-test</module>
   	<module>sqlaction-demo</module>
   	<module>sqlaction-benchmark</module>
+  	<module>mybatis-benchmark</module>
   </modules>
 </project>

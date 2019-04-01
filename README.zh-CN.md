@@ -1,6 +1,6 @@
 sqlaction
 ======
 
-# 概述
+# 姒傝堪
 
-sqlaction是一个用JAVA编写的SQL对象自动jdbc代码生成工具
+sqlaction鏄竴涓敤JAVA缂栧啓鐨凷QL瀵硅薄鑷姩jdbc浠ｇ爜鐢熸垚宸ュ叿

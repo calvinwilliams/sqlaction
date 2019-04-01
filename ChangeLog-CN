@@ -1,3 +1,6 @@
+0.0.6.0		2019-04-01		calvin
+			* 新增子项目sqlaction-benchmark和mybatis-benchmark用于性能比较
+
 0.0.5.0		2019-03-31		calvin
 			* 支持在dbserver.conf.json中用户自定义数据类型
 			  ，比如MySQL的"decimal(12,2)"对应jdbc的"SQLACTION_DATA_TYPE_DECIMAL"

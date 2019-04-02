@@ -1,3 +1,11 @@
+/*
+ * sqlaction - SQL action object auto-gencode tool based JDBC for Java
+ * author	: calvin
+ * email	: calvinwilliams@163.com
+ *
+ * See the file LICENSE in base directory.
+ */
+
 package xyz.calvinwilliams.sqlaction.gencode;
 
 import java.sql.*;
@@ -8,7 +16,7 @@ public class SqlActionIndex {
 	boolean					isUnique ;
 	List<SqlActionColumn>	columnList ;
 
-	public static int GetAllIndexesInTable( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception  {
+	public static int getAllIndexesInTable( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception  {
 		PreparedStatement	prestmt = null ;
 		ResultSet			rs ;
 		SqlActionIndex		index ;
@@ -64,7 +72,7 @@ public class SqlActionIndex {
 				}
 				rs = prestmt.executeQuery() ;
 				while( rs.next() ) {
-					nret = SqlActionColumn.GetColumnFromResultSet( dbserverConf, sqlactionConf, database, table, c, rs );
+					nret = SqlActionColumn.getColumnFromResultSet( dbserverConf, sqlactionConf, database, table, c, rs );
 					if( nret != 0 ) {
 						System.out.println( "GetColumnFromResultSet failed["+nret+"] , database["+database.databaseName+"] table["+table.tableName+"] column["+c.columnName+"]" );
 						return nret;
@@ -77,13 +85,13 @@ public class SqlActionIndex {
 		return 0;
 	}
 
-	public static int TravelAllIndexes( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionIndex> sqlactionIndexList, int depth, StringBuilder out ) throws Exception {
+	public static int travelAllIndexes( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionIndex> sqlactionIndexList, int depth, StringBuilder out ) throws Exception {
 		for( SqlActionIndex i : sqlactionIndexList ) {
 			for( int n = 0 ; n < depth ; n++ )
 				System.out.print( "\t" );
 			System.out.println( "indexName["+i.indexName+"] isUnique["+i.isUnique+"]" );
 
-			SqlActionColumn.TravelAllColumns( dbserverConf, sqlactionConf, i.columnList, depth+1, out );
+			SqlActionColumn.travelAllColumns( dbserverConf, sqlactionConf, i.columnList, depth+1, out );
 		}
 		
 		return 0;

@@ -1,3 +1,11 @@
+/*
+ * sqlaction - SQL action object auto-gencode tool based JDBC for Java
+ * author	: calvin
+ * email	: calvinwilliams@163.com
+ *
+ * See the file LICENSE in base directory.
+ */
+
 package xyz.calvinwilliams.sqlaction.gencode;
 
 import java.util.*;
@@ -20,7 +28,7 @@ public class SqlActionSyntaxParser {
 	
 	public String							otherTokens = null ;
 	
-	public int ParseSyntax( String sql ) {
+	public int parseSyntax( String sql ) {
 		SqlActionSelectColumnToken	selectColumnToken = null ;
 		SqlActionFromTableToken		fromTableToken = null ;
 		SqlActionSetColumnToken		setColumnToken = null ;
@@ -28,27 +36,27 @@ public class SqlActionSyntaxParser {
 		String						token9 = null ;
 		
 		SqlActionLexicalParser lexicalParser = new SqlActionLexicalParser() ;
-		lexicalParser.SetSqlString(sql);
+		lexicalParser.setSqlString(sql);
 		
 		selectColumnTokenList = new LinkedList<SqlActionSelectColumnToken>() ;
 		fromTableTokenList = new LinkedList<SqlActionFromTableToken>() ;
 		setColumnTokenList = new LinkedList<SqlActionSetColumnToken>() ;
 		whereColumnTokenList = new LinkedList<SqlActionWhereColumnToken>() ;
 		
-		String	token = lexicalParser.GetSqlToken() ;
+		String	token = lexicalParser.getSqlToken() ;
 		if( token == null )
 			return 0;
 		while( token != null ) {
 			if( token.equalsIgnoreCase("SELECT") ) {
 				while(true) {
-					String token1 = lexicalParser.GetSqlToken() ;
+					String token1 = lexicalParser.getSqlToken() ;
 					if( token1 == null ) {
 						return -11;
 					} else if( token1.equals("*") ) {
 						// SELECT *
 						selectAllColumn = true ;
 						
-						String token2 = lexicalParser.GetSqlToken() ;
+						String token2 = lexicalParser.getSqlToken() ;
 						if( token2 == null ) {
 							// SELECT *\0
 							token = token2 ;
@@ -64,7 +72,7 @@ public class SqlActionSyntaxParser {
 						selectHint = token1 ;
 						continue;
 					}
-					String token2 = lexicalParser.GetSqlToken() ;
+					String token2 = lexicalParser.getSqlToken() ;
 					if( token2 == null ) {
 						// SELECT column1\0
 						selectColumnToken = new SqlActionSelectColumnToken() ;
@@ -81,14 +89,14 @@ public class SqlActionSyntaxParser {
 						break;
 					} else if( token2.equals(".") ) {
 						// SELECT table1.column1
-						String token3 = lexicalParser.GetSqlToken() ;
+						String token3 = lexicalParser.getSqlToken() ;
 						
 						selectColumnToken = new SqlActionSelectColumnToken() ;
 						selectColumnToken.tableAliasName = token1 ;
 						selectColumnToken.columnName = token3 ;
 						selectColumnTokenList.add(selectColumnToken);
 						
-						String token4 = lexicalParser.GetSqlToken() ;
+						String token4 = lexicalParser.getSqlToken() ;
 						if( token4 == null ) {
 							// SELECT table1.column1\0
 							token = null ;
@@ -111,7 +119,7 @@ public class SqlActionSyntaxParser {
 					}
 				}
 			} else if( token.equalsIgnoreCase("INSERT") ) {
-				String token1 = lexicalParser.GetSqlToken() ;
+				String token1 = lexicalParser.getSqlToken() ;
 				if( token1 == null ) {
 					return -21;
 				}
@@ -121,14 +129,14 @@ public class SqlActionSyntaxParser {
 					token = token1 ;
 				}
 				
-				String token2 = lexicalParser.GetSqlToken() ;
+				String token2 = lexicalParser.getSqlToken() ;
 				if( token2 == null ) {
 					return -23;
 				} else {
 					insertTableName = token2 ;
 				}
 				
-				String token3 = lexicalParser.GetSqlToken() ;
+				String token3 = lexicalParser.getSqlToken() ;
 				if( token3 == null ) {
 					token = null ;
 					break;
@@ -136,12 +144,12 @@ public class SqlActionSyntaxParser {
 					return -24;
 				}
 			} else if( token.equalsIgnoreCase("UPDATE") ) {
-				String token1 = lexicalParser.GetSqlToken() ;
+				String token1 = lexicalParser.getSqlToken() ;
 				if( token1 == null ) {
 					return -31;
 				}
 				
-				String token2 = lexicalParser.GetSqlToken() ;
+				String token2 = lexicalParser.getSqlToken() ;
 				if( token2 == null ) {
 					// UPDATE table\0
 					return -32;
@@ -154,7 +162,7 @@ public class SqlActionSyntaxParser {
 					return -32;
 				}
 			} else if( token.equalsIgnoreCase("DELETE") ) {
-				String token1 = lexicalParser.GetSqlToken() ;
+				String token1 = lexicalParser.getSqlToken() ;
 				if( token1 == null ) {
 					return -41;
 				}
@@ -162,39 +170,39 @@ public class SqlActionSyntaxParser {
 					return -42;
 				}
 				
-				String token2 = lexicalParser.GetSqlToken() ;
+				String token2 = lexicalParser.getSqlToken() ;
 				if( token2 == null ) {
 					return -43;
 				}
 				
 				deleteTableName = token2 ;
 				
-				String token3 = lexicalParser.GetSqlToken() ;
+				String token3 = lexicalParser.getSqlToken() ;
 				token = token3 ;
 			} else if( token.equalsIgnoreCase("SET") ) {
 				while(true) {
-					String token1 = lexicalParser.GetSqlToken() ;
+					String token1 = lexicalParser.getSqlToken() ;
 					if( token1 == null ) {
 						return -41;
 					}
 					
-					String token2 = lexicalParser.GetSqlToken() ;
+					String token2 = lexicalParser.getSqlToken() ;
 					if( token2 == null ) {
 						return -42;
 					}
 					
-					String token3 = lexicalParser.GetSqlToken() ;
+					String token3 = lexicalParser.getSqlToken() ;
 					if( token3 == null ) {
 						return -43;
 					}
 					
 					if( token2.equals(".") ) {
-						String token4 = lexicalParser.GetSqlToken() ;
+						String token4 = lexicalParser.getSqlToken() ;
 						if( token4 == null ) {
 							return -441;
 						}
 						
-						String token5 = lexicalParser.GetSqlToken() ;
+						String token5 = lexicalParser.getSqlToken() ;
 						if( token5 == null ) {
 							return -442;
 						}
@@ -219,7 +227,7 @@ public class SqlActionSyntaxParser {
 						setColumnTokenList.add(setColumnToken);
 					}
 					
-					String token6 = lexicalParser.GetSqlToken() ;
+					String token6 = lexicalParser.getSqlToken() ;
 					if( token6 == null ) {
 						// SET column = ?\0
 						token = null ;
@@ -237,11 +245,11 @@ public class SqlActionSyntaxParser {
 				}
 			} else if( token.equalsIgnoreCase("FROM") ) {
 				while(true) {
-					String token1 = lexicalParser.GetSqlToken() ;
+					String token1 = lexicalParser.getSqlToken() ;
 					if( token1 == null ) {
 						return -51;
 					}
-					String token2 = lexicalParser.GetSqlToken() ;
+					String token2 = lexicalParser.getSqlToken() ;
 					if( token2 == null ) {
 						//      1
 						// FROM table\0
@@ -283,7 +291,7 @@ public class SqlActionSyntaxParser {
 							fromTableToken.tableAliasName = token2 ;
 							fromTableTokenList.add(fromTableToken);
 							
-							String token3 = lexicalParser.GetSqlToken() ;
+							String token3 = lexicalParser.getSqlToken() ;
 							if( token3 == null ) {
 								//      1      2 3
 								// FROM table1 t1\0
@@ -304,40 +312,40 @@ public class SqlActionSyntaxParser {
 				}
 			} else if( token.equalsIgnoreCase("WHERE") ) {
 				while(true) {
-					String token1 = lexicalParser.GetSqlToken() ;
+					String token1 = lexicalParser.getSqlToken() ;
 					if( token1 == null ) {
 						return -61;
 					}
 					
-					String token2 = lexicalParser.GetSqlToken() ;
+					String token2 = lexicalParser.getSqlToken() ;
 					if( token2 == null ) {
 						return -62;
 					}
 					
-					String token3 = lexicalParser.GetSqlToken() ;
+					String token3 = lexicalParser.getSqlToken() ;
 					if( token3 == null ) {
 						return -63;
 					}
 					
 					if( token2.equals(".") ) {
 						// table.column
-						String token4 = lexicalParser.GetSqlToken() ;
+						String token4 = lexicalParser.getSqlToken() ;
 						if( token4 == null ) {
 							return -641;
 						}
 						
-						String token5 = lexicalParser.GetSqlToken() ;
+						String token5 = lexicalParser.getSqlToken() ;
 						if( token5 == null ) {
 							return -642;
 						}
 						
-						String token6 = lexicalParser.GetSqlToken() ;
+						String token6 = lexicalParser.getSqlToken() ;
 						if( token6 == null ) {
 							return -642;
 						}
 						
 						if( token6.equals(".") ) {
-							String token7 = lexicalParser.GetSqlToken() ;
+							String token7 = lexicalParser.getSqlToken() ;
 							if( token7 == null ) {
 								return -6431;
 							}
@@ -351,7 +359,7 @@ public class SqlActionSyntaxParser {
 							whereColumnToken.columnName2 = token7 ;
 							whereColumnTokenList.add(whereColumnToken);
 							
-							token9 = lexicalParser.GetSqlToken() ;
+							token9 = lexicalParser.getSqlToken() ;
 							if( token9 == null ) {
 								token = null ;
 								break;
@@ -370,7 +378,7 @@ public class SqlActionSyntaxParser {
 						}
 					} else {
 						// column = x
-						String token4 = lexicalParser.GetSqlToken() ;
+						String token4 = lexicalParser.getSqlToken() ;
 						if( token4 == null ) {
 							whereColumnToken = new SqlActionWhereColumnToken() ;
 							whereColumnToken.columnName = token1 ;
@@ -383,7 +391,7 @@ public class SqlActionSyntaxParser {
 						
 						if( token4.equals(".") ) {
 							// column1 = table2.column2
-							String token5 = lexicalParser.GetSqlToken() ;
+							String token5 = lexicalParser.getSqlToken() ;
 							if( token5 == null ) {
 								return -6441;
 							}
@@ -395,7 +403,7 @@ public class SqlActionSyntaxParser {
 							whereColumnToken.columnName2 = token5 ;
 							whereColumnTokenList.add(whereColumnToken);
 							
-							token9 = lexicalParser.GetSqlToken() ;
+							token9 = lexicalParser.getSqlToken() ;
 							if( token9 == null ) {
 								token = null ;
 								break;
@@ -421,7 +429,7 @@ public class SqlActionSyntaxParser {
 					}
 				}
 			} else if( token.equalsIgnoreCase("GROUP") || token.equalsIgnoreCase("ORDER") || token.equalsIgnoreCase("HAVING") ) {
-				otherTokens = " " + token + lexicalParser.GetRemainSqlToken() ;
+				otherTokens = " " + token + lexicalParser.getRemainSqlTokens() ;
 				token = null ;
 				break;
 			} else {
@@ -443,7 +451,7 @@ public class SqlActionSyntaxParser {
 		return false;
 	}
 	
-	public String FindFromTableFromAliasName( String tableAliasName ) {
+	public String findFromTableFromAliasName( String tableAliasName ) {
 		for( SqlActionFromTableToken tt : fromTableTokenList ) {
 			if( tt.tableAliasName.equalsIgnoreCase(tableAliasName) ) {
 				return tt.tableName;

@@ -1,3 +1,11 @@
+/*
+ * sqlaction - SQL action object auto-gencode tool based JDBC for Java
+ * author	: calvin
+ * email	: calvinwilliams@163.com
+ *
+ * See the file LICENSE in base directory.
+ */
+
 package xyz.calvinwilliams.sqlaction.test;
 
 import java.sql.Connection;
@@ -7,7 +15,7 @@ import java.util.*;
 
 public class SqlActionTest {
 
-	public static int TestSelectTable( Connection conn ) {
+	public static int testSelectTable( Connection conn ) {
 
 		List<UserSAO>		userList = null ;
 		UserSAO				user = null ;
@@ -131,7 +139,7 @@ public class SqlActionTest {
 		return 0;
 	}
 
-	public static int TestInsertTable( Connection conn ) {
+	public static int testInsertTable( Connection conn ) {
 
 		UserSAO			user = null ;
 		List<UserSAO>	userList = null ;
@@ -223,7 +231,7 @@ public class SqlActionTest {
 		return 0;
 	}
 
-	public static int TestUpdateTable( Connection conn ) {
+	public static int testUpdateTable( Connection conn ) {
 
 		UserSAO			userForSetInput = null ;
 		UserSAO			userForWhereInput = null ;
@@ -306,7 +314,7 @@ public class SqlActionTest {
 		return 0;
 	}
 
-	public static int TestDeleteTable1( Connection conn ) {
+	public static int testDeleteTable1( Connection conn ) {
 
 		UserSAO			user ;
 		int				nret = 0 ;
@@ -344,7 +352,7 @@ public class SqlActionTest {
 		return 0;
 	}
 
-	public static int TestDeleteTable2( Connection conn ) {
+	public static int testDeleteTable2( Connection conn ) {
 
 		int						nret = 0 ;
 
@@ -401,7 +409,7 @@ public class SqlActionTest {
 		}
 
 		System.out.println( "TestDeleteTable2 ..." );
-		nret = TestDeleteTable2( conn ) ;
+		nret = testDeleteTable2( conn ) ;
 		if( nret != 0 ) {
 			System.out.println( "TestDeleteTable2 failed" );
 			return;
@@ -410,7 +418,7 @@ public class SqlActionTest {
 		}
 
 		System.out.println( "TestSelectTable ..." );
-		nret = TestSelectTable( conn ) ;
+		nret = testSelectTable( conn ) ;
 		if( nret != 0 ) {
 			System.out.println( "TestSelectTable failed["+nret+"]" );
 			return;
@@ -419,7 +427,7 @@ public class SqlActionTest {
 		}
 
 		System.out.println( "TestInsertTable ..." );
-		nret = TestInsertTable( conn ) ;
+		nret = testInsertTable( conn ) ;
 		if( nret != 0 ) {
 			System.out.println( "TestInsertTable failed["+nret+"]" );
 			return;
@@ -428,7 +436,7 @@ public class SqlActionTest {
 		}
 
 		System.out.println( "TestSelectTable ..." );
-		nret = TestSelectTable( conn ) ;
+		nret = testSelectTable( conn ) ;
 		if( nret != 0 ) {
 			System.out.println( "TestSelectTable failed["+nret+"]" );
 			return;
@@ -437,7 +445,7 @@ public class SqlActionTest {
 		}
 
 		System.out.println( "TestUpdateTable ..." );
-		nret = TestUpdateTable( conn ) ;
+		nret = testUpdateTable( conn ) ;
 		if( nret != 0 ) {
 			System.out.println( "TestUpdateTable failed["+nret+"]" );
 			return;
@@ -446,7 +454,7 @@ public class SqlActionTest {
 		}
 
 		System.out.println( "TestSelectTable ..." );
-		nret = TestSelectTable( conn ) ;
+		nret = testSelectTable( conn ) ;
 		if( nret != 0 ) {
 			System.out.println( "TestSelectTable failed["+nret+"]" );
 			return;
@@ -455,7 +463,7 @@ public class SqlActionTest {
 		}
 
 		System.out.println( "TestDeleteTable ..." );
-		nret = TestDeleteTable1( conn ) ;
+		nret = testDeleteTable1( conn ) ;
 		if( nret != 0 ) {
 			System.out.println( "TestDeleteTable1 failed["+nret+"]" );
 			return;
@@ -464,7 +472,7 @@ public class SqlActionTest {
 		}
 
 		System.out.println( "TestSelectTable ..." );
-		nret = TestSelectTable( conn ) ;
+		nret = testSelectTable( conn ) ;
 		if( nret != 0 ) {
 			System.out.println( "TestSelectTable failed["+nret+"]" );
 			return;
@@ -473,7 +481,7 @@ public class SqlActionTest {
 		}
 
 		System.out.println( "TestDeleteTable2 ..." );
-		nret = TestDeleteTable2( conn ) ;
+		nret = testDeleteTable2( conn ) ;
 		if( nret != 0 ) {
 			System.out.println( "TestDeleteTable2 failed["+nret+"]" );
 			return;
@@ -482,7 +490,7 @@ public class SqlActionTest {
 		}
 
 		System.out.println( "TestSelectTable ..." );
-		nret = TestSelectTable( conn ) ;
+		nret = testSelectTable( conn ) ;
 		if( nret != 0 ) {
 			System.out.println( "TestSelectTable failed["+nret+"]" );
 			return;

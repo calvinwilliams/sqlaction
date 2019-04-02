@@ -1,3 +1,11 @@
+/*
+ * sqlaction - SQL action object auto-gencode tool based JDBC for Java
+ * author	: calvin
+ * email	: calvinwilliams@163.com
+ *
+ * See the file LICENSE in base directory.
+ */
+
 package xyz.calvinwilliams.sqlaction.gencode;
 
 import java.sql.*;
@@ -12,7 +20,7 @@ public class SqlActionTable {
 	String					javaObjectName ;
 	String					javaFileName ;
 	
-	public static int GetAllTablesInDatabase( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database ) throws Exception {
+	public static int getAllTablesInDatabase( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database ) throws Exception {
 		PreparedStatement	prestmt = null ;
 		ResultSet			rs ;
 		SqlActionTable		table ;
@@ -39,13 +47,13 @@ public class SqlActionTable {
 		rs.close();
 		
 		for( SqlActionTable t : database.tableList ) {
-			nret = SqlActionColumn.GetAllColumnsInTable( dbserverConf, sqlactionConf, conn, database, t ) ;
+			nret = SqlActionColumn.getAllColumnsInTable( dbserverConf, sqlactionConf, conn, database, t ) ;
 			if( nret != 0 ) {
 				System.out.println( "GetAllColumnsInTable failed["+nret+"] , database["+database.databaseName+"] table["+t.tableName+"]" );
 				return nret;
 			}
 			
-			nret = SqlActionIndex.GetAllIndexesInTable( dbserverConf, sqlactionConf, conn, database, t ) ;
+			nret = SqlActionIndex.getAllIndexesInTable( dbserverConf, sqlactionConf, conn, database, t ) ;
 			if( nret != 0 ) {
 				System.out.println( "GetAllIndexesInTable failed["+nret+"] , database["+database.databaseName+"] table["+t.tableName+"]" );
 				return nret;
@@ -66,7 +74,7 @@ public class SqlActionTable {
 		return 0;
 	}
 	
-	public static int TravelAllTables( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionTable> sqlactionTableList, int depth ) throws Exception {
+	public static int travelAllTables( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionTable> sqlactionTableList, int depth ) throws Exception {
 		StringBuilder		out = new StringBuilder() ;
 		
 		for( SqlActionTable t : sqlactionTableList ) {
@@ -74,15 +82,15 @@ public class SqlActionTable {
 				System.out.print( "\t" );
 			System.out.println( "tableName["+t.tableName+"]" );
 			
-			SqlActionColumn.TravelAllColumns( dbserverConf, sqlactionConf, t.columnList, depth+1, out );
+			SqlActionColumn.travelAllColumns( dbserverConf, sqlactionConf, t.columnList, depth+1, out );
 			
-			SqlActionIndex.TravelAllIndexes( dbserverConf, sqlactionConf, t.indexList, depth+1, out );
+			SqlActionIndex.travelAllIndexes( dbserverConf, sqlactionConf, t.indexList, depth+1, out );
 		}
 		
 		return 0;
 	}
 	
-	public static SqlActionTable FindTable( List<SqlActionTable> sqlactionTableList, String tableName ) throws Exception {
+	public static SqlActionTable findTable( List<SqlActionTable> sqlactionTableList, String tableName ) throws Exception {
 		for( SqlActionTable t : sqlactionTableList ) {
 			if( t.tableName.equals(tableName) )
 				return t;

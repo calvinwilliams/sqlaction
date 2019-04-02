@@ -1,3 +1,11 @@
+/*
+ * sqlaction - SQL action object auto-gencode tool based JDBC for Java
+ * author	: calvin
+ * email	: calvinwilliams@163.com
+ *
+ * See the file LICENSE in base directory.
+ */
+
 package xyz.calvinwilliams.sqlaction.gencode;
 
 import java.sql.*;
@@ -17,7 +25,7 @@ public class SqlActionColumn {
 	
 	String					javaPropertyName ;
 	
-	public static String GetUserDefineDataType( DbServerConf dbserverConf, String sourceDataTypeAndLength ) {
+	public static String getUserDefineDataType( DbServerConf dbserverConf, String sourceDataTypeAndLength ) {
 		if( dbserverConf.userDefineDataTypes == null )
 			return null;
 		
@@ -29,7 +37,7 @@ public class SqlActionColumn {
 		return null;
 	}
 	
-	public static int GetColumnFromResultSet( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionDatabase database, SqlActionTable table, SqlActionColumn column, ResultSet rs ) throws Exception {
+	public static int getColumnFromResultSet( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionDatabase database, SqlActionTable table, SqlActionColumn column, ResultSet rs ) throws Exception {
 		String		sourceDataType ;
 		String		sourceDataTypeAndLength ;
 		String		userDefineDataTypeAndLength ;
@@ -45,7 +53,7 @@ public class SqlActionColumn {
 		column.numericPrecision = rs.getInt(6) ;
 		column.numericScale = rs.getInt(7) ;
 		sourceDataTypeAndLength = sourceDataType+","+column.columnMaximumLength+","+column.numericPrecision+","+column.numericScale ;
-		userDefineDataTypeAndLength = GetUserDefineDataType( dbserverConf, sourceDataTypeAndLength ) ;
+		userDefineDataTypeAndLength = getUserDefineDataType( dbserverConf, sourceDataTypeAndLength ) ;
 		if( userDefineDataTypeAndLength != null ) {
 			String[] sa = userDefineDataTypeAndLength.split(",") ;
 			sourceDataType = sa[0] ;
@@ -146,7 +154,7 @@ public class SqlActionColumn {
 		return 0;
 	}
 	
-	public static int GetAllColumnsInTable( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception  {
+	public static int getAllColumnsInTable( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception  {
 		PreparedStatement	prestmt = null ;
 		ResultSet			rs ;
 		SqlActionColumn		column ;
@@ -163,7 +171,7 @@ public class SqlActionColumn {
 		while( rs.next() ) {
 			column = new SqlActionColumn() ;
 			
-			nret = GetColumnFromResultSet( dbserverConf, sqlactionConf, database, table, column, rs );
+			nret = getColumnFromResultSet( dbserverConf, sqlactionConf, database, table, column, rs );
 			if( nret != 0 ) {
 				System.out.println( "GetColumnFromResultSet failed["+nret+"] , database["+database.databaseName+"] table["+table.tableName+"] column["+column.columnName+"]" );
 				return nret;
@@ -177,7 +185,7 @@ public class SqlActionColumn {
 		return 0;
 	}
 	
-	public static SqlActionColumn FindColumn( List<SqlActionColumn> sqlactionColumnList, String columnName ) {
+	public static SqlActionColumn findColumn( List<SqlActionColumn> sqlactionColumnList, String columnName ) {
 		for( SqlActionColumn c : sqlactionColumnList ) {
 			if( c.columnName.equals(columnName) )
 				return c; 
@@ -218,7 +226,7 @@ public class SqlActionColumn {
 		return javaPropertyNameBuilder.toString() ;
 	}
 	
-	public static int TravelAllColumns( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionColumn> sqlactionColumnList, int depth, StringBuilder out ) throws Exception {
+	public static int travelAllColumns( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionColumn> sqlactionColumnList, int depth, StringBuilder out ) throws Exception {
 		for( SqlActionColumn c : sqlactionColumnList ) {
 			for( int n = 0 ; n < depth ; n++ )
 				System.out.print( "\t" );
@@ -228,7 +236,7 @@ public class SqlActionColumn {
 		return 0;
 	}
 	
-	public static int DumpDefineProperty( SqlActionColumn c, StringBuilder out ) {
+	public static int dumpDefineProperty( SqlActionColumn c, StringBuilder out ) {
 	
 		switch( c.dataType ) {
 			case SQLACTION_DATA_TYPE_BIT :
@@ -317,7 +325,7 @@ public class SqlActionColumn {
 		return 0;
 	}
 	
-	public static int DumpSelectOutputColumn( int columnIndex, SqlActionColumn column, String columnValue, StringBuilder out ) {
+	public static int dumpSelectOutputColumn( int columnIndex, SqlActionColumn column, String columnValue, StringBuilder out ) {
 		switch( column.dataType ) {
 			case SQLACTION_DATA_TYPE_BIT :
 				out.append("\t\t\t").append(columnValue).append(" = rs.getBoolean( "+columnIndex+" ) ;\n" );
@@ -399,7 +407,7 @@ public class SqlActionColumn {
 		return 0;
 	}
 	
-	public static int DumpSetInputColumn( int columnIndex, SqlActionColumn column, String columnValue, StringBuilder out ) {
+	public static int dumpSetInputColumn( int columnIndex, SqlActionColumn column, String columnValue, StringBuilder out ) {
 
 		switch( column.dataType ) {
 			case SQLACTION_DATA_TYPE_BIT :
@@ -482,7 +490,7 @@ public class SqlActionColumn {
 		return 0;
 	}
 	
-	public static int DumpWhereInputColumn( int columnIndex, SqlActionColumn column, String columnValue, StringBuilder out ) {
+	public static int dumpWhereInputColumn( int columnIndex, SqlActionColumn column, String columnValue, StringBuilder out ) {
 
 		switch( column.dataType ) {
 			case SQLACTION_DATA_TYPE_BIT :

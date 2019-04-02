@@ -1,3 +1,11 @@
+/*
+ * sqlaction - SQL action object auto-gencode tool based JDBC for Java
+ * author	: calvin
+ * email	: calvinwilliams@163.com
+ *
+ * See the file LICENSE in base directory.
+ */
+
 package xyz.calvinwilliams.sqlaction.gencode;
 
 public class SqlActionLexicalParser {
@@ -6,14 +14,14 @@ public class SqlActionLexicalParser {
 	int				sqlLength ;
 	int				parserOffset ;
 	
-	public void SetSqlString( String sql ) {
+	public void setSqlString( String sql ) {
 		this.sql = sql.toCharArray() ;
 		this.sqlLength = sql.length() ;
 		this.parserOffset = 0 ;
 		return;
 	}
 	
-	public String GetSqlToken() {
+	public String getSqlToken() {
 		int		beginOffset ;
 		
 		while( parserOffset < sqlLength ) {
@@ -142,7 +150,7 @@ public class SqlActionLexicalParser {
 		}
 	}
 	
-	public String GetRemainSqlToken() {
+	public String getRemainSqlTokens() {
 		return new String( sql, parserOffset, sqlLength-parserOffset );
 	}
 }

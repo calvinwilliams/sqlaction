@@ -1,3 +1,11 @@
+/*
+ * sqlaction - SQL action object auto-gencode tool based JDBC for Java
+ * author	: calvin
+ * email	: calvinwilliams@163.com
+ *
+ * See the file LICENSE in base directory.
+ */
+
 package xyz.calvinwilliams.sqlaction.gencode;
 
 import java.sql.*;
@@ -10,7 +18,7 @@ public class SqlActionDatabase {
 	String						databaseName ;
 	List<SqlActionTable>		tableList ;
 	
-	public static int GetAllDatabases( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, List<SqlActionDatabase> sqlactionDatabaseList ) throws Exception {
+	public static int getAllDatabases( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, List<SqlActionDatabase> sqlactionDatabaseList ) throws Exception {
 		Statement			stmt = null ;
 		ResultSet			rs = null ;
 		SqlActionDatabase	database ;
@@ -32,7 +40,7 @@ public class SqlActionDatabase {
 		rs.close();
 		
 		for( SqlActionDatabase d : sqlactionDatabaseList ) {
-			nret = SqlActionTable.GetAllTablesInDatabase( dbserverConf, sqlactionConf, conn, d ) ;
+			nret = SqlActionTable.getAllTablesInDatabase( dbserverConf, sqlactionConf, conn, d ) ;
 			if( nret != 0 ) {
 				System.out.println( "GetAllTablesInDatabase failed["+nret+"] , schema["+d.databaseName+"]" );
 				return nret;
@@ -42,7 +50,7 @@ public class SqlActionDatabase {
 		return 0;
 	}
 	
-	public static int TravelAllDatabases( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionDatabase> sqlactionDatabaseList, int depth ) throws Exception {
+	public static int travelAllDatabases( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionDatabase> sqlactionDatabaseList, int depth ) throws Exception {
 		for( SqlActionDatabase d : sqlactionDatabaseList ) {
 			if( ! d.databaseName.equals(sqlactionConf.database) )
 				continue;
@@ -51,7 +59,7 @@ public class SqlActionDatabase {
 				System.out.print( "\t" );
 			System.out.println( "databaseName["+d.databaseName+"]" );
 			
-			SqlActionTable.TravelAllTables( dbserverConf, sqlactionConf, d.tableList, depth+1 );
+			SqlActionTable.travelAllTables( dbserverConf, sqlactionConf, d.tableList, depth+1 );
 		}
 		
 		return 0;

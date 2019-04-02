@@ -1,3 +1,11 @@
+/*
+ * sqlaction - SQL action object auto-gencode tool based JDBC for Java
+ * author	: calvin
+ * email	: calvinwilliams@163.com
+ *
+ * See the file LICENSE in base directory.
+ */
+
 package xyz.calvinwilliams.sqlaction.gencode;
 
 import java.io.*;
@@ -113,7 +121,7 @@ public class SqlActionGencode {
 			database = new SqlActionDatabase() ;
 			database.databaseName = sqlactionConf.database ;
 			
-			nret = SqlActionTable.GetAllTablesInDatabase( dbserverConf, sqlactionConf, conn, database ) ;
+			nret = SqlActionTable.getAllTablesInDatabase( dbserverConf, sqlactionConf, conn, database ) ;
 			if( nret != 0 ) {
 				System.out.println( "*** ERROR : SqlActionTable.GetAllTablesInDatabase failed["+nret+"]" );
 				conn.close();
@@ -125,7 +133,7 @@ public class SqlActionGencode {
 			conn.close();
 			
 			// Show all databases and tables and columns and indexes
-			nret = SqlActionTable.TravelAllTables( dbserverConf, sqlactionConf, database.tableList, 1 ) ;
+			nret = SqlActionTable.travelAllTables( dbserverConf, sqlactionConf, database.tableList, 1 ) ;
 			if( nret != 0 ) {
 				System.out.println( "*** ERROR : SqlActionTable.TravelAllTables failed["+nret+"]" );
 				return;
@@ -135,7 +143,7 @@ public class SqlActionGencode {
 			
 			// Generate class code
 			for( SqlActionTableConf tc : sqlactionConf.tables ) {
-				SqlActionTable table = SqlActionTable.FindTable( database.tableList, tc.table ) ;
+				SqlActionTable table = SqlActionTable.findTable( database.tableList, tc.table ) ;
 				if( table == null ) {
 					System.out.println( "\t" + "*** ERROR : table["+tc.table+"] not found in database["+sqlactionConf.database+"]" );
 					return;
@@ -162,7 +170,7 @@ public class SqlActionGencode {
 				
 				out.append( "\n" );
 				for( SqlActionColumn c : table.columnList ) {
-					SqlActionColumn.DumpDefineProperty( c, out );
+					SqlActionColumn.dumpDefineProperty( c, out );
 				}
 				out.append( "\n" );
 				out.append("\t").append("int				").append(COUNT___).append(" ; // defining for 'SELECT COUNT(*)'\n");
@@ -173,7 +181,7 @@ public class SqlActionGencode {
 					System.out.println( "Parse sql action ["+sqlaction+"]" );
 					
 					SqlActionSyntaxParser parser = new SqlActionSyntaxParser() ;
-					nret = parser.ParseSyntax(sqlaction) ;
+					nret = parser.parseSyntax(sqlaction) ;
 					if( nret != 0 ) {
 						System.out.println( "\t" + "*** ERROR : SqlActionSyntaxParser.ParseSyntax failed["+nret+"]" );
 						return;
@@ -200,14 +208,14 @@ public class SqlActionGencode {
 							if( parser.isFromTableNameExist(ct.tableAliasName) ) {
 								ct.tableName = ct.tableAliasName ;
 							} else {
-								ct.tableName = parser.FindFromTableFromAliasName(ct.tableAliasName) ;
+								ct.tableName = parser.findFromTableFromAliasName(ct.tableAliasName) ;
 								if( ct.tableName == null ) {
 									System.out.println( "\t" + "tableAliasName["+ct.tableAliasName+"] not found in sqlaction["+sqlaction+"] at SELECT" );
 									return;
 								}
 							}
 
-							ct.table = SqlActionTable.FindTable( database.tableList, ct.tableName ) ;
+							ct.table = SqlActionTable.findTable( database.tableList, ct.tableName ) ;
 							if( ct.table == null ) {
 								System.out.println( "\t" + "table["+ct.tableName+"] not found in database["+sqlactionConf.database+"] at SELECT" );
 								return;
@@ -220,14 +228,14 @@ public class SqlActionGencode {
 							if( parser.isFromTableNameExist(ct.tableAliasName) ) {
 								ct.tableName = ct.tableAliasName ;
 							} else {
-								ct.tableName = parser.FindFromTableFromAliasName(ct.tableAliasName) ;
+								ct.tableName = parser.findFromTableFromAliasName(ct.tableAliasName) ;
 								if( ct.tableName == null ) {
 									System.out.println( "\t" + "tableAliasName["+ct.tableAliasName+"] not found in sqlaction["+sqlaction+"] at WHERE" );
 									return;
 								}
 							}
 
-							ct.table = SqlActionTable.FindTable( database.tableList, ct.tableName ) ;
+							ct.table = SqlActionTable.findTable( database.tableList, ct.tableName ) ;
 							if( ct.table == null ) {
 								System.out.println( "\t" + "otherTable["+ct.tableName+"] not found in database["+sqlactionConf.database+"] at WHERE" );
 								return;
@@ -238,14 +246,14 @@ public class SqlActionGencode {
 							if( parser.isFromTableNameExist(ct.tableAliasName2) ) {
 								ct.tableName2 = ct.tableAliasName2 ;
 							} else {
-								ct.tableName2 = parser.FindFromTableFromAliasName(ct.tableAliasName2) ;
+								ct.tableName2 = parser.findFromTableFromAliasName(ct.tableAliasName2) ;
 								if( ct.tableName2 == null ) {
 									System.out.println( "\t" + "tableAliasName2["+ct.tableAliasName2+"] not found in sqlaction["+sqlaction+"] at WHERE" );
 									return;
 								}
 							}
 
-							ct.table2 = SqlActionTable.FindTable( database.tableList, ct.tableName2 ) ;
+							ct.table2 = SqlActionTable.findTable( database.tableList, ct.tableName2 ) ;
 							if( ct.table2 == null ) {
 								System.out.println( "\t" + "table2["+ct.tableName2+"] not found in database["+sqlactionConf.database+"] at WHERE" );
 								return;
@@ -290,7 +298,7 @@ public class SqlActionGencode {
 					for( SqlActionSelectColumnToken ct : parser.selectColumnTokenList ) {
 						if( ct.table == null ) {
 							if( ct.tableName != null && ! ct.tableName.equalsIgnoreCase(table.tableName) ) {
-								ct.table = SqlActionTable.FindTable( database.tableList, ct.tableName ) ;
+								ct.table = SqlActionTable.findTable( database.tableList, ct.tableName ) ;
 								if( ct.table == null ) {
 									System.out.println( "\t" + "other table["+ct.tableName+"] not found in database["+sqlactionConf.database+"] at SELECT" );
 									return;
@@ -306,13 +314,13 @@ public class SqlActionGencode {
 						
 						if( ct.column == null && ! ct.columnName.equalsIgnoreCase(SELECT_COUNT___) ) {
 							if( ct.tableName != null && ! ct.tableName.equalsIgnoreCase(table.tableName) ) {
-								ct.column = SqlActionColumn.FindColumn( ct.table.columnList, ct.columnName ) ;
+								ct.column = SqlActionColumn.findColumn( ct.table.columnList, ct.columnName ) ;
 								if( ct.column == null ) {
 									System.out.println( "\t" + "other column["+ct.columnName+"] not found in table["+ct.tableName+"] in sqlaction["+sqlaction+"] at SELECT" );
 									return;
 								}
 							} else {
-								ct.column = SqlActionColumn.FindColumn( table.columnList, ct.columnName ) ;
+								ct.column = SqlActionColumn.findColumn( table.columnList, ct.columnName ) ;
 								if( ct.column == null ) {
 									System.out.println( "\t" + "column["+ct.columnName+"] not found in table["+table.tableName+"] in sqlaction["+sqlaction+"] at SELECT" );
 									return;
@@ -324,7 +332,7 @@ public class SqlActionGencode {
 					for( SqlActionSetColumnToken ct : parser.setColumnTokenList ) {
 						if( ct.table == null ) {
 							if( ct.tableName != null && ! ct.tableName.equalsIgnoreCase(table.tableName) ) {
-								ct.table = SqlActionTable.FindTable( database.tableList, ct.tableName ) ;
+								ct.table = SqlActionTable.findTable( database.tableList, ct.tableName ) ;
 								if( ct.table == null ) {
 									System.out.println( "\t" + "other table["+ct.tableName+"] not found in database["+sqlactionConf.database+"] at SET" );
 									return;
@@ -340,13 +348,13 @@ public class SqlActionGencode {
 						
 						if( ct.column == null && ! ct.columnName.equals("?") ) {
 							if( ct.tableName != null && ! ct.tableName.equalsIgnoreCase(table.tableName) ) {
-								ct.column = SqlActionColumn.FindColumn( ct.table.columnList, ct.columnName ) ;
+								ct.column = SqlActionColumn.findColumn( ct.table.columnList, ct.columnName ) ;
 								if( ct.column == null ) {
 									System.out.println( "\t" + "other column["+ct.columnName+"] not found in table["+ct.tableName+"] in sqlaction["+sqlaction+"] at SET" );
 									return;
 								}
 							} else {
-								ct.column = SqlActionColumn.FindColumn( table.columnList, ct.columnName ) ;
+								ct.column = SqlActionColumn.findColumn( table.columnList, ct.columnName ) ;
 								if( ct.column == null ) {
 									System.out.println( "\t" + "column["+ct.columnName+"] not found in table["+table.tableName+"] in sqlaction["+sqlaction+"] at SET" );
 									return;
@@ -358,7 +366,7 @@ public class SqlActionGencode {
 					for( SqlActionFromTableToken ct : parser.fromTableTokenList ) {
 						if( ct.table == null ) {
 							if( ct.tableName != null && ! ct.tableName.equalsIgnoreCase(table.tableName) ) {
-								ct.table = SqlActionTable.FindTable( database.tableList, ct.tableName ) ;
+								ct.table = SqlActionTable.findTable( database.tableList, ct.tableName ) ;
 								if( ct.table == null ) {
 									System.out.println( "\t" + "other table["+ct.tableName+"] not found in database["+sqlactionConf.database+"] at FROM" );
 									return;
@@ -376,7 +384,7 @@ public class SqlActionGencode {
 					for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
 						if( ct.table == null ) {
 							if( ct.tableName != null && ! ct.tableName.equalsIgnoreCase(table.tableName) ) {
-								ct.table = SqlActionTable.FindTable( database.tableList, ct.tableName ) ;
+								ct.table = SqlActionTable.findTable( database.tableList, ct.tableName ) ;
 								if( ct.table == null ) {
 									System.out.println( "\t" + "other table["+ct.tableName+"] not found in database["+sqlactionConf.database+"] at WHERE" );
 									return;
@@ -392,19 +400,19 @@ public class SqlActionGencode {
 						
 						if( ct.column == null ) {
 							if( ct.tableName != null && ! ct.tableName.equalsIgnoreCase(table.tableName) ) {
-								ct.column = SqlActionColumn.FindColumn( ct.table.columnList, ct.columnName ) ;
+								ct.column = SqlActionColumn.findColumn( ct.table.columnList, ct.columnName ) ;
 								if( ct.column == null ) {
 									System.out.println( "\t" + "othercolumn["+ct.columnName+"] not found in table["+ct.tableName+"] in sqlaction["+sqlaction+"] at WHERE" );
 									return;
 								}
 							} else {
-								ct.column = SqlActionColumn.FindColumn( table.columnList, ct.columnName ) ;
+								ct.column = SqlActionColumn.findColumn( table.columnList, ct.columnName ) ;
 							}
 						}
 						
 						if( ct.table2 == null ) {
 							if( ct.tableName2 != null && ! ct.tableName2.equalsIgnoreCase(table.tableName) ) {
-								ct.table2 = SqlActionTable.FindTable( database.tableList, ct.tableName2 ) ;
+								ct.table2 = SqlActionTable.findTable( database.tableList, ct.tableName2 ) ;
 								if( ct.table2 == null ) {
 									System.out.println( "\t" + "other table2["+ct.tableName2+"] not found in database["+sqlactionConf.database+"] at WHERE" );
 									return;
@@ -420,13 +428,13 @@ public class SqlActionGencode {
 						
 						if( ct.column2 == null && ! ct.columnName2.equals("?") ) {
 							if( ct.tableName2 != null && ! ct.tableName2.equalsIgnoreCase(table.tableName) ) {
-								ct.column2 = SqlActionColumn.FindColumn( ct.table2.columnList, ct.columnName2 ) ;
+								ct.column2 = SqlActionColumn.findColumn( ct.table2.columnList, ct.columnName2 ) ;
 								if( ct.column2 == null ) {
 									System.out.println( "\t" + "other column2["+ct.columnName2+"] not found in table["+ct.tableName2+"] in sqlaction["+sqlaction+"] at WHERE" );
 									return;
 								}
 							} else {
-								ct.column2 = SqlActionColumn.FindColumn( table.columnList, ct.columnName2 ) ;
+								ct.column2 = SqlActionColumn.findColumn( table.columnList, ct.columnName2 ) ;
 							}
 						}
 					}
@@ -435,7 +443,7 @@ public class SqlActionGencode {
 					System.out.println( "Dump gencode ["+sqlaction+"]" );
 					
 					if( parser.selectColumnTokenList != null && parser.selectColumnTokenList.size() > 0 ) {
-						nret = SelectSqlDumpGencode( dbserverConf, sqlactionConf, tc, sqlaction, parser, database, table, out ) ;
+						nret = selectSqlDumpGencode( dbserverConf, sqlactionConf, tc, sqlaction, parser, database, table, out ) ;
 						if( nret != 0 ) {
 							System.out.println( "\t" + "*** ERROR : SelectSqlDumpGencode failed["+nret+"]" );
 							return;
@@ -443,7 +451,7 @@ public class SqlActionGencode {
 							System.out.println( "\t" + "SelectSqlDumpGencode ok" );
 						}
 					} else if( parser.insertTableName != null ) {
-						nret = InsertSqlDumpGencode( dbserverConf, sqlactionConf, tc, sqlaction, parser, database, table, out ) ;
+						nret = insertSqlDumpGencode( dbserverConf, sqlactionConf, tc, sqlaction, parser, database, table, out ) ;
 						if( nret != 0 ) {
 							System.out.println( "\t" + "*** ERROR : InsertSqlDumpGencode failed["+nret+"]" );
 							return;
@@ -451,7 +459,7 @@ public class SqlActionGencode {
 							System.out.println( "\t" + "InsertSqlDumpGencode ok" );
 						}
 					} else if( parser.updateTableName != null ) {
-						nret = UpdateSqlDumpGencode( dbserverConf, sqlactionConf, tc, sqlaction, parser, database, table, out ) ;
+						nret = updateSqlDumpGencode( dbserverConf, sqlactionConf, tc, sqlaction, parser, database, table, out ) ;
 						if( nret != 0 ) {
 							System.out.println( "\t" + "*** ERROR : UpdateSqlDumpGencode failed["+nret+"]" );
 							return;
@@ -459,7 +467,7 @@ public class SqlActionGencode {
 							System.out.println( "\t" + "UpdateSqlDumpGencode ok" );
 						}
 					} else if( parser.deleteTableName != null ) {
-						nret = DeleteSqlDumpGencode( dbserverConf, sqlactionConf, tc, sqlaction, parser, database, table, out ) ;
+						nret = deleteSqlDumpGencode( dbserverConf, sqlactionConf, tc, sqlaction, parser, database, table, out ) ;
 						if( nret != 0 ) {
 							System.out.println( "\t" + "*** ERROR : DeleteSqlDumpGencode failed["+nret+"]" );
 							return;
@@ -483,7 +491,7 @@ public class SqlActionGencode {
 		}
 	}
 
-	public static int SelectSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf, String sqlaction, SqlActionSyntaxParser parser, SqlActionDatabase database, SqlActionTable table, StringBuilder out ) {
+	public static int selectSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf, String sqlaction, SqlActionSyntaxParser parser, SqlActionDatabase database, SqlActionTable table, StringBuilder out ) {
 		
 		StringBuilder		sql = new StringBuilder() ;
 		StringBuilder		methodName = new StringBuilder() ;
@@ -584,7 +592,7 @@ public class SqlActionGencode {
 			for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
 				columnIndex++;
 				if( ct.columnName2.equals("?") ) {
-					nret = SqlActionColumn.DumpWhereInputColumn( columnIndex, ct.column, ct.table.javaObjectName+"ForWhereInput"+"."+ct.column.javaPropertyName, out ) ;
+					nret = SqlActionColumn.dumpWhereInputColumn( columnIndex, ct.column, ct.table.javaObjectName+"ForWhereInput"+"."+ct.column.javaPropertyName, out ) ;
 					if( nret != 0 ) {
 						System.out.println( "DumpWhereInputColumn["+table.tableName+"]["+ct.columnName+"] failed["+nret+"]" );
 						return nret;
@@ -608,7 +616,7 @@ public class SqlActionGencode {
 				if( ct.columnName.equalsIgnoreCase(SELECT_COUNT___) ) {
 					out.append("\t\t\t").append(ct.table.javaObjectName+"."+COUNT___).append(" = rs.getInt( "+columnIndex+" ) ;\n" );
 				} else {
-					nret = SqlActionColumn.DumpSelectOutputColumn( columnIndex, ct.column, ct.table.javaObjectName+"."+ct.column.javaPropertyName, out ) ;
+					nret = SqlActionColumn.dumpSelectOutputColumn( columnIndex, ct.column, ct.table.javaObjectName+"."+ct.column.javaPropertyName, out ) ;
 					if( nret != 0 ) {
 						System.out.println( "DumpSelectOutputColumn["+table.tableName+"]["+ct.columnName+"] failed["+nret+"]" );
 						return nret;
@@ -626,7 +634,7 @@ public class SqlActionGencode {
 		return 0;
 	}
 	
-	public static int InsertSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf, String sqlaction, SqlActionSyntaxParser parser, SqlActionDatabase database, SqlActionTable table, StringBuilder out ) {
+	public static int insertSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf, String sqlaction, SqlActionSyntaxParser parser, SqlActionDatabase database, SqlActionTable table, StringBuilder out ) {
 		
 		StringBuilder		sql = new StringBuilder() ;
 		StringBuilder		methodName = new StringBuilder() ;
@@ -671,7 +679,7 @@ public class SqlActionGencode {
 		for( SqlActionColumn c : table.columnList ) {
 			if( c.isAutoIncrement == false ) {
 				columnIndex++;
-				nret = SqlActionColumn.DumpWhereInputColumn( columnIndex, c, table.javaObjectName+"."+c.javaPropertyName, out ) ;
+				nret = SqlActionColumn.dumpWhereInputColumn( columnIndex, c, table.javaObjectName+"."+c.javaPropertyName, out ) ;
 				if( nret != 0 ) {
 					System.out.println( "DumpWhereInputColumn["+table.tableName+"]["+c.columnName+"] failed["+nret+"]" );
 					return nret;
@@ -684,7 +692,7 @@ public class SqlActionGencode {
 		return 0;
 	}
 	
-	public static int UpdateSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf, String sqlaction, SqlActionSyntaxParser parser, SqlActionDatabase database, SqlActionTable table, StringBuilder out ) {
+	public static int updateSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf, String sqlaction, SqlActionSyntaxParser parser, SqlActionDatabase database, SqlActionTable table, StringBuilder out ) {
 		
 		StringBuilder		sql = new StringBuilder() ;
 		StringBuilder		methodName = new StringBuilder() ;
@@ -740,7 +748,7 @@ public class SqlActionGencode {
 			for( SqlActionSetColumnToken ct : parser.setColumnTokenList ) {
 				columnIndex++;
 				if( ct.columnValue.equals("?") ) {
-					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, table.javaObjectName+"ForSetInput."+ct.column.javaPropertyName, out ) ;
+					nret = SqlActionColumn.dumpSetInputColumn( columnIndex, ct.column, table.javaObjectName+"ForSetInput."+ct.column.javaPropertyName, out ) ;
 					if( nret != 0 ) {
 						System.out.println( "DumpSetInputColumn[\"+table.tableName+\"][\"+ct.columnName+\"] failed["+nret+"]" );
 						return nret;
@@ -750,7 +758,7 @@ public class SqlActionGencode {
 			for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
 				columnIndex++;
 				if( ct.columnName2.equals("?") ) {
-					nret = SqlActionColumn.DumpWhereInputColumn( columnIndex, ct.column, table.javaObjectName+"ForWhereInput."+ct.column.javaPropertyName, out ) ;
+					nret = SqlActionColumn.dumpWhereInputColumn( columnIndex, ct.column, table.javaObjectName+"ForWhereInput."+ct.column.javaPropertyName, out ) ;
 					if( nret != 0 ) {
 						System.out.println( "DumpWhereInputColumn[\"+table.tableName+\"][\"+ct.columnName+\"] failed["+nret+"]" );
 						return nret;
@@ -765,7 +773,7 @@ public class SqlActionGencode {
 			for( SqlActionSetColumnToken ct : parser.setColumnTokenList ) {
 				columnIndex++;
 				if( ct.columnValue.equals("?") ) {
-					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, table.javaObjectName+"ForSetInput."+ct.column.javaPropertyName, out ) ;
+					nret = SqlActionColumn.dumpSetInputColumn( columnIndex, ct.column, table.javaObjectName+"ForSetInput."+ct.column.javaPropertyName, out ) ;
 					if( nret != 0 ) {
 						System.out.println( "DumpSetInputColumn[\"+table.tableName+\"][\"+ct.columnName+\"] failed["+nret+"]" );
 						return nret;
@@ -779,7 +787,7 @@ public class SqlActionGencode {
 		return 0;
 	}
 	
-	public static int DeleteSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf, String sqlaction, SqlActionSyntaxParser parser, SqlActionDatabase database, SqlActionTable table, StringBuilder out ) {
+	public static int deleteSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf, String sqlaction, SqlActionSyntaxParser parser, SqlActionDatabase database, SqlActionTable table, StringBuilder out ) {
 		
 		StringBuilder		sql = new StringBuilder() ;
 		StringBuilder		methodName = new StringBuilder() ;
@@ -825,7 +833,7 @@ public class SqlActionGencode {
 			for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
 				columnIndex++;
 				if( ct.columnName2.equals("?") ) {
-					nret = SqlActionColumn.DumpWhereInputColumn( columnIndex, ct.column, table.javaObjectName+"ForWhereInput."+ct.column.javaPropertyName, out ) ;
+					nret = SqlActionColumn.dumpWhereInputColumn( columnIndex, ct.column, table.javaObjectName+"ForWhereInput."+ct.column.javaPropertyName, out ) ;
 					if( nret != 0 ) {
 						System.out.println( "DumpWhereInputColumn[\"+table.tableName+\"][\"+ct.columnName+\"] failed["+nret+"]" );
 						return nret;
@@ -840,7 +848,7 @@ public class SqlActionGencode {
 			for( SqlActionSetColumnToken ct : parser.setColumnTokenList ) {
 				columnIndex++;
 				if( ct.columnValue.equals("?") ) {
-					nret = SqlActionColumn.DumpSetInputColumn( columnIndex, ct.column, table.javaObjectName+"ForSetInput."+ct.column.javaPropertyName, out ) ;
+					nret = SqlActionColumn.dumpSetInputColumn( columnIndex, ct.column, table.javaObjectName+"ForSetInput."+ct.column.javaPropertyName, out ) ;
 					if( nret != 0 ) {
 						System.out.println( "DumpWhereInputColumn[\"+table.tableName+\"][\"+ct.columnName+\"] failed["+nret+"]" );
 						return nret;

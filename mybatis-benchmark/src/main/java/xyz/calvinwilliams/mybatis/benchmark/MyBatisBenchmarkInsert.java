@@ -29,13 +29,18 @@ public class MyBatisBenchmarkInsert {
 			long time = System.currentTimeMillis() ;
 			sqlactionBenchmark.birthday = new java.sql.Date(time) ;
 			
-			count = 5000 ;
+			count = 10000 ;
 			
 			long beginMillisSecondstamp = System.currentTimeMillis() ;
 			
 			for( i = 0 ; i < count ; i++ ) {
+				sqlactionBenchmark.name = "Calvin"+i ;
+				sqlactionBenchmark.name_cn = "卡尔文"+i ;
 				mapper = session.getMapper(SqlactionBenchmarkSAOMapper.class) ;
 				rows = mapper.insertOne(sqlactionBenchmark) ;
+				if( i % 10 == 0 ) {
+					session.commit();
+				}
 			}
 			session.commit();
 			System.out.println( "All mybatis insert done!!!" );

@@ -12,10 +12,9 @@
            <!-- 配置数据源 -->
            <dataSource type="POOLED">
                <property name="driver" value="com.mysql.jdbc.Driver"/>
-               <property name="url" value="jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" />
+               <property name="url" value="jdbc:mysql://192.168.6.74:3306/calvindb?serverTimezone=GMT" />
                <property name="username" value="calvin"/>
                <property name="password" value="calvin"/>
-           
            </dataSource>
        </environment>
      </environments>

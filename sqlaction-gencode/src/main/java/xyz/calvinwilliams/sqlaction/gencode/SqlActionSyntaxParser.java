@@ -4,6 +4,7 @@ import java.util.*;
 
 public class SqlActionSyntaxParser {
 
+	public String							selectHint = null ;
 	public boolean							selectAllColumn = false ;
 	public List<SqlActionSelectColumnToken>	selectColumnTokenList = null ;
 	public List<SqlActionFromTableToken>	fromTableTokenList = null ;
@@ -59,6 +60,9 @@ public class SqlActionSyntaxParser {
 						} else {
 							return -12;
 						}
+					} else if( token1.length() > 2 && ( token1.charAt(0) == '/' || token1.charAt(1) == '*' ) ) {
+						selectHint = token1 ;
+						continue;
 					}
 					String token2 = lexicalParser.GetSqlToken() ;
 					if( token2 == null ) {

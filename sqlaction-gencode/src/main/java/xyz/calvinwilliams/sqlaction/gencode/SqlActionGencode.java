@@ -6,7 +6,7 @@ import java.sql.*;
 
 public class SqlActionGencode {
 
-	final private static String				SQLACTION_VERSION = "0.0.6.0" ;
+	final private static String				SQLACTION_VERSION = "0.0.7.0" ;
 	
 	final private static String				SELECT_COUNT___ = "count(*)" ;
 	final private static String				COUNT___ = "count___" ;
@@ -256,6 +256,8 @@ public class SqlActionGencode {
 					// Show parser result
 					System.out.println( "Show parser result ["+sqlaction+"]" );
 					
+					System.out.println( "\t" + "selectHint["+parser.selectHint+"]" );
+					
 					System.out.println( "\t" + "selectAllColumn["+parser.selectAllColumn+"]" );
 					
 					for( SqlActionSelectColumnToken ct : parser.selectColumnTokenList ) {
@@ -489,12 +491,15 @@ public class SqlActionGencode {
 		int					nret = 0 ;
 		
 		sql.append( "SELECT " );
+		methodName.append( "SqlAction_SELECT_" );
+		if( parser.selectHint != null ) {
+			sql.append( parser.selectHint+" " );
+			methodName.append( SqlActionUtil.convertToUnderscoreExceptForLetterAndDigit(parser.selectHint) );
+		}
 		if( parser.selectAllColumn ) {
 			sql.append( "*" );
-			methodName.append( "SqlAction_SELECT_ALL" );
+			methodName.append( "ALL" );
 		} else {
-			methodName.append( "SqlAction_SELECT_" );
-			
 			for( SqlActionSelectColumnToken ct : parser.selectColumnTokenList ) {
 				if( ct != parser.selectColumnTokenList.get(0) ) {
 					sql.append( "," );

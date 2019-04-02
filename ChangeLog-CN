@@ -1,3 +1,6 @@
+0.0.7.0		2019-04-02		calvin
+			* 支持hint
+
 0.0.6.0		2019-04-01		calvin
 			* 新增子项目sqlaction-benchmark和mybatis-benchmark用于性能比较
 

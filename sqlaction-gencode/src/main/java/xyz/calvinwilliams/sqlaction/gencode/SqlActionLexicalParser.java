@@ -27,7 +27,38 @@ public class SqlActionLexicalParser {
 		beginOffset = parserOffset ;
 		
 		while( parserOffset < sqlLength ) {
-			if( sql[parserOffset] == '.' ) {
+			
+			if( sql[parserOffset] == '/' ) {
+				if( parserOffset != beginOffset ) {
+					return new String(sql,beginOffset,parserOffset-beginOffset);
+				}
+
+				parserOffset++;
+				if( sql[parserOffset] == '*' ) {
+					parserOffset++;
+					while( parserOffset < sqlLength ) {
+						if( sql[parserOffset] == '*' ) {
+							parserOffset++;
+							if( parserOffset >= sqlLength )
+								return null;
+							if( sql[parserOffset] == '/' ) {
+								break;
+							} else {
+								return null;
+							}
+						}
+
+						parserOffset++;
+					}
+					if( parserOffset >= sqlLength )
+						return null;
+
+					parserOffset++;
+					return new String(sql,beginOffset,parserOffset-beginOffset);
+				} else {
+					return new String(sql,beginOffset,1);
+				}
+			} else if( sql[parserOffset] == '.' ) {
 				if( parserOffset != beginOffset ) {
 					return new String(sql,beginOffset,parserOffset-beginOffset);
 				}

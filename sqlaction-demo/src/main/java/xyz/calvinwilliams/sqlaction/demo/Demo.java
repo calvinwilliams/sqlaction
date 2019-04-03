@@ -106,13 +106,13 @@ public class Demo {
 			sqlactionDemoForSetInput.address = "My address 2" ;
 			sqlactionDemoForWhereInput = new SqlactionDemoSAO() ;
 			sqlactionDemoForWhereInput.name = "Calvin" ;
-			nret = SqlactionDemoSAO.SqlAction_UPDATE_sqlaction_demo_SET_address_E___WHERE_name_E__( conn, sqlactionDemoForSetInput, sqlactionDemoForWhereInput ) ;
+			nret = SqlactionDemoSAO.updateAddressByName( conn, sqlactionDemoForSetInput, sqlactionDemoForWhereInput ) ;
 			if( nret < 0 ) {
-				System.out.println( "SqlactionDemoSAO.SqlAction_UPDATE_sqlaction_demo_SET_address_E___WHERE_name_E__ failed["+nret+"]" );
+				System.out.println( "SqlactionDemoSAO.updateAddressByName failed["+nret+"]" );
 				conn.rollback();
 				return;
 			} else {
-				System.out.println( "SqlactionDemoSAO.SqlAction_UPDATE_sqlaction_demo_SET_address_E___WHERE_name_E__ ok , rows["+nret+"] effected" );
+				System.out.println( "SqlactionDemoSAO.updateAddressByName ok , rows["+nret+"] effected" );
 			}
 			
 			sqlactionDemoList = new LinkedList<SqlactionDemoSAO>() ;

@@ -14,7 +14,7 @@ import java.sql.*;
 
 public class SqlActionGencode {
 
-	final private static String				SQLACTION_VERSION = "0.0.7.0" ;
+	final private static String				SQLACTION_VERSION = "0.0.8.0" ;
 	
 	final private static String				SELECT_COUNT___ = "count(*)" ;
 	final private static String				COUNT___ = "count___" ;
@@ -583,6 +583,10 @@ public class SqlActionGencode {
 			methodName.append( SqlActionUtil.convertToUnderscoreExceptForLetterAndDigit(parser.otherTokens) );
 		}
 		
+		if( parser.methodName != null ) {
+			methodName = new StringBuilder(parser.methodName) ;
+		}
+		
 		out.append( "\n" );
 		out.append( "\t" + "// "+sqlaction+"\n" );
 		if( parser.whereColumnTokenList.size() > 0 ) {
@@ -671,6 +675,10 @@ public class SqlActionGencode {
 		
 		methodParameters.append( "Connection conn, " + table.javaClassName + " " + table.javaObjectName );
 		
+		if( parser.methodName != null ) {
+			methodName = new StringBuilder(parser.methodName) ;
+		}
+		
 		out.append( "\n" );
 		out.append( "\t" + "// "+sqlaction+"\n" );
 		out.append( "\t" + "public static int " + methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
@@ -737,6 +745,10 @@ public class SqlActionGencode {
 			methodParameters.append( "Connection conn, " + table.javaClassName + " " + table.javaObjectName + "ForSetInput, " + table.javaClassName + " " + table.javaObjectName + "ForWhereInput" );
 		} else {
 			methodParameters.append( "Connection conn, " + table.javaClassName + " " + table.javaObjectName + "ForSetInput " );
+		}
+		
+		if( parser.methodName != null ) {
+			methodName = new StringBuilder(parser.methodName) ;
 		}
 		
 		out.append( "\n" );
@@ -822,6 +834,10 @@ public class SqlActionGencode {
 			methodParameters.append( "Connection conn, " + table.javaClassName + " " + table.javaObjectName + "ForWhereInput" );
 		} else {
 			methodParameters.append( "Connection conn" );
+		}
+		
+		if( parser.methodName != null ) {
+			methodName = new StringBuilder(parser.methodName) ;
 		}
 		
 		out.append( "\n" );

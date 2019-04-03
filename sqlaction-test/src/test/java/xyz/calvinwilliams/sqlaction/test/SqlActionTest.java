@@ -99,12 +99,12 @@ public class SqlActionTest {
 			userOrderListForSelectOutput = new LinkedList<UserOrderSAO>() ;
 			userForWhereInput = new UserSAO() ;
 			userForWhereInput.name = "Calvin" ;
-			nret = UserOrderSAO.SqlAction_SELECT_user_O_name_J_user_O_address_J_user_order_O_item_name_J_user_order_O_amount_J_user_order_O_total_price_FROM_user_J_user_order_WHERE_user_O_name_E___AND_user_O_id_E_user_order_O_user_id( conn, userListForSelectOutput, userOrderListForSelectOutput, userForWhereInput, null ) ;
+			nret = UserOrderSAO.selectUserAndOrderByName( conn, userListForSelectOutput, userOrderListForSelectOutput, userForWhereInput, null ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_SELECT_user_O_name_J_user_O_address_J_user_order_O_item_name_J_user_order_O_amount_J_user_order_O_total_price_FROM_user_J_user_order_WHERE_user_O_name_E___AND_user_O_id_E_user_order_O_user_id failed["+nret+"]" );
+				System.out.println( "\t" + "selectUserAndOrderByName failed["+nret+"]" );
 				return -21;
 			} else {
-				System.out.println( "\t" + "SqlAction_SELECT_user_O_name_J_user_O_address_J_user_order_O_item_name_J_user_order_O_amount_J_user_order_O_total_price_FROM_user_J_user_order_WHERE_user_O_name_E___AND_user_O_id_E_user_order_O_user_id ok , ["+userListForSelectOutput.size()+"]records" );
+				System.out.println( "\t" + "selectUserAndOrderByName ok , ["+userListForSelectOutput.size()+"]records" );
 			}
 
 			for( UserSAO u : userListForSelectOutput ) {

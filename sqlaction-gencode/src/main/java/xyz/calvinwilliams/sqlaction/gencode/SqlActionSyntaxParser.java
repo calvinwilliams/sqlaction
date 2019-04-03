@@ -28,12 +28,31 @@ public class SqlActionSyntaxParser {
 	
 	public String							otherTokens = null ;
 	
+	public String							methodName = null ;
+	
 	public int parseSyntax( String sql ) {
+		int							beginMetaData ;
+		int							endMetaData ;
 		SqlActionSelectColumnToken	selectColumnToken = null ;
 		SqlActionFromTableToken		fromTableToken = null ;
 		SqlActionSetColumnToken		setColumnToken = null ;
 		SqlActionWhereColumnToken	whereColumnToken = null ;
 		String						token9 = null ;
+		
+		beginMetaData = sql.indexOf( "@@METHOD(" ) ;
+		if( beginMetaData >= 0 ) {
+			endMetaData = sql.indexOf( ")", beginMetaData ) ;
+			if( endMetaData == -1 ) {
+				System.out.println( "sql["+sql+"] invalid" );
+				return -1;
+			}
+			methodName = sql.substring( beginMetaData+9, endMetaData ) ;
+		}
+		
+		beginMetaData = sql.indexOf( "@@" ) ;
+		if( beginMetaData >= 0 ) {
+			sql = sql.substring( 0, beginMetaData ) ;
+		}
 		
 		SqlActionLexicalParser lexicalParser = new SqlActionLexicalParser() ;
 		lexicalParser.setSqlString(sql);

@@ -4,8 +4,12 @@
 		{
 			"table" : "sqlaction_benchmark" ,
 			"sqlactions" : [
+				"INSERT INTO sqlaction_benchmark" ,
+				"UPDATE sqlaction_benchmark SET salary=? WHERE name=?" ,
+				"SELECT * FROM sqlaction_benchmark WHERE name=?" ,
 				"SELECT * FROM sqlaction_benchmark" ,
-				"INSERT INTO sqlaction_benchmark"
+				"DELETE FROM sqlaction_benchmark WHERE name=?" ,
+				"DELETE FROM sqlaction_benchmark"
 			]
 		}
 	] ,

@@ -4,10 +4,22 @@
 <!-- 保证唯一性 -->
 <mapper namespace="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAOMapper">
 	<!-- 将返回的数据 与对象对应。将返回的数据，按照配置组装成对应的对象。 -->
-	<select id="selectAll" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
-		SELECT * FROM sqlaction_benchmark
-	</select>
-	<insert id="insertOne">
+	<insert id="insertOne" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
 		INSERT INTO sqlaction_benchmark (name,name_cn,salary,birthday) VALUES( #{name}, #{name_cn}, #{salary}, #{birthday} )
 	</insert>
+	<update id="updateOne" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
+		UPDATE sqlaction_benchmark SET salary=#{salary} WHERE name=#{name}
+	</update>
+	<select id="selectOneByName" parameterType="java.lang.String" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
+		SELECT * FROM sqlaction_benchmark WHERE name=#{name}
+	</select>
+	<select id="selectAll" resultMap="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
+		SELECT * FROM sqlaction_benchmark
+	</select>
+	<delete id="deleteOneByName" parameterType="java.lang.String">
+		DELETE FROM sqlaction_benchmark WHERE name=#{name}
+	</delete>
+	<delete id="deleteAll">
+		DELETE FROM sqlaction_benchmark
+	</delete>
 </mapper>

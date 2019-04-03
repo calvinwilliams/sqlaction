@@ -54,8 +54,8 @@ public class UserOrderSAO {
 		return userOrderListForSelectOutput.size();
 	}
 
-	// SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id
-	public static int SqlAction_SELECT_user_O_name_J_user_O_address_J_user_order_O_item_name_J_user_order_O_amount_J_user_order_O_total_price_FROM_user_J_user_order_WHERE_user_O_name_E___AND_user_O_id_E_user_order_O_user_id( Connection conn, List<UserSAO> userListForSelectOutput, List<UserOrderSAO> userOrderListForSelectOutput, UserSAO userForWhereInput, UserOrderSAO userOrderForWhereInput ) throws Exception {
+	// SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id @@METHOD(selectUserAndOrderByName)
+	public static int selectUserAndOrderByName( Connection conn, List<UserSAO> userListForSelectOutput, List<UserOrderSAO> userOrderListForSelectOutput, UserSAO userForWhereInput, UserOrderSAO userOrderForWhereInput ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement("SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id") ;
 		prestmt.setString( 1, userForWhereInput.name );
 		ResultSet rs = prestmt.executeQuery() ;

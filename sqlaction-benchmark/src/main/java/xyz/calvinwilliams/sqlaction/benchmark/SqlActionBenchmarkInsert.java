@@ -14,14 +14,20 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 public class SqlActionBenchmarkInsert {
 
 	public static void main(String[] args) {
-		Connection				conn = null ;
-		SqlactionBenchmarkSAO	sqlactionBenchmark ;
-		long					i , count ;
-		int						nret = 0 ;
+		Connection					conn = null ;
+		SqlactionBenchmarkSAO		sqlactionBenchmark ;
+		List<SqlactionBenchmarkSAO>	sqlactionBenchmarkList ;
+		long						beginMillisSecondstamp ;
+		long						endMillisSecondstamp ;
+		double						elpaseSecond ;
+		long						i , count ;
+		int							rows = 0 ;
 		
 		// connect to database
 		try {
@@ -36,32 +42,100 @@ public class SqlActionBenchmarkInsert {
 		try {
 			conn.setAutoCommit(false);
 			
-			// benchmark for INSERT
 			sqlactionBenchmark = new SqlactionBenchmarkSAO() ;
 			sqlactionBenchmark.name = "Calvin" ;
 			sqlactionBenchmark.nameCn = "卡尔文" ;
 			sqlactionBenchmark.salary = new BigDecimal(0) ;
 			long time = System.currentTimeMillis() ;
 			sqlactionBenchmark.birthday = new java.sql.Date(time) ;
+			count = 5000 ;
 			
-			count = 10000 ;
+			rows = SqlactionBenchmarkSAO.SqlAction_DELETE_FROM_sqlaction_benchmark( conn ) ;
+			conn.commit();
 			
-			long beginMillisSecondstamp = System.currentTimeMillis() ;
-			
+			// benchmark for INSERT
+			beginMillisSecondstamp = System.currentTimeMillis() ;
 			for( i = 0 ; i < count ; i++ ) {
 				sqlactionBenchmark.name = "Calvin"+i ;
 				sqlactionBenchmark.nameCn = "卡尔文"+i ;
-				nret = SqlactionBenchmarkSAO.SqlAction_INSERT_INTO_sqlaction_benchmark( conn, sqlactionBenchmark ) ;
+				rows = SqlactionBenchmarkSAO.SqlAction_INSERT_INTO_sqlaction_benchmark( conn, sqlactionBenchmark ) ;
+				if( rows != 1 ) {
+					System.out.println( "SqlactionBenchmarkSAO.SqlAction_INSERT_INTO_sqlaction_benchmark failed["+rows+"]" );
+					return;
+				}
 				if( i % 10 == 0 ) {
 					conn.commit();
 				}
 			}
 			conn.commit();
-			System.out.println( "All sqlaction insert done!!!" );
+			endMillisSecondstamp = System.currentTimeMillis() ;
+			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
+			System.out.println( "All sqlaction INSERT done , count["+count+"] elapse["+elpaseSecond+"]s" );
 			
-			long endMillisSecondstamp = System.currentTimeMillis() ;
-			double elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
-			System.out.println( "count["+count+"] elapse["+elpaseSecond+"]s" );
+			// benchmark for UPDATE
+			beginMillisSecondstamp = System.currentTimeMillis() ;
+			for( i = 0 ; i < count ; i++ ) {
+				sqlactionBenchmark.name = "Calvin"+i ;
+				sqlactionBenchmark.salary = new BigDecimal(i) ;
+				rows = SqlactionBenchmarkSAO.SqlAction_UPDATE_sqlaction_benchmark_SET_salary_E___WHERE_name_E__( conn, sqlactionBenchmark, sqlactionBenchmark ) ;
+				if( rows != 1 ) {
+					System.out.println( "SqlactionBenchmarkSAO.SqlAction_UPDATE_sqlaction_benchmark_SET_salary_E___WHERE_name_E__ failed["+rows+"]" );
+					return;
+				}
+				if( i % 10 == 0 ) {
+					conn.commit();
+				}
+			}
+			conn.commit();
+			endMillisSecondstamp = System.currentTimeMillis() ;
+			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
+			System.out.println( "All sqlaction UPDATE WHERE done , count["+count+"] elapse["+elpaseSecond+"]s" );
+			
+			// benchmark for SELECT ... WHERE ...
+			beginMillisSecondstamp = System.currentTimeMillis() ;
+			for( i = 0 ; i < count ; i++ ) {
+				sqlactionBenchmarkList = new LinkedList<SqlactionBenchmarkSAO>() ;
+				sqlactionBenchmark.name = "Calvin"+i ;
+				rows = SqlactionBenchmarkSAO.SqlAction_SELECT_ALL_FROM_sqlaction_benchmark_WHERE_name_E__( conn, sqlactionBenchmarkList, sqlactionBenchmark ) ;
+				if( rows != 1 ) {
+					System.out.println( "SqlactionBenchmarkSAO.SqlAction_SELECT_ALL_FROM_sqlaction_benchmark_WHERE_name_E__ failed["+rows+"]" );
+					return;
+				}
+			}
+			endMillisSecondstamp = System.currentTimeMillis() ;
+			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
+			System.out.println( "All sqlaction SELECT WHERE done , count["+count+"] elapse["+elpaseSecond+"]s" );
+			
+			// benchmark for SELECT
+			beginMillisSecondstamp = System.currentTimeMillis() ;
+			sqlactionBenchmarkList = new LinkedList<SqlactionBenchmarkSAO>() ;
+			sqlactionBenchmark.name = "Calvin"+i ;
+			rows = SqlactionBenchmarkSAO.SqlAction_SELECT_ALL_FROM_sqlaction_benchmark( conn, sqlactionBenchmarkList, sqlactionBenchmark ) ;
+			if( rows != count ) {
+				System.out.println( "SqlactionBenchmarkSAO.SqlAction_SELECT_ALL_FROM_sqlaction_benchmark failed["+rows+"]" );
+				return;
+			}
+			endMillisSecondstamp = System.currentTimeMillis() ;
+			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
+			System.out.println( "All sqlaction SELECT ALL to LIST done , count["+count+"] elapse["+elpaseSecond+"]s" );
+			
+			// benchmark for DELETE
+			beginMillisSecondstamp = System.currentTimeMillis() ;
+			for( i = 0 ; i < count ; i++ ) {
+				sqlactionBenchmark.name = "Calvin"+i ;
+				rows = SqlactionBenchmarkSAO.SqlAction_DELETE_FROM_sqlaction_benchmark_WHERE_name_E__( conn, sqlactionBenchmark ) ;
+				if( rows != 1 ) {
+					System.out.println( "SqlactionBenchmarkSAO.SqlAction_DELETE_FROM_sqlaction_benchmark_WHERE_name_E__ failed["+rows+"]" );
+					return;
+				}
+				if( i % 10 == 0 ) {
+					conn.commit();
+				}
+			}
+			conn.commit();
+			endMillisSecondstamp = System.currentTimeMillis() ;
+			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
+			System.out.println( "All sqlaction DELETE WHERE done , count["+count+"] elapse["+elpaseSecond+"]s" );
 		} catch(Exception e) {
 			e.printStackTrace();
 			try {

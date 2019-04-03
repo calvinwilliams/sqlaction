@@ -3,7 +3,7 @@
   <parent>
     <groupId>xyz.calvinwilliams.sqlaction</groupId>
     <artifactId>sqlaction</artifactId>
-    <version>0.0.7.0</version>
+    <version>0.0.8.0</version>
   </parent>
   <artifactId>sqlaction-demo</artifactId>
 </project>

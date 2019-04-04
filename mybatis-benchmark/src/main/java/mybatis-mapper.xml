@@ -7,13 +7,13 @@
 	<insert id="insertOne" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
 		INSERT INTO sqlaction_benchmark (name,name_cn,salary,birthday) VALUES( #{name}, #{name_cn}, #{salary}, #{birthday} )
 	</insert>
-	<update id="updateOne" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
+	<update id="updateOneByName" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
 		UPDATE sqlaction_benchmark SET salary=#{salary} WHERE name=#{name}
 	</update>
-	<select id="selectOneByName" parameterType="java.lang.String" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
+	<select id="selectOneByName" parameterType="java.lang.String" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO" flushCache="true" useCache="false">
 		SELECT * FROM sqlaction_benchmark WHERE name=#{name}
 	</select>
-	<select id="selectAll" resultMap="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
+	<select id="selectAll" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO" flushCache="true" useCache="false">
 		SELECT * FROM sqlaction_benchmark
 	</select>
 	<delete id="deleteOneByName" parameterType="java.lang.String">

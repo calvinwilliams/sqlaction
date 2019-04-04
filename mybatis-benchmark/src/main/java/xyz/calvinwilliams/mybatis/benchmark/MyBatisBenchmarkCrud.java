@@ -18,7 +18,7 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO;
 import xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAOMapper;
 
-public class MyBatisBenchmarkInsert {
+public class MyBatisBenchmarkCrud {
 
 	public static void main(String[] args) {
 		SqlSession					session = null ;
@@ -27,7 +27,8 @@ public class MyBatisBenchmarkInsert {
 		long						beginMillisSecondstamp ;
 		long						endMillisSecondstamp ;
 		double						elpaseSecond ;
-		long						i , count ;
+		long						i , j , k ;
+		long						count , count2 , count3 ;
 		
 		try {
 			FileInputStream in = new FileInputStream("src/main/java/mybatis-config.xml");
@@ -40,7 +41,9 @@ public class MyBatisBenchmarkInsert {
 			sqlactionBenchmark.salary = new BigDecimal(0) ;
 			long time = System.currentTimeMillis() ;
 			sqlactionBenchmark.birthday = new java.sql.Date(time) ;
-			count = 5000 ;
+			count = 500 ;
+			count2 = 5 ;
+			count3 = 1000 ;
 			
 			mapper = session.getMapper(SqlactionBenchmarkSAOMapper.class) ;
 			
@@ -79,27 +82,31 @@ public class MyBatisBenchmarkInsert {
 			
 			// benchmark for SELECT ... WHERE ...
 			beginMillisSecondstamp = System.currentTimeMillis() ;
-			for( i = 0 ; i < count ; i++ ) {
-				sqlactionBenchmark = mapper.selectOneByName(sqlactionBenchmark.name) ;
-				if( sqlactionBenchmark == null ) {
-					System.out.println( "mapper.selectOneByName failed" );
+			for( j = 0 ; j < count2 ; j++ ) {
+				for( i = 0 ; i < count ; i++ ) {
+					sqlactionBenchmark = mapper.selectOneByName(sqlactionBenchmark.name) ;
+					if( sqlactionBenchmark == null ) {
+						System.out.println( "mapper.selectOneByName failed" );
+						return;
+					}
+				}
+			}
+			endMillisSecondstamp = System.currentTimeMillis() ;
+			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
+			System.out.println( "All mybatis SELECT WHERE done , count2["+count2+"] count["+count+"] elapse["+elpaseSecond+"]s" );
+			
+			// benchmark for SELECT
+			beginMillisSecondstamp = System.currentTimeMillis() ;
+			for( k = 0 ; k < count3 ; k++ ) {
+				sqlactionBenchmarkList = mapper.selectAll() ;
+				if( sqlactionBenchmarkList == null ) {
+					System.out.println( "mapper.selectAll failed" );
 					return;
 				}
 			}
 			endMillisSecondstamp = System.currentTimeMillis() ;
 			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
-			System.out.println( "All mybatis SELECT WHERE done , count["+count+"] elapse["+elpaseSecond+"]s" );
-			
-			// benchmark for SELECT
-			beginMillisSecondstamp = System.currentTimeMillis() ;
-			sqlactionBenchmarkList = mapper.selectAll() ;
-			if( sqlactionBenchmarkList == null ) {
-				System.out.println( "mapper.selectAll failed" );
-				return;
-			}
-			endMillisSecondstamp = System.currentTimeMillis() ;
-			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
-			System.out.println( "All mybatis SELECT ALL to List done , count["+count+"] elapse["+elpaseSecond+"]s" );
+			System.out.println( "All mybatis SELECT to List done , count3["+count3+"] elapse["+elpaseSecond+"]s" );
 			
 			// benchmark for DELETE
 			beginMillisSecondstamp = System.currentTimeMillis() ;

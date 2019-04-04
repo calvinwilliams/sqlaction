@@ -194,26 +194,6 @@ public class SqlActionColumn {
 		return null;
 	}
 	
-	public static String operatorTo( String operator ) {
-		
-		switch( operator ) {
-			case "=" :
-				return "E";
-			case "<>" :
-				return "NE";
-			case ">" :
-				return "GT";
-			case ">=" :
-				return "GE";
-			case "<" :
-				return "LT";
-			case "<=" :
-				return "LE";
-			default :
-				return operator;
-		}
-	}
-	
 	public static String columnToJavaProperty( String columnName ) {
 		String[] sa = columnName.split( "_" ) ;
 		StringBuilder javaPropertyNameBuilder = new StringBuilder() ;

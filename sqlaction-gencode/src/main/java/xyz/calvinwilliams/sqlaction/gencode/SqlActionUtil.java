@@ -64,14 +64,40 @@ public class SqlActionUtil {
 		return wildcardMatchChar( wildcard.toCharArray(), 0, wildcard.length(), str.toCharArray(), 0, str.length() );
 	}
 	
-	public static String convertToUnderscoreExceptForLetterAndDigit( String str ) {
-		char[] charArray = str.toCharArray() ;
-		int	strLength = str.length() ;
+	public static String sqlConvertToMethodName( String sql ) {
+		sql = sql.replaceAll( "<>", "_NE_" ) ;
+		sql = sql.replaceAll( ">=", "_GE_" ) ;
+		sql = sql.replaceAll( "<=", "_LE_" ) ;
+		sql = sql.replaceAll( ">", "_GT_" ) ;
+		sql = sql.replaceAll( "<", "_LT_" ) ;
+		sql = sql.replaceAll( "=", "_E_" ) ;
+		
+		sql = sql.replaceAll( "\\/\\*", "_HT_" ) ;
+		sql = sql.replaceAll( "\\*\\/", "_TH_" ) ;
+		sql = sql.replaceAll( "\\*", "_ALL_" ) ;
+		sql = sql.replaceAll( "\\.", "_O_" ) ;
+		sql = sql.replaceAll( ",", "_j_" ) ;
+		
+		char[] charArray = sql.toCharArray() ;
+		int	strLength = sql.length() ;
 		for( int i = 0 ; i < strLength ; i++ ) {
 			if( ! Character.isLetterOrDigit(charArray[i]) ) {
 				charArray[i] = '_' ;
 			}
 		}
-		return new String( charArray );
+		sql = new String( charArray );
+		
+		while(true) {
+			String sql2 = sql.replaceAll( "__", "_" ) ;
+			if( sql2.length() == sql.length() ) {
+				sql = sql2 ;
+				break;
+			} else {
+				sql = sql2 ;
+			}
+		}
+		
+		return sql;
 	}
+	
 }

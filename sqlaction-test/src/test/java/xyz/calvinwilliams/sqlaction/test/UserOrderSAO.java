@@ -22,7 +22,7 @@ public class UserOrderSAO {
 	int				count___ ; // defining for 'SELECT COUNT(*)'
 
 	// SELECT /* blablabla~ */ * FROM user_order
-	public static int SqlAction_SELECT____blablabla____ALL_FROM_user_order( Connection conn, List<UserOrderSAO> userOrderListForSelectOutput, UserOrderSAO userOrderForWhereInput ) throws Exception {
+	public static int SELECT_HT_blablabla_TH_ALL_FROM_user_order( Connection conn, List<UserOrderSAO> userOrderListForSelectOutput, UserOrderSAO userOrderForWhereInput ) throws Exception {
 		Statement stmt = conn.createStatement() ;
 		ResultSet rs = stmt.executeQuery("SELECT /* blablabla~ */ * FROM user_order") ;
 		while( rs.next() ) {
@@ -38,7 +38,7 @@ public class UserOrderSAO {
 	}
 
 	// SELECT * FROM user_order WHERE user_id=?
-	public static int SqlAction_SELECT_ALL_FROM_user_order_WHERE_user_id_E__( Connection conn, List<UserOrderSAO> userOrderListForSelectOutput, UserOrderSAO userOrderForWhereInput ) throws Exception {
+	public static int SELECT_ALL_FROM_user_order_WHERE_user_id_E_( Connection conn, List<UserOrderSAO> userOrderListForSelectOutput, UserOrderSAO userOrderForWhereInput ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement("SELECT * FROM user_order WHERE user_id=?") ;
 		prestmt.setInt( 1, userOrderForWhereInput.userId );
 		ResultSet rs = prestmt.executeQuery() ;
@@ -54,9 +54,9 @@ public class UserOrderSAO {
 		return userOrderListForSelectOutput.size();
 	}
 
-	// SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id @@METHOD(queryUserAndOrderByName)
+	// SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id 
 	public static int queryUserAndOrderByName( Connection conn, List<UserSAO> userListForSelectOutput, List<UserOrderSAO> userOrderListForSelectOutput, UserSAO userForWhereInput, UserOrderSAO userOrderForWhereInput ) throws Exception {
-		PreparedStatement prestmt = conn.prepareStatement("SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id") ;
+		PreparedStatement prestmt = conn.prepareStatement("SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id ") ;
 		prestmt.setString( 1, userForWhereInput.name );
 		ResultSet rs = prestmt.executeQuery() ;
 		while( rs.next() ) {
@@ -74,7 +74,7 @@ public class UserOrderSAO {
 	}
 
 	// SELECT u.name,u.address,o.item_name,o.amount,o.total_price FROM user u,user_order o WHERE u.name=? AND u.id=o.user_id
-	public static int SqlAction_SELECT_u_O_name_J_u_O_address_J_o_O_item_name_J_o_O_amount_J_o_O_total_price_FROM_user_u_J_user_order_o_WHERE_u_O_name_E___AND_u_O_id_E_o_O_user_id( Connection conn, List<UserSAO> userListForSelectOutput, List<UserOrderSAO> userOrderListForSelectOutput, UserSAO userForWhereInput, UserOrderSAO userOrderForWhereInput ) throws Exception {
+	public static int SELECT_u_O_name_j_u_O_address_j_o_O_item_name_j_o_O_amount_j_o_O_total_price_FROM_user_u_j_user_order_o_WHERE_u_O_name_E_AND_u_O_id_E_o_O_user_id( Connection conn, List<UserSAO> userListForSelectOutput, List<UserOrderSAO> userOrderListForSelectOutput, UserSAO userForWhereInput, UserOrderSAO userOrderForWhereInput ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement("SELECT u.name,u.address,o.item_name,o.amount,o.total_price FROM user u,user_order o WHERE u.name=? AND u.id=o.user_id") ;
 		prestmt.setString( 1, userForWhereInput.name );
 		ResultSet rs = prestmt.executeQuery() ;
@@ -92,8 +92,8 @@ public class UserOrderSAO {
 		return userListForSelectOutput.size();
 	}
 
-	// INSERT INTO order
-	public static int SqlAction_INSERT_INTO_user_order( Connection conn, UserOrderSAO userOrder ) throws Exception {
+	// INSERT INTO user_order (user_id,item_name,amount,total_price) VALUES (?,?,?,?)
+	public static int INSERT_INTO_user_order( Connection conn, UserOrderSAO userOrder ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement("INSERT INTO user_order (user_id,item_name,amount,total_price) VALUES (?,?,?,?)") ;
 		prestmt.setInt( 1, userOrder.userId );
 		prestmt.setString( 2, userOrder.itemName );
@@ -102,16 +102,16 @@ public class UserOrderSAO {
 		return prestmt.executeUpdate() ;
 	}
 
-	// UPDATE order SET total_price=? WHERE user_id=?
-	public static int SqlAction_UPDATE_user_order_SET_total_price_E___WHERE_user_id_E__( Connection conn, UserOrderSAO userOrderForSetInput, UserOrderSAO userOrderForWhereInput ) throws Exception {
+	// UPDATE user_order SET total_price=? WHERE user_id=?
+	public static int UPDATE_user_order_SET_total_price_E_WHERE_user_id_E_( Connection conn, UserOrderSAO userOrderForSetInput, UserOrderSAO userOrderForWhereInput ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement("UPDATE user_order SET total_price=? WHERE user_id=?") ;
 		prestmt.setDouble( 1, userOrderForSetInput.totalPrice );
 		prestmt.setInt( 2, userOrderForWhereInput.userId );
 		return prestmt.executeUpdate() ;
 	}
 
-	// DELETE FROM order
-	public static int SqlAction_DELETE_FROM_user_order( Connection conn ) throws Exception {
+	// DELETE FROM user_order
+	public static int DELETE_FROM_user_order( Connection conn ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement("DELETE FROM user_order") ;
 		return prestmt.executeUpdate() ;
 	}

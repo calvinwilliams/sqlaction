@@ -74,24 +74,6 @@ public class SqlActionTable {
 		return 0;
 	}
 	
-	/*
-	public static int travelAllTables( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionTable> sqlactionTableList, int depth ) throws Exception {
-		StringBuilder		out = new StringBuilder() ;
-		
-		for( SqlActionTable t : sqlactionTableList ) {
-			for( int n = 0 ; n < depth ; n++ )
-				System.out.print( "\t" );
-			System.out.println( "tableName["+t.tableName+"]" );
-			
-			SqlActionColumn.travelAllColumns( dbserverConf, sqlactionConf, t.columnList, depth+1, out );
-			
-			SqlActionIndex.travelAllIndexes( dbserverConf, sqlactionConf, t.indexList, depth+1, out );
-		}
-		
-		return 0;
-	}
-	*/
-	
 	public static int travelTable( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionDatabase database, String tableName, int depth ) throws Exception {
 		for( SqlActionTable t : database.tableList ) {
 			if( ! t.tableName.equalsIgnoreCase(tableName) )

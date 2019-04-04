@@ -26,12 +26,12 @@ public class SqlActionTest {
 
 		try {
 			userList = new LinkedList<UserSAO>() ;
-			nret = UserSAO.SqlAction_SELECT_ALL_FROM_user( conn, userList, null ) ;
+			nret = UserSAO.SELECT_ALL_FROM_user( conn, userList, null ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user failed["+nret+"]" );
+				System.out.println( "\t" + "SELECT_ALL_FROM_user failed["+nret+"]" );
 				return -11;
 			} else {
-				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user ok , ["+userList.size()+"]records" );
+				System.out.println( "\t" + "SELECT_ALL_FROM_user ok , ["+userList.size()+"]records" );
 			}
 
 			for( UserSAO u : userList ) {
@@ -41,12 +41,12 @@ public class SqlActionTest {
 			userList = new LinkedList<UserSAO>() ;
 			user = new UserSAO() ;
 			user.name = "Calvin" ;
-			nret = UserSAO.SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__( conn, userList, user ) ;
+			nret = UserSAO.SELECT_ALL_FROM_user_WHERE_name_E_( conn, userList, user ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ failed["+nret+"]" );
+				System.out.println( "\t" + "SELECT_ALL_FROM_user_WHERE_name_E_ failed["+nret+"]" );
 				return -12;
 			} else {
-				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ ok , ["+userList.size()+"]records" );
+				System.out.println( "\t" + "SELECT_ALL_FROM_user_WHERE_name_E_ ok , ["+userList.size()+"]records" );
 			}
 
 			for( UserSAO u : userList ) {
@@ -57,12 +57,12 @@ public class SqlActionTest {
 			user = new UserSAO() ;
 			user.age = 3 ;
 			user.gender = "M" ;
-			nret = UserSAO.SqlAction_SELECT_name_J_address_FROM_user_WHERE_age_LE___AND_gender_E__( conn, userList, user ) ;
+			nret = UserSAO.SELECT_name_j_address_FROM_user_WHERE_age_LE_AND_gender_E_( conn, userList, user ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_SELECT_name_J_address_FROM_user_WHERE_age_LE___AND_gender_E__ failed["+nret+"]" );
+				System.out.println( "\t" + "SELECT_name_j_address_FROM_user_WHERE_age_LE_AND_gender_E_ failed["+nret+"]" );
 				return -13;
 			} else {
-				System.out.println( "\t" + "SqlAction_SELECT_name_J_address_FROM_user_WHERE_age_LE___AND_gender_E__ ok , ["+userList.size()+"]records" );
+				System.out.println( "\t" + "SELECT_name_j_address_FROM_user_WHERE_age_LE_AND_gender_E_ ok , ["+userList.size()+"]records" );
 			}
 
 			for( UserSAO u : userList ) {
@@ -70,12 +70,12 @@ public class SqlActionTest {
 			}
 
 			userList = new LinkedList<UserSAO>() ;
-			nret = UserSAO.SqlAction_SELECT_ALL_FROM_user_ORDER_BY_name_DESC( conn, userList, user ) ;
+			nret = UserSAO.SELECT_ALL_FROM_user_ORDER_BY_name_DESC( conn, userList, user ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_ORDER_BY_name_DESC failed["+nret+"]" );
+				System.out.println( "\t" + "SELECT_ALL_FROM_user_ORDER_BY_name_DESC failed["+nret+"]" );
 				return -14;
 			} else {
-				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_ORDER_BY_name_DESC ok , ["+userList.size()+"]records" );
+				System.out.println( "\t" + "SELECT_ALL_FROM_user_ORDER_BY_name_DESC ok , ["+userList.size()+"]records" );
 			}
 			
 			for( UserSAO u : userList ) {
@@ -83,12 +83,12 @@ public class SqlActionTest {
 			}
 			
 			userList = new LinkedList<UserSAO>() ;
-			nret = UserSAO.SqlAction_SELECT_gender_J_count____FROM_user_GROUP_BY_gender( conn, userList, user ) ;
+			nret = UserSAO.SELECT_gender_j_count_ALL_FROM_user_GROUP_BY_gender( conn, userList, user ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_SELECT_gender_J_count____FROM_user_GROUP_BY_gender failed["+nret+"]" );
+				System.out.println( "\t" + "SELECT_gender_j_count_ALL_FROM_user_GROUP_BY_gender failed["+nret+"]" );
 				return -14;
 			} else {
-				System.out.println( "\t" + "SqlAction_SELECT_gender_J_count____FROM_user_GROUP_BY_gender ok , ["+userList.size()+"]records" );
+				System.out.println( "\t" + "SELECT_gender_j_count_ALL_FROM_user_GROUP_BY_gender ok , ["+userList.size()+"]records" );
 			}
 			
 			for( UserSAO u : userList ) {
@@ -118,12 +118,12 @@ public class SqlActionTest {
 			userOrderListForSelectOutput = new LinkedList<UserOrderSAO>() ;
 			userForWhereInput = new UserSAO() ;
 			userForWhereInput.name = "Calvin" ;
-			nret = UserOrderSAO.SqlAction_SELECT_u_O_name_J_u_O_address_J_o_O_item_name_J_o_O_amount_J_o_O_total_price_FROM_user_u_J_user_order_o_WHERE_u_O_name_E___AND_u_O_id_E_o_O_user_id( conn, userListForSelectOutput, userOrderListForSelectOutput, userForWhereInput, null ) ;
+			nret = UserOrderSAO.SELECT_u_O_name_j_u_O_address_j_o_O_item_name_j_o_O_amount_j_o_O_total_price_FROM_user_u_j_user_order_o_WHERE_u_O_name_E_AND_u_O_id_E_o_O_user_id( conn, userListForSelectOutput, userOrderListForSelectOutput, userForWhereInput, null ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_SELECT_u_O_name_J_u_O_address_J_o_O_item_name_J_o_O_amount_J_o_O_total_price_FROM_user_u_J_user_order_o_WHERE_u_O_name_E___AND_u_O_id_E_o_O_user_id failed["+nret+"]" );
+				System.out.println( "\t" + "SELECT_u_O_name_j_u_O_address_j_o_O_item_name_j_o_O_amount_j_o_O_total_price_FROM_user_u_j_user_order_o_WHERE_u_O_name_E_AND_u_O_id_E_o_O_user_id failed["+nret+"]" );
 				return -22;
 			} else {
-				System.out.println( "\t" + "SqlAction_SELECT_u_O_name_J_u_O_address_J_o_O_item_name_J_o_O_amount_J_o_O_total_price_FROM_user_u_J_user_order_o_WHERE_u_O_name_E___AND_u_O_id_E_o_O_user_id ok , ["+userListForSelectOutput.size()+"]records" );
+				System.out.println( "\t" + "SELECT_u_O_name_j_u_O_address_j_o_O_item_name_j_o_O_amount_j_o_O_total_price_FROM_user_u_j_user_order_o_WHERE_u_O_name_E_AND_u_O_id_E_o_O_user_id ok , ["+userListForSelectOutput.size()+"]records" );
 			}
 
 			for( UserSAO u : userListForSelectOutput ) {
@@ -133,9 +133,10 @@ public class SqlActionTest {
 				System.out.println( " | " + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			return -1;
 		}
-
+		
 		return 0;
 	}
 
@@ -153,12 +154,12 @@ public class SqlActionTest {
 			user.age = 30 ;
 			user.address = "Calvin address" ;
 			user.level = 8 ;
-			nret = UserSAO.SqlAction_INSERT_INTO_user( conn, user ) ;
+			nret = UserSAO.INSERT_INTO_user( conn, user ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_INSERT_INTO_user failed["+nret+"]" );
+				System.out.println( "\t" + "INSERT_INTO_user failed["+nret+"]" );
 				return -11;
 			} else {
-				System.out.println( "\t" + "SqlAction_INSERT_INTO_user ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "INSERT_INTO_user ok , rows["+nret+"] effected" );
 			}
 
 			user = new UserSAO() ;
@@ -167,12 +168,12 @@ public class SqlActionTest {
 			user.age = 20 ;
 			user.address = "Dozimoyi address" ;
 			user.level = 7 ;
-			nret = UserSAO.SqlAction_INSERT_INTO_user( conn, user ) ;
+			nret = UserSAO.INSERT_INTO_user( conn, user ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_INSERT_INTO_user failed["+nret+"]" );
+				System.out.println( "\t" + "INSERT_INTO_user failed["+nret+"]" );
 				return -12;
 			} else {
-				System.out.println( "\t" + "SqlAction_INSERT_INTO_user ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "INSERT_INTO_user ok , rows["+nret+"] effected" );
 			}
 
 			user = new UserSAO() ;
@@ -181,23 +182,23 @@ public class SqlActionTest {
 			user.age = 3 ;
 			user.address = "Mark address" ;
 			user.level = 2 ;
-			nret = UserSAO.SqlAction_INSERT_INTO_user( conn, user ) ;
+			nret = UserSAO.INSERT_INTO_user( conn, user ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_INSERT_INTO_user failed["+nret+"]" );
+				System.out.println( "\t" + "INSERT_INTO_user failed["+nret+"]" );
 				return -13;
 			} else {
-				System.out.println( "\t" + "SqlAction_INSERT_INTO_user ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "INSERT_INTO_user ok , rows["+nret+"] effected" );
 			}
 
 			userList = new LinkedList<UserSAO>() ;
 			user = new UserSAO() ;
 			user.name = "Calvin" ;
-			nret = UserSAO.SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__( conn, userList, user ) ;
+			nret = UserSAO.SELECT_ALL_FROM_user_WHERE_name_E_( conn, userList, user ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ failed["+nret+"]" );
+				System.out.println( "\t" + "SELECT_ALL_FROM_user_WHERE_name_E_ failed["+nret+"]" );
 				return -14;
 			} else {
-				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ ok , count["+nret+"]" );
+				System.out.println( "\t" + "SELECT_ALL_FROM_user_WHERE_name_E_ ok , count["+nret+"]" );
 			}
 
 			if( userList.size() < 1 ) {
@@ -210,16 +211,17 @@ public class SqlActionTest {
 			userOrder.itemName = "我的商品" ;
 			userOrder.amount = 100 ;
 			userOrder.totalPrice = 1000.00 ;
-			nret = UserOrderSAO.SqlAction_INSERT_INTO_user_order( conn, userOrder ) ;
+			nret = UserOrderSAO.INSERT_INTO_user_order( conn, userOrder ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_INSERT_INTO_user_order failed["+nret+"]" );
+				System.out.println( "\t" + "INSERT_INTO_user_order failed["+nret+"]" );
 				return -21;
 			} else {
-				System.out.println( "\t" + "SqlAction_INSERT_INTO_user_order ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "INSERT_INTO_user_order ok , rows["+nret+"] effected" );
 			}
 
 			conn.commit();
 		} catch (Exception e) {
+			e.printStackTrace();
 			try {
 				conn.rollback();
 			} catch (Exception e2) {
@@ -244,20 +246,20 @@ public class SqlActionTest {
 		try {
 			userForSetInput = new UserSAO() ;
 			userForSetInput.level = 6 ;
-			nret = UserSAO.SqlAction_UPDATE_user_SET_level_E__( conn, userForSetInput ) ;
+			nret = UserSAO.UPDATE_user_SET_level_E_( conn, userForSetInput ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_level_E__ failed["+nret+"]" );
+				System.out.println( "\t" + "UPDATE_user_SET_level_E_ failed["+nret+"]" );
 				return -11;
 			} else {
-				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_level_E__ ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "UPDATE_user_SET_level_E_ ok , rows["+nret+"] effected" );
 			}
 
-			nret = UserSAO.SqlAction_UPDATE_user_SET_address_E__calvin_address__j_level_E_10_WHERE_name_E__Calvin_( conn, null, null ) ;
+			nret = UserSAO.UPDATE_user_SET_address_E_calvin_address_j_level_E_10_WHERE_name_E_Calvin_( conn, null, null ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_address_E__calvin_address__j_level_E_10_WHERE_name_E__Calvin_ failed["+nret+"]" );
+				System.out.println( "\t" + "UPDATE_user_SET_address_E_calvin_address_j_level_E_10_WHERE_name_E_Calvin_ failed["+nret+"]" );
 				return -12;
 			} else {
-				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_address_E__calvin_address__j_level_E_10_WHERE_name_E__Calvin_ ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "UPDATE_user_SET_address_E_calvin_address_j_level_E_10_WHERE_name_E_Calvin_ ok , rows["+nret+"] effected" );
 			}
 
 			userForSetInput = new UserSAO() ;
@@ -265,23 +267,23 @@ public class SqlActionTest {
 			userForWhereInput = new UserSAO() ;
 			userForWhereInput.age = 19 ;
 			userForWhereInput.gender = "F" ;
-			nret = UserSAO.SqlAction_UPDATE_user_SET_level_E___WHERE_age_GT___AND__gender_E__( conn, userForSetInput, userForWhereInput ) ;
+			nret = UserSAO.UPDATE_user_SET_level_E_WHERE_age_GT_AND_gender_E_( conn, userForSetInput, userForWhereInput ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_level_E___WHERE_age_GT___AND__gender_E__ failed["+nret+"]" );
+				System.out.println( "\t" + "UPDATE_user_SET_level_E_WHERE_age_GT_AND_gender_E_ failed["+nret+"]" );
 				return -21;
 			} else {
-				System.out.println( "\t" + "SqlAction_UPDATE_user_SET_level_E___WHERE_age_GT___AND__gender_E__ ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "UPDATE_user_SET_level_E_WHERE_age_GT_AND_gender_E_ ok , rows["+nret+"] effected" );
 			}
 
 			userList = new LinkedList<UserSAO>() ;
 			user = new UserSAO() ;
 			user.name = "Calvin" ;
-			nret = UserSAO.SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__( conn, userList, user ) ;
+			nret = UserSAO.SELECT_ALL_FROM_user_WHERE_name_E_( conn, userList, user ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ failed["+nret+"]" );
+				System.out.println( "\t" + "SELECT_ALL_FROM_user_WHERE_name_E_ failed["+nret+"]" );
 				return -22;
 			} else {
-				System.out.println( "\t" + "SqlAction_SELECT_ALL_FROM_user_WHERE_name_E__ ok , ["+nret+"]records" );
+				System.out.println( "\t" + "SELECT_ALL_FROM_user_WHERE_name_E_ ok , ["+nret+"]records" );
 			}
 
 			if( userList.size() < 1 ) {
@@ -293,16 +295,17 @@ public class SqlActionTest {
 			userOrderForSetInput.totalPrice = 10000.00 ;
 			userOrderForWhereInput = new UserOrderSAO() ;
 			userOrderForWhereInput.userId = userList.get(0).id ;
-			nret = UserOrderSAO.SqlAction_UPDATE_user_order_SET_total_price_E___WHERE_user_id_E__( conn, userOrderForSetInput, userOrderForWhereInput ) ;
+			nret = UserOrderSAO.UPDATE_user_order_SET_total_price_E_WHERE_user_id_E_( conn, userOrderForSetInput, userOrderForWhereInput ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_UPDATE_user_order_SET_total_price_E___WHERE_user_id_E__ failed["+nret+"]" );
+				System.out.println( "\t" + "UPDATE_user_order_SET_total_price_E_WHERE_user_id_E_ failed["+nret+"]" );
 				return -23;
 			} else {
-				System.out.println( "\t" + "SqlAction_UPDATE_user_order_SET_total_price_E___WHERE_user_id_E__ ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "UPDATE_user_order_SET_total_price_E_WHERE_user_id_E_ ok , rows["+nret+"] effected" );
 			}
 
 			conn.commit();
 		} catch (Exception e) {
+			e.printStackTrace();
 			try {
 				conn.rollback();
 			} catch (Exception e2) {
@@ -320,27 +323,28 @@ public class SqlActionTest {
 		int				nret = 0 ;
 
 		try {
-			nret = UserSAO.SqlAction_DELETE_FROM_user_WHERE_name_E__Calvin_( conn, null ) ;
+			nret = UserSAO.DELETE_FROM_user_WHERE_name_E_Calvin_( conn, null ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_WHERE_name_E__Calvin_ failed["+nret+"]" );
+				System.out.println( "\t" + "DELETE_FROM_user_WHERE_name_E_Calvin_ failed["+nret+"]" );
 				return -11;
 			} else {
-				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_WHERE_name_E__Calvin_ ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "DELETE_FROM_user_WHERE_name_E_Calvin_ ok , rows["+nret+"] effected" );
 			}
 
 			user = new UserSAO() ;
 			user.age = 3 ;
 			user.gender = "M" ;
-			nret = UserSAO.SqlAction_DELETE_FROM_user_WHERE_age_NE___AND__gender_NE__( conn, user ) ;
+			nret = UserSAO.DELETE_FROM_user_WHERE_age_NE_AND_gender_NE_( conn, user ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_WHERE_age_NE___AND__gender_NE__ failed["+nret+"]" );
+				System.out.println( "\t" + "DELETE_FROM_user_WHERE_age_NE_AND_gender_NE_ failed["+nret+"]" );
 				return -12;
 			} else {
-				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_WHERE_age_NE___AND__gender_NE__ ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "DELETE_FROM_user_WHERE_age_NE_AND_gender_NE_ ok , rows["+nret+"] effected" );
 			}
 
 			conn.commit();
 		} catch (Exception e) {
+			e.printStackTrace();
 			try {
 				conn.rollback();
 			} catch (Exception e2) {
@@ -357,24 +361,25 @@ public class SqlActionTest {
 		int						nret = 0 ;
 
 		try {
-			nret = UserSAO.SqlAction_DELETE_FROM_user( conn ) ;
+			nret = UserSAO.DELETE_FROM_user( conn ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_DELETE_FROM_user failed["+nret+"]" );
+				System.out.println( "\t" + "DELETE_FROM_user failed["+nret+"]" );
 				return -11;
 			} else {
-				System.out.println( "\t" + "SqlAction_DELETE_FROM_user ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "DELETE_FROM_user ok , rows["+nret+"] effected" );
 			}
 
-			nret = UserOrderSAO.SqlAction_DELETE_FROM_user_order( conn ) ;
+			nret = UserOrderSAO.DELETE_FROM_user_order( conn ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_order failed["+nret+"]" );
+				System.out.println( "\t" + "DELETE_FROM_user_order failed["+nret+"]" );
 				return -21;
 			} else {
-				System.out.println( "\t" + "SqlAction_DELETE_FROM_user_order ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "DELETE_FROM_user_order ok , rows["+nret+"] effected" );
 			}
 
 			conn.commit();
 		} catch (Exception e) {
+			e.printStackTrace();
 			try {
 				conn.rollback();
 			} catch (Exception e2) {

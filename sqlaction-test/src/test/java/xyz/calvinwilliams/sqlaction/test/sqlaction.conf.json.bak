@@ -25,9 +25,9 @@
 				"SELECT * FROM user_order WHERE user_id=?" ,
 				"SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id @@METHOD(queryUserAndOrderByName)" ,
 				"SELECT u.name,u.address,o.item_name,o.amount,o.total_price FROM user u,user_order o WHERE u.name=? AND u.id=o.user_id" ,
-				"INSERT INTO order" ,
-				"UPDATE order SET total_price=? WHERE user_id=?" ,
-				"DELETE FROM order"
+				"INSERT INTO user_order" ,
+				"UPDATE user_order SET total_price=? WHERE user_id=?" ,
+				"DELETE FROM user_order"
 			]
 		}
 	] ,

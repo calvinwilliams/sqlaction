@@ -85,13 +85,13 @@ public class SqlActionIndex {
 		return 0;
 	}
 
-	public static int travelAllIndexes( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionIndex> sqlactionIndexList, int depth, StringBuilder out ) throws Exception {
+	public static int travelAllIndexes( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionIndex> sqlactionIndexList, int depth ) throws Exception {
 		for( SqlActionIndex i : sqlactionIndexList ) {
 			for( int n = 0 ; n < depth ; n++ )
 				System.out.print( "\t" );
 			System.out.println( "indexName["+i.indexName+"] isUnique["+i.isUnique+"]" );
 
-			SqlActionColumn.travelAllColumns( dbserverConf, sqlactionConf, i.columnList, depth+1, out );
+			SqlActionColumn.travelAllColumns( dbserverConf, sqlactionConf, i.columnList, depth+1 );
 		}
 		
 		return 0;

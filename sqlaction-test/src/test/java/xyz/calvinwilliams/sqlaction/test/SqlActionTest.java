@@ -99,12 +99,12 @@ public class SqlActionTest {
 			userOrderListForSelectOutput = new LinkedList<UserOrderSAO>() ;
 			userForWhereInput = new UserSAO() ;
 			userForWhereInput.name = "Calvin" ;
-			nret = UserOrderSAO.selectUserAndOrderByName( conn, userListForSelectOutput, userOrderListForSelectOutput, userForWhereInput, null ) ;
+			nret = UserOrderSAO.queryUserAndOrderByName( conn, userListForSelectOutput, userOrderListForSelectOutput, userForWhereInput, null ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "selectUserAndOrderByName failed["+nret+"]" );
+				System.out.println( "\t" + "queryUserAndOrderByName failed["+nret+"]" );
 				return -21;
 			} else {
-				System.out.println( "\t" + "selectUserAndOrderByName ok , ["+userListForSelectOutput.size()+"]records" );
+				System.out.println( "\t" + "queryUserAndOrderByName ok , ["+userListForSelectOutput.size()+"]records" );
 			}
 
 			for( UserSAO u : userListForSelectOutput ) {

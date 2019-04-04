@@ -54,8 +54,8 @@ public class UserOrderSAO {
 		return userOrderListForSelectOutput.size();
 	}
 
-	// SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id @@METHOD(selectUserAndOrderByName)
-	public static int selectUserAndOrderByName( Connection conn, List<UserSAO> userListForSelectOutput, List<UserOrderSAO> userOrderListForSelectOutput, UserSAO userForWhereInput, UserOrderSAO userOrderForWhereInput ) throws Exception {
+	// SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id @@METHOD(queryUserAndOrderByName)
+	public static int queryUserAndOrderByName( Connection conn, List<UserSAO> userListForSelectOutput, List<UserOrderSAO> userOrderListForSelectOutput, UserSAO userForWhereInput, UserOrderSAO userOrderForWhereInput ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement("SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id") ;
 		prestmt.setString( 1, userForWhereInput.name );
 		ResultSet rs = prestmt.executeQuery() ;

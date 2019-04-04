@@ -20,14 +20,12 @@ public class SqlActionTable {
 	String					javaObjectName ;
 	String					javaFileName ;
 	
-	public static int getAllTablesInDatabase( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database ) throws Exception {
+	public static int getTableInDatabase( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, String tableName ) throws Exception {
 		PreparedStatement	prestmt = null ;
 		ResultSet			rs ;
 		SqlActionTable		table ;
 		String				tableType ;
 		int					nret = 0 ;
-		
-		database.tableList = new LinkedList<SqlActionTable>() ;
 		
 		if( dbserverConf.dbms.equals(SqlActionDatabase.SQLACTION_DBMS_MYSQL) ) {
 			prestmt = conn.prepareStatement("SELECT table_name,table_type FROM information_schema.TABLES WHERE table_schema=?") ;
@@ -38,6 +36,8 @@ public class SqlActionTable {
 			table = new SqlActionTable() ;
 			
 			table.tableName = rs.getString(1) ;
+			if( ! table.tableName.equalsIgnoreCase(tableName) )
+				continue;
 			tableType = rs.getString(2) ;
 			if( ! tableType.equals("BASE TABLE") )
 				continue;
@@ -74,6 +74,7 @@ public class SqlActionTable {
 		return 0;
 	}
 	
+	/*
 	public static int travelAllTables( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionTable> sqlactionTableList, int depth ) throws Exception {
 		StringBuilder		out = new StringBuilder() ;
 		
@@ -89,10 +90,28 @@ public class SqlActionTable {
 		
 		return 0;
 	}
+	*/
+	
+	public static int travelTable( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionDatabase database, String tableName, int depth ) throws Exception {
+		for( SqlActionTable t : database.tableList ) {
+			if( ! t.tableName.equalsIgnoreCase(tableName) )
+				continue;
+			
+			for( int n = 0 ; n < depth ; n++ )
+				System.out.print( "\t" );
+			System.out.println( "tableName["+t.tableName+"]" );
+			
+			SqlActionColumn.travelAllColumns( dbserverConf, sqlactionConf, t.columnList, depth+1 );
+			
+			SqlActionIndex.travelAllIndexes( dbserverConf, sqlactionConf, t.indexList, depth+1 );
+		}
+		
+		return 0;
+	}
 	
 	public static SqlActionTable findTable( List<SqlActionTable> sqlactionTableList, String tableName ) throws Exception {
 		for( SqlActionTable t : sqlactionTableList ) {
-			if( t.tableName.equals(tableName) )
+			if( t.tableName.equalsIgnoreCase(tableName) )
 				return t;
 		}
 		

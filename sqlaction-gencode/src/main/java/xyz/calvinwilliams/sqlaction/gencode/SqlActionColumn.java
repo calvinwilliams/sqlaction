@@ -187,7 +187,7 @@ public class SqlActionColumn {
 	
 	public static SqlActionColumn findColumn( List<SqlActionColumn> sqlactionColumnList, String columnName ) {
 		for( SqlActionColumn c : sqlactionColumnList ) {
-			if( c.columnName.equals(columnName) )
+			if( c.columnName.equalsIgnoreCase(columnName) )
 				return c; 
 		}
 		
@@ -226,7 +226,7 @@ public class SqlActionColumn {
 		return javaPropertyNameBuilder.toString() ;
 	}
 	
-	public static int travelAllColumns( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionColumn> sqlactionColumnList, int depth, StringBuilder out ) throws Exception {
+	public static int travelAllColumns( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionColumn> sqlactionColumnList, int depth ) throws Exception {
 		for( SqlActionColumn c : sqlactionColumnList ) {
 			for( int n = 0 ; n < depth ; n++ )
 				System.out.print( "\t" );

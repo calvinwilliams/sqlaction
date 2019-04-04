@@ -11,6 +11,7 @@ package xyz.calvinwilliams.sqlaction.gencode;
 import java.io.*;
 import java.nio.file.*;
 import java.sql.*;
+import java.util.LinkedList;
 
 public class SqlActionGencode {
 
@@ -120,29 +121,31 @@ public class SqlActionGencode {
 			
 			database = new SqlActionDatabase() ;
 			database.databaseName = sqlactionConf.database ;
-			
-			nret = SqlActionTable.getAllTablesInDatabase( dbserverConf, sqlactionConf, conn, database ) ;
-			if( nret != 0 ) {
-				System.out.println( "*** ERROR : SqlActionTable.GetAllTablesInDatabase failed["+nret+"]" );
-				conn.close();
-				return;
-			} else {
-				System.out.println( "SqlActionTable.GetAllTablesInDatabase ok" );
-			}
-			
-			conn.close();
-			
-			// Show all databases and tables and columns and indexes
-			nret = SqlActionTable.travelAllTables( dbserverConf, sqlactionConf, database.tableList, 1 ) ;
-			if( nret != 0 ) {
-				System.out.println( "*** ERROR : SqlActionTable.TravelAllTables failed["+nret+"]" );
-				return;
-			} else {
-				System.out.println( "SqlActionTable.TravelAllTables ok" );
-			}
+			database.tableList = new LinkedList<SqlActionTable>() ;
 			
 			// Generate class code
 			for( SqlActionTableConf tc : sqlactionConf.tables ) {
+				// Get the table in the database
+				System.out.println( "SqlActionTable.getTableInDatabase["+tc.table+"] ..." );
+				nret = SqlActionTable.getTableInDatabase( dbserverConf, sqlactionConf, conn, database, tc.table ) ;
+				if( nret != 0 ) {
+					System.out.println( "*** ERROR : SqlActionTable.getTableInDatabase["+tc.table+"] failed["+nret+"]" );
+					conn.close();
+					return;
+				} else {
+					System.out.println( "SqlActionTable.getTableInDatabase["+tc.table+"] ok" );
+				}
+				
+				// Show all databases and tables and columns and indexes
+				nret = SqlActionTable.travelTable( dbserverConf, sqlactionConf, database, tc.table, 1 ) ;
+				if( nret != 0 ) {
+					System.out.println( "*** ERROR : SqlActionTable.travelTable["+tc.table+"] failed["+nret+"]" );
+					return;
+				} else {
+					System.out.println( "SqlActionTable.travelTable["+tc.table+"] ok" );
+				}
+				
+				// query table
 				SqlActionTable table = SqlActionTable.findTable( database.tableList, tc.table ) ;
 				if( table == null ) {
 					System.out.println( "\t" + "*** ERROR : table["+tc.table+"] not found in database["+sqlactionConf.database+"]" );
@@ -214,12 +217,14 @@ public class SqlActionGencode {
 									return;
 								}
 							}
-
+							
+							/*
 							ct.table = SqlActionTable.findTable( database.tableList, ct.tableName ) ;
 							if( ct.table == null ) {
 								System.out.println( "\t" + "table["+ct.tableName+"] not found in database["+sqlactionConf.database+"] at SELECT" );
 								return;
 							}
+							*/
 						}
 					}
 					
@@ -234,12 +239,14 @@ public class SqlActionGencode {
 									return;
 								}
 							}
-
+							
+							/*
 							ct.table = SqlActionTable.findTable( database.tableList, ct.tableName ) ;
 							if( ct.table == null ) {
 								System.out.println( "\t" + "otherTable["+ct.tableName+"] not found in database["+sqlactionConf.database+"] at WHERE" );
 								return;
 							}
+							*/
 						}
 						
 						if( ct.tableAliasName2 != null ) {
@@ -252,12 +259,14 @@ public class SqlActionGencode {
 									return;
 								}
 							}
-
+							
+							/*
 							ct.table2 = SqlActionTable.findTable( database.tableList, ct.tableName2 ) ;
 							if( ct.table2 == null ) {
 								System.out.println( "\t" + "table2["+ct.tableName2+"] not found in database["+sqlactionConf.database+"] at WHERE" );
 								return;
 							}
+							*/
 						}
 					}
 					
@@ -294,6 +303,31 @@ public class SqlActionGencode {
 					
 					// Postpro parser II
 					System.out.println( "Postpro parser II ["+sqlaction+"]" );
+					
+					for( SqlActionFromTableToken ct : parser.fromTableTokenList ) {
+						// Get the table in the database
+						System.out.println( "SqlActionTable.getTableInDatabase["+ct.tableName+"] ..." );
+						nret = SqlActionTable.getTableInDatabase( dbserverConf, sqlactionConf, conn, database, ct.tableName ) ;
+						if( nret != 0 ) {
+							System.out.println( "*** ERROR : SqlActionTable.getTableInDatabase["+ct.tableName+"] failed["+nret+"]" );
+							conn.close();
+							return;
+						} else {
+							System.out.println( "SqlActionTable.getTableInDatabase["+ct.tableName+"] ok" );
+						}
+						
+						// Show all databases and tables and columns and indexes
+						nret = SqlActionTable.travelTable( dbserverConf, sqlactionConf, database, ct.tableName, 1 ) ;
+						if( nret != 0 ) {
+							System.out.println( "*** ERROR : SqlActionTable.travelTable["+ct.tableName+"] failed["+nret+"]" );
+							return;
+						} else {
+							System.out.println( "SqlActionTable.travelTable["+ct.tableName+"] ok" );
+						}
+					}
+					
+					// Postpro parser III
+					System.out.println( "Postpro parser III ["+sqlaction+"]" );
 					
 					for( SqlActionSelectColumnToken ct : parser.selectColumnTokenList ) {
 						if( ct.table == null ) {
@@ -488,6 +522,12 @@ public class SqlActionGencode {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

@@ -18,6 +18,7 @@ public class SqlActionDatabase {
 	String						databaseName ;
 	List<SqlActionTable>		tableList ;
 	
+	/*
 	public static int getAllDatabases( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, List<SqlActionDatabase> sqlactionDatabaseList ) throws Exception {
 		Statement			stmt = null ;
 		ResultSet			rs = null ;
@@ -64,5 +65,6 @@ public class SqlActionDatabase {
 		
 		return 0;
 	}
+	*/
 	
 }

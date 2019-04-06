@@ -56,9 +56,9 @@ public class SqlactionDemoSAO {
 		return prestmt.executeUpdate() ;
 	}
 
-	// UPDATE sqlaction_demo SET address=? WHERE name=? 
-	public static int updateAddressByName( Connection conn, String _1_address_ForSetInput, String _1_name_ForWhereInput ) throws Exception {
-		PreparedStatement prestmt = conn.prepareStatement("UPDATE sqlaction_demo SET address=? WHERE name=? ") ;
+	// UPDATE sqlaction_demo SET address=? WHERE name=?
+	public static int UPDATE_sqlaction_demo_SET_address_E_WHERE_name_E_( Connection conn, String _1_address_ForSetInput, String _1_name_ForWhereInput ) throws Exception {
+		PreparedStatement prestmt = conn.prepareStatement("UPDATE sqlaction_demo SET address=? WHERE name=?") ;
 		prestmt.setString( 1, _1_address_ForSetInput );
 		prestmt.setString( 2, _1_name_ForWhereInput );
 		return prestmt.executeUpdate() ;

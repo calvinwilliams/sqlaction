@@ -15,7 +15,7 @@ import java.util.LinkedList;
 
 public class SqlActionGencode {
 
-	final private static String				SQLACTION_VERSION = "0.0.8.0" ;
+	final private static String				SQLACTION_VERSION = "0.1.0.0" ;
 	
 	final public static String				SELECT_COUNT___ = "count(" ;
 	final private static String				COUNT___ = "_count_" ;

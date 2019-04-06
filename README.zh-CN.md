@@ -13,7 +13,8 @@ sqlaction - JDBC代码自动生成工具
 - [3. 配置文件`dbserver.conf.json`](#3-配置文件dbserverconfjson)
 - [4. 配置文件`sqlaction.conf.json`](#4-配置文件sqlactionconfjson)
 - [5. 性能压测](#5-性能压测)
-- [6. 关于作者](#6-关于作者)
+- [6. 后续开发](#6-后续开发)
+- [7. 关于作者](#7-关于作者)
 
 <!-- /TOC -->
 
@@ -62,7 +63,7 @@ CREATE TABLE `sqlaction_demo` (
 }
 ```
 
-在包目录或上级某一级目录中创建SQL配置文件`sqlaction.conf.json`
+在包目录或上级某一级目录中创建SQL动作配置文件`sqlaction.conf.json`
 
 ```
 {
@@ -115,23 +116,7 @@ driver[com.mysql.jdbc.Driver]
                 sqlaction[INSERT INTO sqlaction_demo]
                 sqlaction[UPDATE sqlaction_demo SET address=? WHERE name=? @@METHOD(updateAddressByName)]
                 sqlaction[DELETE FROM sqlaction_demo WHERE name=?]
-Loading class `com.mysql.jdbc.Driver'. This is deprecated. The new driver class is `com.mysql.cj.jdbc.Driver'. The driver is automatically registered via the SPI and manual loading of the driver class is generally unnecessary
-.
 SqlActionTable.getTableInDatabase[sqlaction_demo] ...
-SqlActionTable.getTableInDatabase[sqlaction_demo] ok
-        tableName[sqlaction_demo]
-                columnName[id] columnDefault[null] isNullable[false] DataType[SQLACTION_DATA_TYPE_INTEGER] columnLength[0] numericPrecision[10] numericScale[0] isPrimaryKey[true] isAutoIncrement[true] columnComment[编编号号]
-                columnName[name] columnDefault[null] isNullable[false] DataType[SQLACTION_DATA_TYPE_VARCHAR] columnLength[32] numericPrecision[0] numericScale[0] isPrimaryKey[false] isAutoIncrement[false] columnComment[名名字字]
-                columnName[address] columnDefault[null] isNullable[true] DataType[SQLACTION_DATA_TYPE_VARCHAR] columnLength[128] numericPrecision[0] numericScale[0] isPrimaryKey[false] isAutoIncrement[false] columnComment[地地
-址址]
-                indexName[PRIMARY] isUnique[true]
-                        columnName[id] columnDefault[null] isNullable[false] DataType[SQLACTION_DATA_TYPE_INTEGER] columnLength[0] numericPrecision[10] numericScale[0] isPrimaryKey[true] isAutoIncrement[true] columnComment[编编
-号号]
-                indexName[sqlaction_demo] isUnique[false]
-                        columnName[name] columnDefault[null] isNullable[false] DataType[SQLACTION_DATA_TYPE_VARCHAR] columnLength[32] numericPrecision[0] numericScale[0] isPrimaryKey[false] isAutoIncrement[false] columnCommen
-t[名名字字]
-SqlActionTable.travelTable[sqlaction_demo] ok
-*** NOTICE : Prepare SqlactionDemoSAO.java output buffer ...
 ...
 ...
 ...
@@ -333,7 +318,9 @@ SqlactionDemoSAO.SELECT_ALL_FROM_sqlaction_demo ok
 
 对表的增删改查只需调用前面自动生成的数据库表实体类中的方法即可，而且底层执行代码可随时查看，没有什么秘密，没有什么高深的技术。
 
-工具`sqlaction`只在开发阶段使用，与运行阶段无关，说到底只是在应用与JDBC之间自动生成了薄薄的一层代码而已，把大量手工冗余工作都自动做掉了，让开发者节省大量时间而关注业务，减少大量机械操作减轻心智负担。简单朴素，无需MyBatis或Hibernate那么复杂、炫耀技术之嫌。
+工具`sqlaction`只在开发阶段使用，与运行阶段无关，说到底只是在应用与JDBC之间自动生成了薄薄的一层代码而已，把大量手工冗余工作都自动做掉了，让开发者节省大量时间而去关注业务，减少大量机械操作减轻心智负担，提高生产力，早点做完工作回家抱女盆友/老婆 :)
+
+`sqlaction`简单朴素，无需MyBatis或Hibernate那么复杂、炫耀技术之嫌。简洁就是优秀工具的特质，而不是用一种复杂性解决另一种复杂性。
 
 # 3. 配置文件`dbserver.conf.json`
 
@@ -348,6 +335,50 @@ SqlactionDemoSAO.SELECT_ALL_FROM_sqlaction_demo ok
 	]
 }
 ```
+
+数据库连接配置文件`dbserver.conf.json`配置了工具`sqlaction`执行所需数据库层面上的信息：
+
+`deiver` : DBMS驱动类。
+
+`url` : DBMS连接配置串。
+
+`user` : DBMS连接用户名。
+
+`pwd` : DBMS连接密码。
+
+`userDefineDataTypes` : 自定义字段类型转换，比如数据库中的类型`DECIMAL(12,2)`映射到JAVA变量类型是`BigDecimal`，但在某应用系统中希望是`double`，可以在这个配置集中在正式转换前把`DECIMAL(12,2)`强制转换成`DOUBLE`，那么正式转换时`DOUBLE`会映射成JAVA变量类型`double`。
+
+| MySQL字段类型 | sqlaction的JAVA变量类型 |
+|---|---|
+| bit | boolean |
+| tinyint | byte |
+| smallint | short |
+| mediumint | int |
+| int | int |
+| bigint | long |
+| real | float |
+| float | double |
+| double | double |
+| decimal | BigDecimal |
+| numeric | BigDecimal |
+| char | String |
+| varchar | String |
+| date | java.sql.Date |
+| time | java.sql.Time |
+| datetime | java.sql.Date |
+| timestamp | timestamp |
+| year | java.sql.Date |
+| binary | byte[] |
+| varbinary | byte[] |
+| blob | byte[] |
+| tinyblob | byte[] |
+| mediumblob | byte[] |
+| longblob | byte[] |
+| (other) | String |
+
+注意：数据库连接配置文件`dbserver.conf.json`一般放在项目根目录里，以便于所有子项目都能使用到。
+
+注意：读取JSON配置文件使用到了我的另一个开源项目：okjson，一个简洁易用的JSON解析器/生成器，只有一个类文件，可以很方便的融合到其它项目中。
 
 # 4. 配置文件`sqlaction.conf.json`
 
@@ -389,7 +420,27 @@ SqlactionDemoSAO.SELECT_ALL_FROM_sqlaction_demo ok
 }
 ```
 
+SQL动作配置文件`sqlaction.conf.json`配置了工具`sqlaction`执行所需表层面上的信息：
+
+`database` : 数据库名。
+
+`tables` : 表列表。
+
+`table` : 表名。
+
+`sqlactions` : SQL语句列表。
+
+`javaPackage` : JAVA包名，自动生成JAVA类文件时放在最上面。
+
+
 
 # 5. 性能压测
 
-# 6. 关于作者
+# 6. 后续开发
+
+TODO
+
+1. 目前`sqlaction`支持基本SQL操作（包含SQL），后续还要新增支持函数和子查询，以适应更复杂的SQL。
+2. 目前只支持MySQL数据库，后续将新增支持PostgreSQL和Oracle。
+
+# 7. 关于作者

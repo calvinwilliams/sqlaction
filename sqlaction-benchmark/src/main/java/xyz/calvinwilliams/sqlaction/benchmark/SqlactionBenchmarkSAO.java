@@ -13,16 +13,16 @@ import java.sql.ResultSet;
 
 public class SqlactionBenchmarkSAO {
 
-	int				id ;
-	String			name ;
-	String			nameCn ;
-	BigDecimal		salary ;
-	java.sql.Date	birthday ;
+	int				id ; // 编号
+	String			name ; // 英文名
+	String			nameCn ; // 中文名
+	BigDecimal		salary ; // 薪水
+	java.sql.Date	birthday ; // 生日
 
-	int				count___ ; // defining for 'SELECT COUNT(*)'
+	int				_count_ ; // defining for 'SELECT COUNT(*)'
 
-	// INSERT INTO sqlaction_benchmark
-	public static int SqlAction_INSERT_INTO_sqlaction_benchmark( Connection conn, SqlactionBenchmarkSAO sqlactionBenchmark ) throws Exception {
+	// INSERT INTO sqlaction_benchmark (name,name_cn,salary,birthday) VALUES (?,?,?,?)
+	public static int INSERT_INTO_sqlaction_benchmark( Connection conn, SqlactionBenchmarkSAO sqlactionBenchmark ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement("INSERT INTO sqlaction_benchmark (name,name_cn,salary,birthday) VALUES (?,?,?,?)") ;
 		prestmt.setString( 1, sqlactionBenchmark.name );
 		prestmt.setString( 2, sqlactionBenchmark.nameCn );
@@ -32,17 +32,17 @@ public class SqlactionBenchmarkSAO {
 	}
 
 	// UPDATE sqlaction_benchmark SET salary=? WHERE name=?
-	public static int SqlAction_UPDATE_sqlaction_benchmark_SET_salary_E___WHERE_name_E__( Connection conn, SqlactionBenchmarkSAO sqlactionBenchmarkForSetInput, SqlactionBenchmarkSAO sqlactionBenchmarkForWhereInput ) throws Exception {
+	public static int UPDATE_sqlaction_benchmark_SET_salary_E_WHERE_name_E_( Connection conn, BigDecimal _1_salary_ForSetInput, String _1_name_ForWhereInput ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement("UPDATE sqlaction_benchmark SET salary=? WHERE name=?") ;
-		prestmt.setBigDecimal( 1, sqlactionBenchmarkForSetInput.salary );
-		prestmt.setString( 2, sqlactionBenchmarkForWhereInput.name );
+		prestmt.setBigDecimal( 1, _1_salary_ForSetInput );
+		prestmt.setString( 2, _1_name_ForWhereInput );
 		return prestmt.executeUpdate() ;
 	}
 
 	// SELECT * FROM sqlaction_benchmark WHERE name=?
-	public static int SqlAction_SELECT_ALL_FROM_sqlaction_benchmark_WHERE_name_E__( Connection conn, List<SqlactionBenchmarkSAO> sqlactionBenchmarkListForSelectOutput, SqlactionBenchmarkSAO sqlactionBenchmarkForWhereInput ) throws Exception {
+	public static int SELECT_ALL_FROM_sqlaction_benchmark_WHERE_name_E_( Connection conn, List<SqlactionBenchmarkSAO> sqlactionBenchmarkListForSelectOutput, String _1_name ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement("SELECT * FROM sqlaction_benchmark WHERE name=?") ;
-		prestmt.setString( 1, sqlactionBenchmarkForWhereInput.name );
+		prestmt.setString( 1, _1_name );
 		ResultSet rs = prestmt.executeQuery() ;
 		while( rs.next() ) {
 			SqlactionBenchmarkSAO sqlactionBenchmark = new SqlactionBenchmarkSAO() ;
@@ -57,7 +57,7 @@ public class SqlactionBenchmarkSAO {
 	}
 
 	// SELECT * FROM sqlaction_benchmark
-	public static int SqlAction_SELECT_ALL_FROM_sqlaction_benchmark( Connection conn, List<SqlactionBenchmarkSAO> sqlactionBenchmarkListForSelectOutput, SqlactionBenchmarkSAO sqlactionBenchmarkForWhereInput ) throws Exception {
+	public static int SELECT_ALL_FROM_sqlaction_benchmark( Connection conn, List<SqlactionBenchmarkSAO> sqlactionBenchmarkListForSelectOutput ) throws Exception {
 		Statement stmt = conn.createStatement() ;
 		ResultSet rs = stmt.executeQuery("SELECT * FROM sqlaction_benchmark") ;
 		while( rs.next() ) {
@@ -73,14 +73,14 @@ public class SqlactionBenchmarkSAO {
 	}
 
 	// DELETE FROM sqlaction_benchmark WHERE name=?
-	public static int SqlAction_DELETE_FROM_sqlaction_benchmark_WHERE_name_E__( Connection conn, SqlactionBenchmarkSAO sqlactionBenchmarkForWhereInput ) throws Exception {
+	public static int DELETE_FROM_sqlaction_benchmark_WHERE_name_E_( Connection conn, String _1_name ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement("DELETE FROM sqlaction_benchmark WHERE name=?") ;
-		prestmt.setString( 1, sqlactionBenchmarkForWhereInput.name );
+		prestmt.setString( 1, _1_name );
 		return prestmt.executeUpdate() ;
 	}
 
 	// DELETE FROM sqlaction_benchmark
-	public static int SqlAction_DELETE_FROM_sqlaction_benchmark( Connection conn ) throws Exception {
+	public static int DELETE_FROM_sqlaction_benchmark( Connection conn ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement("DELETE FROM sqlaction_benchmark") ;
 		return prestmt.executeUpdate() ;
 	}

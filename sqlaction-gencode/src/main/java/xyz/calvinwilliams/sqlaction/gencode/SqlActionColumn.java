@@ -23,6 +23,8 @@ public class SqlActionColumn {
 	boolean					isAutoIncrement ;
 	String					columnComment ;
 	
+	String					javaPropertyType ;
+	int						javaDefineTabsBetweenTypeAndName ;
 	String					javaPropertyName ;
 	
 	public static String getUserDefineDataType( DbServerConf dbserverConf, String sourceDataTypeAndLength ) {
@@ -37,7 +39,7 @@ public class SqlActionColumn {
 		return null;
 	}
 	
-	public static int getColumnFromResultSet( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionDatabase database, SqlActionTable table, SqlActionColumn column, ResultSet rs ) throws Exception {
+	public static int getColumnMetadataFromResultSet( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionDatabase database, SqlActionTable table, SqlActionColumn column, ResultSet rs ) throws Exception {
 		String		sourceDataType ;
 		String		sourceDataTypeAndLength ;
 		String		userDefineDataTypeAndLength ;
@@ -67,78 +69,128 @@ public class SqlActionColumn {
 		switch( sourceDataType ) {
 			case "bit" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_BIT ;
+				column.javaPropertyType = "boolean" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
 				break;
 			case "tinyint" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_TINYINT ;
+				column.javaPropertyType = "byte" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
 				break;
 			case "smallint" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_SMALLINT ;
+				column.javaPropertyType = "short" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
 				break;
 			case "mediumint" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_MEDIUMINT ;
+				column.javaPropertyType = "int" ;
+				column.javaDefineTabsBetweenTypeAndName = 4 ;
 				break;
 			case "int" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_INTEGER ;
+				column.javaPropertyType = "int" ;
+				column.javaDefineTabsBetweenTypeAndName = 4 ;
 				break;
 			case "bigint" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_BIGINT ;
+				column.javaPropertyType = "long" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
 				break;
 			case "real" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_REAL ;
+				column.javaPropertyType = "float" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
 				break;
 			case "float" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_FLOAT ;
+				column.javaPropertyType = "double" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
 				break;
 			case "double" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_DOUBLE ;
+				column.javaPropertyType = "double" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
 				break;
 			case "decimal" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_DECIMAL ;
+				column.javaPropertyType = "BigDecimal" ;
+				column.javaDefineTabsBetweenTypeAndName = 2 ;
 				break;
 			case "numeric" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_NUMBERIC ;
+				column.javaPropertyType = "BigDecimal" ;
+				column.javaDefineTabsBetweenTypeAndName = 2 ;
 				break;
 			case "char" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_CHAR ;
+				column.javaPropertyType = "String" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
 				break;
 			case "varchar" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_VARCHAR ;
+				column.javaPropertyType = "String" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
 				break;
 			case "date" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_DATE ;
+				column.javaPropertyType = "java.sql.Date" ;
+				column.javaDefineTabsBetweenTypeAndName = 1 ;
 				break;
 			case "time" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_TIME ;
+				column.javaPropertyType = "java.sql.Time" ;
+				column.javaDefineTabsBetweenTypeAndName = 1 ;
 				break;
 			case "datetime" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_DATETIME ;
+				column.javaPropertyType = "java.sql.Date" ;
+				column.javaDefineTabsBetweenTypeAndName = 1 ;
 				break;
 			case "timestamp" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_TIMESTAMP ;
+				column.javaPropertyType = "Timestamp" ;
+				column.javaDefineTabsBetweenTypeAndName = 2 ;
 				break;
 			case "year" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_YEAR ;
+				column.javaPropertyType = "java.sql.Date" ;
+				column.javaDefineTabsBetweenTypeAndName = 1 ;
 				break;
 			case "binary" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_BINARY ;
+				column.javaPropertyType = "byte[]" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
 				break;
 			case "varbinary" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_VARBINARY ;
+				column.javaPropertyType = "byte[]" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
 				break;
 			case "blob" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_BLOB ;
+				column.javaPropertyType = "byte[]" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
 				break;
 			case "tinyblob" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_TINYBLOB ;
+				column.javaPropertyType = "byte[]" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
 				break;
 			case "mediumblob" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_MEDIUMBLOB ;
+				column.javaPropertyType = "byte[]" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
 				break;
 			case "longblob" :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_LONGBLOB ;
+				column.javaPropertyType = "byte[]" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
 				break;
 			default :
 				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_VARCHAR ;
+				column.javaPropertyType = "String" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
 				break;
 		}
 		if( rs.getString(8).equals("PRI") )
@@ -154,7 +206,7 @@ public class SqlActionColumn {
 		return 0;
 	}
 	
-	public static int getAllColumnsInTable( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception  {
+	public static int fetchAllColumnsMetadataInTable( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception  {
 		PreparedStatement	prestmt = null ;
 		ResultSet			rs ;
 		SqlActionColumn		column ;
@@ -171,7 +223,7 @@ public class SqlActionColumn {
 		while( rs.next() ) {
 			column = new SqlActionColumn() ;
 			
-			nret = getColumnFromResultSet( dbserverConf, sqlactionConf, database, table, column, rs );
+			nret = getColumnMetadataFromResultSet( dbserverConf, sqlactionConf, database, table, column, rs );
 			if( nret != 0 ) {
 				System.out.println( "GetColumnFromResultSet failed["+nret+"] , database["+database.databaseName+"] table["+table.tableName+"] column["+column.columnName+"]" );
 				return nret;
@@ -206,7 +258,7 @@ public class SqlActionColumn {
 		return javaPropertyNameBuilder.toString() ;
 	}
 	
-	public static int travelAllColumns( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionColumn> sqlactionColumnList, int depth ) throws Exception {
+	public static int travelAllColumnsMetadata( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionColumn> sqlactionColumnList, int depth ) {
 		for( SqlActionColumn c : sqlactionColumnList ) {
 			for( int n = 0 ; n < depth ; n++ )
 				System.out.print( "\t" );
@@ -218,6 +270,7 @@ public class SqlActionColumn {
 	
 	public static int dumpDefineProperty( SqlActionColumn c, StringBuilder out ) {
 	
+		/*
 		switch( c.dataType ) {
 			case SQLACTION_DATA_TYPE_BIT :
 				out.append("\t").append("boolean			").append(c.javaPropertyName).append(" ;");
@@ -295,6 +348,8 @@ public class SqlActionColumn {
 				out.append("\t").append("String			").append(c.javaPropertyName).append(" ;");
 				break;
 		}
+		*/
+		out.append("\t").append(c.javaPropertyType).append(SqlActionUtil._8tabsArray,0,c.javaDefineTabsBetweenTypeAndName).append(c.javaPropertyName).append(" ;");
 		
 		if( c.columnComment != null && ! c.columnComment.isEmpty() ) {
 			out.append(" // ").append(c.columnComment).append("\n");

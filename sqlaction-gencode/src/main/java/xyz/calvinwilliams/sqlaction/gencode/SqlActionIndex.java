@@ -16,7 +16,7 @@ public class SqlActionIndex {
 	boolean					isUnique ;
 	List<SqlActionColumn>	columnList ;
 
-	public static int getAllIndexesInTable( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception  {
+	public static int fetchAllIndexesMetadataInTable( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception  {
 		PreparedStatement	prestmt = null ;
 		ResultSet			rs ;
 		SqlActionIndex		index ;
@@ -72,7 +72,7 @@ public class SqlActionIndex {
 				}
 				rs = prestmt.executeQuery() ;
 				while( rs.next() ) {
-					nret = SqlActionColumn.getColumnFromResultSet( dbserverConf, sqlactionConf, database, table, c, rs );
+					nret = SqlActionColumn.getColumnMetadataFromResultSet( dbserverConf, sqlactionConf, database, table, c, rs );
 					if( nret != 0 ) {
 						System.out.println( "GetColumnFromResultSet failed["+nret+"] , database["+database.databaseName+"] table["+table.tableName+"] column["+c.columnName+"]" );
 						return nret;
@@ -85,13 +85,13 @@ public class SqlActionIndex {
 		return 0;
 	}
 
-	public static int travelAllIndexes( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionIndex> sqlactionIndexList, int depth ) throws Exception {
+	public static int travelAllIndexesMetadata( DbServerConf dbserverConf, SqlActionConf sqlactionConf, List<SqlActionIndex> sqlactionIndexList, int depth ) {
 		for( SqlActionIndex i : sqlactionIndexList ) {
 			for( int n = 0 ; n < depth ; n++ )
 				System.out.print( "\t" );
 			System.out.println( "indexName["+i.indexName+"] isUnique["+i.isUnique+"]" );
 
-			SqlActionColumn.travelAllColumns( dbserverConf, sqlactionConf, i.columnList, depth+1 );
+			SqlActionColumn.travelAllColumnsMetadata( dbserverConf, sqlactionConf, i.columnList, depth+1 );
 		}
 		
 		return 0;

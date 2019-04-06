@@ -20,61 +20,64 @@ public class SqlActionTable {
 	String					javaObjectName ;
 	String					javaFileName ;
 	
-	public static int getTableInDatabase( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, String tableName ) throws Exception {
+	public static SqlActionTable fetchTableMetadataInDatabase( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable tableCache, String tableName ) throws Exception {
+		SqlActionTable		table ;
 		PreparedStatement	prestmt = null ;
 		ResultSet			rs ;
-		SqlActionTable		table ;
 		String				tableType ;
 		int					nret = 0 ;
 		
+		if( tableCache != null ) {
+			if( tableName.equalsIgnoreCase(tableCache.tableName) )
+				return tableCache;
+		}
+		
+		table = findTable( database.tableList, tableName ) ;
+		if( table != null )
+			return table;
+		
 		if( dbserverConf.dbms.equals(SqlActionDatabase.SQLACTION_DBMS_MYSQL) ) {
-			prestmt = conn.prepareStatement("SELECT table_name,table_type FROM information_schema.TABLES WHERE table_schema=?") ;
+			prestmt = conn.prepareStatement("SELECT table_name,table_type FROM information_schema.TABLES WHERE table_schema=? AND table_name=?") ;
 			prestmt.setString( 1, database.databaseName );
+			prestmt.setString( 2, tableName );
 		}
 		rs = prestmt.executeQuery() ;
-		while( rs.next() ) {
-			table = new SqlActionTable() ;
-			
-			table.tableName = rs.getString(1) ;
-			if( ! table.tableName.equalsIgnoreCase(tableName) )
-				continue;
-			tableType = rs.getString(2) ;
-			if( ! tableType.equals("BASE TABLE") )
-				continue;
-			
-			database.tableList.add( table );
-		}
+		rs.next();
+		
+		table = new SqlActionTable() ;
+		table.tableName = rs.getString(1) ;
+		tableType = rs.getString(2) ;
+		if( ! tableType.equals("BASE TABLE") )
+			return null;
+		database.tableList.add( table );
+		
 		rs.close();
 		
-		for( SqlActionTable t : database.tableList ) {
-			nret = SqlActionColumn.getAllColumnsInTable( dbserverConf, sqlactionConf, conn, database, t ) ;
-			if( nret != 0 ) {
-				System.out.println( "GetAllColumnsInTable failed["+nret+"] , database["+database.databaseName+"] table["+t.tableName+"]" );
-				return nret;
-			}
-			
-			nret = SqlActionIndex.getAllIndexesInTable( dbserverConf, sqlactionConf, conn, database, t ) ;
-			if( nret != 0 ) {
-				System.out.println( "GetAllIndexesInTable failed["+nret+"] , database["+database.databaseName+"] table["+t.tableName+"]" );
-				return nret;
-			}
+		nret = SqlActionColumn.fetchAllColumnsMetadataInTable( dbserverConf, sqlactionConf, conn, database, table ) ;
+		if( nret != 0 ) {
+			System.out.println( "GetAllColumnsInTable failed["+nret+"] , database["+database.databaseName+"] table["+table.tableName+"]" );
+			return null;
 		}
 		
-		for( SqlActionTable t : database.tableList ) {
-			String[] sa = t.tableName.split( "_" ) ;
-			StringBuilder sb = new StringBuilder() ;
-			for( String s : sa ) {
-				sb.append( s.substring(0,1).toUpperCase(Locale.getDefault()) + s.substring(1) );
-			}
-			t.javaClassName = sb.toString() + "SAO" ;
-			t.javaObjectName = sb.toString().substring(0,1).toLowerCase(Locale.getDefault()) + sb.toString().substring(1) ;
-			t.javaFileName = t.javaClassName + ".java" ;
+		nret = SqlActionIndex.fetchAllIndexesMetadataInTable( dbserverConf, sqlactionConf, conn, database, table ) ;
+		if( nret != 0 ) {
+			System.out.println( "GetAllIndexesInTable failed["+nret+"] , database["+database.databaseName+"] table["+table.tableName+"]" );
+			return null;
 		}
 		
-		return 0;
+		String[] sa = table.tableName.split( "_" ) ;
+		StringBuilder sb = new StringBuilder() ;
+		for( String s : sa ) {
+			sb.append( s.substring(0,1).toUpperCase(Locale.getDefault()) + s.substring(1) );
+		}
+		table.javaClassName = sb.toString() + "SAO" ;
+		table.javaObjectName = sb.toString().substring(0,1).toLowerCase(Locale.getDefault()) + sb.toString().substring(1) ;
+		table.javaFileName = table.javaClassName + ".java" ;
+		
+		return table;
 	}
 	
-	public static int travelTable( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionDatabase database, String tableName, int depth ) throws Exception {
+	public static int travelTable( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionDatabase database, String tableName, int depth ) {
 		for( SqlActionTable t : database.tableList ) {
 			if( ! t.tableName.equalsIgnoreCase(tableName) )
 				continue;
@@ -83,15 +86,15 @@ public class SqlActionTable {
 				System.out.print( "\t" );
 			System.out.println( "tableName["+t.tableName+"]" );
 			
-			SqlActionColumn.travelAllColumns( dbserverConf, sqlactionConf, t.columnList, depth+1 );
+			SqlActionColumn.travelAllColumnsMetadata( dbserverConf, sqlactionConf, t.columnList, depth+1 );
 			
-			SqlActionIndex.travelAllIndexes( dbserverConf, sqlactionConf, t.indexList, depth+1 );
+			SqlActionIndex.travelAllIndexesMetadata( dbserverConf, sqlactionConf, t.indexList, depth+1 );
 		}
 		
 		return 0;
 	}
 	
-	public static SqlActionTable findTable( List<SqlActionTable> sqlactionTableList, String tableName ) throws Exception {
+	public static SqlActionTable findTable( List<SqlActionTable> sqlactionTableList, String tableName ) {
 		for( SqlActionTable t : sqlactionTableList ) {
 			if( t.tableName.equalsIgnoreCase(tableName) )
 				return t;

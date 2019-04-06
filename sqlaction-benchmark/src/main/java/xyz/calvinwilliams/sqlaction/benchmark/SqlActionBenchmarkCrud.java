@@ -53,7 +53,7 @@ public class SqlActionBenchmarkCrud {
 			count2 = 5 ;
 			count3 = 1000 ;
 			
-			rows = SqlactionBenchmarkSAO.SqlAction_DELETE_FROM_sqlaction_benchmark( conn ) ;
+			rows = SqlactionBenchmarkSAO.DELETE_FROM_sqlaction_benchmark( conn ) ;
 			conn.commit();
 			
 			// benchmark for INSERT
@@ -61,9 +61,9 @@ public class SqlActionBenchmarkCrud {
 			for( i = 0 ; i < count ; i++ ) {
 				sqlactionBenchmark.name = "Calvin"+i ;
 				sqlactionBenchmark.nameCn = "卡尔文"+i ;
-				rows = SqlactionBenchmarkSAO.SqlAction_INSERT_INTO_sqlaction_benchmark( conn, sqlactionBenchmark ) ;
+				rows = SqlactionBenchmarkSAO.INSERT_INTO_sqlaction_benchmark( conn, sqlactionBenchmark ) ;
 				if( rows != 1 ) {
-					System.out.println( "SqlactionBenchmarkSAO.SqlAction_INSERT_INTO_sqlaction_benchmark failed["+rows+"]" );
+					System.out.println( "SqlactionBenchmarkSAO.INSERT_INTO_sqlaction_benchmark failed["+rows+"]" );
 					return;
 				}
 				if( i % 10 == 0 ) {
@@ -78,11 +78,9 @@ public class SqlActionBenchmarkCrud {
 			// benchmark for UPDATE
 			beginMillisSecondstamp = System.currentTimeMillis() ;
 			for( i = 0 ; i < count ; i++ ) {
-				sqlactionBenchmark.name = "Calvin"+i ;
-				sqlactionBenchmark.salary = new BigDecimal(i) ;
-				rows = SqlactionBenchmarkSAO.SqlAction_UPDATE_sqlaction_benchmark_SET_salary_E___WHERE_name_E__( conn, sqlactionBenchmark, sqlactionBenchmark ) ;
+				rows = SqlactionBenchmarkSAO.UPDATE_sqlaction_benchmark_SET_salary_E_WHERE_name_E_( conn, new BigDecimal(i), "Calvin"+i ) ;
 				if( rows != 1 ) {
-					System.out.println( "SqlactionBenchmarkSAO.SqlAction_UPDATE_sqlaction_benchmark_SET_salary_E___WHERE_name_E__ failed["+rows+"]" );
+					System.out.println( "SqlactionBenchmarkSAO.UPDATE_sqlaction_benchmark_SET_salary_E_WHERE_name_E_ failed["+rows+"]" );
 					return;
 				}
 				if( i % 10 == 0 ) {
@@ -99,10 +97,9 @@ public class SqlActionBenchmarkCrud {
 			for( j = 0 ; j < count2 ; j++ ) {
 				for( i = 0 ; i < count ; i++ ) {
 					sqlactionBenchmarkList = new LinkedList<SqlactionBenchmarkSAO>() ;
-					sqlactionBenchmark.name = "Calvin"+i ;
-					rows = SqlactionBenchmarkSAO.SqlAction_SELECT_ALL_FROM_sqlaction_benchmark_WHERE_name_E__( conn, sqlactionBenchmarkList, sqlactionBenchmark ) ;
+					rows = SqlactionBenchmarkSAO.SELECT_ALL_FROM_sqlaction_benchmark_WHERE_name_E_( conn, sqlactionBenchmarkList, "Calvin"+i ) ;
 					if( rows != 1 ) {
-						System.out.println( "SqlactionBenchmarkSAO.SqlAction_SELECT_ALL_FROM_sqlaction_benchmark_WHERE_name_E__ failed["+rows+"]" );
+						System.out.println( "SqlactionBenchmarkSAO.SELECT_ALL_FROM_sqlaction_benchmark_WHERE_name_E_ failed["+rows+"]" );
 						return;
 					}
 				}
@@ -115,9 +112,9 @@ public class SqlActionBenchmarkCrud {
 			beginMillisSecondstamp = System.currentTimeMillis() ;
 			for( k = 0 ; k < count3 ; k++ ) {
 				sqlactionBenchmarkList = new LinkedList<SqlactionBenchmarkSAO>() ;
-				rows = SqlactionBenchmarkSAO.SqlAction_SELECT_ALL_FROM_sqlaction_benchmark( conn, sqlactionBenchmarkList, sqlactionBenchmark ) ;
+				rows = SqlactionBenchmarkSAO.SELECT_ALL_FROM_sqlaction_benchmark( conn, sqlactionBenchmarkList ) ;
 				if( rows != count ) {
-					System.out.println( "SqlactionBenchmarkSAO.SqlAction_SELECT_ALL_FROM_sqlaction_benchmark failed["+rows+"]" );
+					System.out.println( "SqlactionBenchmarkSAO.SELECT_ALL_FROM_sqlaction_benchmark failed["+rows+"]" );
 					return;
 				}
 			}
@@ -128,10 +125,9 @@ public class SqlActionBenchmarkCrud {
 			// benchmark for DELETE
 			beginMillisSecondstamp = System.currentTimeMillis() ;
 			for( i = 0 ; i < count ; i++ ) {
-				sqlactionBenchmark.name = "Calvin"+i ;
-				rows = SqlactionBenchmarkSAO.SqlAction_DELETE_FROM_sqlaction_benchmark_WHERE_name_E__( conn, sqlactionBenchmark ) ;
+				rows = SqlactionBenchmarkSAO.DELETE_FROM_sqlaction_benchmark_WHERE_name_E_( conn, "Calvin"+i ) ;
 				if( rows != 1 ) {
-					System.out.println( "SqlactionBenchmarkSAO.SqlAction_DELETE_FROM_sqlaction_benchmark_WHERE_name_E__ failed["+rows+"]" );
+					System.out.println( "SqlactionBenchmarkSAO.DELETE_FROM_sqlaction_benchmark_WHERE_name_E_ failed["+rows+"]" );
 					return;
 				}
 				if( i % 10 == 0 ) {

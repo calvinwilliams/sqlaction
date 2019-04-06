@@ -17,10 +17,10 @@ public class SqlactionDemoSAO {
 	String			name ; // 名字
 	String			address ; // 地址
 
-	int				count___ ; // defining for 'SELECT COUNT(*)'
+	int				_count_ ; // defining for 'SELECT COUNT(*)'
 
 	// SELECT * FROM sqlaction_demo
-	public static int SqlAction_SELECT_ALL_FROM_sqlaction_demo( Connection conn, List<SqlactionDemoSAO> sqlactionDemoListForSelectOutput, SqlactionDemoSAO sqlactionDemoForWhereInput ) throws Exception {
+	public static int SELECT_ALL_FROM_sqlaction_demo( Connection conn, List<SqlactionDemoSAO> sqlactionDemoListForSelectOutput ) throws Exception {
 		Statement stmt = conn.createStatement() ;
 		ResultSet rs = stmt.executeQuery("SELECT * FROM sqlaction_demo") ;
 		while( rs.next() ) {
@@ -34,9 +34,9 @@ public class SqlactionDemoSAO {
 	}
 
 	// SELECT * FROM sqlaction_demo WHERE name=?
-	public static int SqlAction_SELECT_ALL_FROM_sqlaction_demo_WHERE_name_E__( Connection conn, List<SqlactionDemoSAO> sqlactionDemoListForSelectOutput, SqlactionDemoSAO sqlactionDemoForWhereInput ) throws Exception {
+	public static int SELECT_ALL_FROM_sqlaction_demo_WHERE_name_E_( Connection conn, List<SqlactionDemoSAO> sqlactionDemoListForSelectOutput, String _1_name ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement("SELECT * FROM sqlaction_demo WHERE name=?") ;
-		prestmt.setString( 1, sqlactionDemoForWhereInput.name );
+		prestmt.setString( 1, _1_name );
 		ResultSet rs = prestmt.executeQuery() ;
 		while( rs.next() ) {
 			SqlactionDemoSAO sqlactionDemo = new SqlactionDemoSAO() ;
@@ -48,26 +48,26 @@ public class SqlactionDemoSAO {
 		return sqlactionDemoListForSelectOutput.size();
 	}
 
-	// INSERT INTO sqlaction_demo
-	public static int SqlAction_INSERT_INTO_sqlaction_demo( Connection conn, SqlactionDemoSAO sqlactionDemo ) throws Exception {
+	// INSERT INTO sqlaction_demo (name,address) VALUES (?,?)
+	public static int INSERT_INTO_sqlaction_demo( Connection conn, SqlactionDemoSAO sqlactionDemo ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement("INSERT INTO sqlaction_demo (name,address) VALUES (?,?)") ;
 		prestmt.setString( 1, sqlactionDemo.name );
 		prestmt.setString( 2, sqlactionDemo.address );
 		return prestmt.executeUpdate() ;
 	}
 
-	// UPDATE sqlaction_demo SET address=? WHERE name=? @@METHOD(updateAddressByName)
-	public static int updateAddressByName( Connection conn, SqlactionDemoSAO sqlactionDemoForSetInput, SqlactionDemoSAO sqlactionDemoForWhereInput ) throws Exception {
-		PreparedStatement prestmt = conn.prepareStatement("UPDATE sqlaction_demo SET address=? WHERE name=?") ;
-		prestmt.setString( 1, sqlactionDemoForSetInput.address );
-		prestmt.setString( 2, sqlactionDemoForWhereInput.name );
+	// UPDATE sqlaction_demo SET address=? WHERE name=? 
+	public static int updateAddressByName( Connection conn, String _1_address_ForSetInput, String _1_name_ForWhereInput ) throws Exception {
+		PreparedStatement prestmt = conn.prepareStatement("UPDATE sqlaction_demo SET address=? WHERE name=? ") ;
+		prestmt.setString( 1, _1_address_ForSetInput );
+		prestmt.setString( 2, _1_name_ForWhereInput );
 		return prestmt.executeUpdate() ;
 	}
 
 	// DELETE FROM sqlaction_demo WHERE name=?
-	public static int SqlAction_DELETE_FROM_sqlaction_demo_WHERE_name_E__( Connection conn, SqlactionDemoSAO sqlactionDemoForWhereInput ) throws Exception {
+	public static int DELETE_FROM_sqlaction_demo_WHERE_name_E_( Connection conn, String _1_name ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement("DELETE FROM sqlaction_demo WHERE name=?") ;
-		prestmt.setString( 1, sqlactionDemoForWhereInput.name );
+		prestmt.setString( 1, _1_name );
 		return prestmt.executeUpdate() ;
 	}
 }

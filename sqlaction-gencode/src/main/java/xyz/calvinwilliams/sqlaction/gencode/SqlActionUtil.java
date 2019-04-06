@@ -10,6 +10,8 @@ package xyz.calvinwilliams.sqlaction.gencode;
 
 public class SqlActionUtil {
 
+	final static char[] _8tabsArray = "\t\t\t\t\t\t\t\t".toCharArray() ;
+	
 	private static int wildcardMatchMultiChar( char[] wildcard, int wildcardOffset, int wildcardLength, char[] str, int strOffset, int strLength ) {
 		int		matchDestOffset = strOffset ;
 		int		nret = 0 ;

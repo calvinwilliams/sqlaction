@@ -1,6 +1,6 @@
 {
 	"driver" : "com.mysql.jdbc.Driver" ,
-	"url" : "jdbc:mysql://192.168.6.74:3306/calvindb?serverTimezone=GMT" ,
+	"url" : "jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" ,
 	"user" : "calvin" ,
 	"pwd" : "calvin"
 }

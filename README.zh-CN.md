@@ -21,7 +21,7 @@ sqlaction - JDBC代码自动生成工具
     - [4.3. 测试案例](#43-测试案例)
     - [4.4. 测试结果](#44-测试结果)
 - [5. 后续开发](#5-后续开发)
-- [6. 关于开源项目](#6-关于开源项目)
+- [6. 关于本项目](#6-关于本项目)
 - [7. 关于作者](#7-关于作者)
 
 <!-- /TOC -->
@@ -59,6 +59,8 @@ CREATE TABLE `sqlaction_demo` (
 ```
 
 ## 2.2. 新建JAVA项目
+
+只依赖数据库连接库，如"mysql-connector-java-X.Y.Z.jar"。
 
 建立包目录，在包目录或上级某一级目录中创建数据库连接配置文件`dbserver.conf.json`
 
@@ -516,12 +518,12 @@ SQL动作对应缺省方法名为SQL转换而来，具体算法为所有非字�
 
 由于`sqlaction`自动生成的JDBC代码，与手工代码基本无异，没有低效的反射，没有多坑的热修改字节码，所以稳定性和运行性能都非常出色。下面是`sqlaction`与`MyBatis`的性能测试，可以在源码包的`sqlaction-benchmark`和`mybatis-benchmark`找到所有源代码。
 
-CPU：Intel Core i5-7500 3.4GHz 3.4GHz
-内存：16GB
-操作系统：WINDOWS 10
-JAVA开发工具：Eclipse 2018-12
-数据库：MySQL 8.0.15 Community Server
-数据库连接地址：127.0.0.1:3306
+CPU : Intel Core i5-7500 3.4GHz 3.4GHz
+内存 : 16GB
+操作系统 : WINDOWS 10
+JAVA开发工具 : Eclipse 2018-12
+数据库 : MySQL 8.0.15 Community Server
+数据库连接地址 : 127.0.0.1:3306
 
 DDL
 
@@ -774,10 +776,7 @@ public class SqlActionBenchmarkCrud {
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<!-- 配置SQL语句，与实体类操作的对应关系。 -->
-<!-- 保证唯一性 -->
 <mapper namespace="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAOMapper">
-	<!-- 将返回的数据 与对象对应。将返回的数据，按照配置组装成对应的对象。 -->
 	<insert id="insertOne" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
 		INSERT INTO sqlaction_benchmark (name,name_cn,salary,birthday) VALUES( #{name}, #{name_cn}, #{salary}, #{birthday} )
 	</insert>
@@ -1034,13 +1033,11 @@ All mybatis DELETE WHERE done , count[500] elapse[6.035]s
 
 # 5. 后续开发
 
-TODO：
-
 1. 目前`sqlaction`支持的SQL标准对于联机交易没问题，对于分析型复杂SQL（如函数、子查询）还需后续研发新增支持。
 1. 目前只支持MySQL数据库，后续将新增支持PostgreSQL和Oracle。
 1. 待设计各DBMS的分页查询语法的兼容统一表达。
 
-# 6. 关于开源项目
+# 6. 关于本项目
 
 欢迎使用`sqlaction`，如果你在使用中碰到了问题请告诉我，谢谢 ^_^
 

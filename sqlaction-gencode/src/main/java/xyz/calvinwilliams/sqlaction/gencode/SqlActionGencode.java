@@ -500,7 +500,7 @@ public class SqlActionGencode {
 		
 		out.append( "\n" );
 		out.append( "\t" + "// "+sql+"\n" );
-		if( parser.whereColumnTokenList.size() > 0 ) {
+		if( parser.setColumnTokenList.size() > 0 || parser.whereColumnTokenList.size() > 0 ) {
 			out.append( "\t" + "public static int " + methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
 			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
 			setColumnIndex = 0 ;

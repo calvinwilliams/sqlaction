@@ -10,17 +10,25 @@ sqlaction - JDBC代码自动生成工具
     - [2.3. 在包目录中执行`sqlaction`工具](#23-在包目录中执行sqlaction工具)
     - [2.4. 到目前为止，一行JAVA代码都没写，现在开始写应用代码](#24-到目前为止一行java代码都没写现在开始写应用代码)
     - [2.5. 执行](#25-执行)
-- [3. 配置文件`dbserver.conf.json`](#3-配置文件dbserverconfjson)
-- [4. 配置文件`sqlaction.conf.json`](#4-配置文件sqlactionconfjson)
-- [5. 性能压测](#5-性能压测)
-- [6. 后续开发](#6-后续开发)
+- [3. 使用参考](#3-使用参考)
+    - [3.1. 配置文件`dbserver.conf.json`](#31-配置文件dbserverconfjson)
+    - [3.2. 配置文件`sqlaction.conf.json`](#32-配置文件sqlactionconfjson)
+    - [3.3. 自动生成规则](#33-自动生成规则)
+    - [3.4. 为什么这么设计](#34-为什么这么设计)
+- [4. 性能压测](#4-性能压测)
+    - [4.1. 准备`sqlaction`](#41-准备sqlaction)
+    - [4.2. 准备`MyBatis`](#42-准备mybatis)
+    - [4.3. 测试案例](#43-测试案例)
+    - [4.4. 测试结果](#44-测试结果)
+- [5. 后续开发](#5-后续开发)
+- [6. 关于开源项目](#6-关于开源项目)
 - [7. 关于作者](#7-关于作者)
 
 <!-- /TOC -->
 
 # 1. 概述
 
-厌烦了MyBatis和JPA(Hibernate)的冗余配置和繁琐使用，以及XML拷来拷去，写那么多Mapper要是直接用JDBC早就写完了，如果使用一个框架/工具比不使用而带来更多的心智负担，那还不如不用。其实，直接使用JDBC还是蛮干净和高性能的，只要解决其三个痛点：
+厌烦了`MyBatis`和`JPA`(`Hibernate`)的冗余配置和繁琐使用，以及XML拷来拷去，写那么多Mapper要是直接用JDBC早就写完了，如果使用一个框架/工具比不使用而带来更多的心智负担，那还不如不用。其实，直接使用JDBC还是蛮干净和高性能的，只要解决其三个痛点：
 
 1. 手工编写数据库表实体类。
 1. 手工编写大量setString和getString代码，尤其还要人工保证字段序号递增。
@@ -30,11 +38,11 @@ sqlaction - JDBC代码自动生成工具
 
 于是，我花了十多个晚上，结合之前在C技术栈中的设计和经验，结合JAVA特点，写了sqlaction。
 
-sqlaction是JDBC代码自动生成工具，它为应用提供了类似MyBatis和Hibernate操作数据库能力，但更轻量级和尽量减少冗余手工工作，提高开发效率，也易于与其它框架搭配使用。sqlaction读取数据库中的表结构元信息和少量配置文件信息（SQL），自动生成数据库表实体类，自动生成基于JDBC的SQL动作方法代码，应用调用其自动生成的代码就能极其快捷的操作数据库，同时还拥有JDBC的高性能，更重要的是开发者能直接看到底层操作代码，增加自主可控，没有低效的反射，没有复杂的热修改字节码，没有庞大笨重的隐藏核心。
+`sqlaction`是JDBC代码自动生成工具，它为应用提供了类似`MyBatis`和`Hibernate`操作数据库能力，但更轻量级和尽量减少冗余手工工作，提高开发效率，也易于与其它框架搭配使用。`sqlaction`读取数据库中的表结构元信息和少量配置文件信息（SQL），自动生成数据库表实体类，自动生成基于JDBC的SQL动作方法代码，应用调用其自动生成的代码就能极其快捷的操作数据库，同时还拥有JDBC的高性能，更重要的是开发者能直接看到底层操作代码，增加自主可控，没有低效的反射，没有复杂的热修改字节码，没有庞大笨重的隐藏核心。
 
 # 2. 一个DEMO
 
-放一个DEMO感受一下：（全套源码详见`sqlaction/sqlaction-demo`）
+放一个DEMO感受一下：（可以在源码包的`sqlaction-demo`找到所有源代码）
 
 ## 2.1. 建表DDL
 
@@ -86,7 +94,7 @@ CREATE TABLE `sqlaction_demo` (
 
 ## 2.3. 在包目录中执行`sqlaction`工具
 
-这里把执行命令行包成批处理文件展示，欢迎懂`Eclipse`插件开发的同学帮我写个插件 :)
+这里把执行命令行包成批处理文件后执行，欢迎懂`Eclipse`插件开发的同学帮我写个插件 :)
 
 pp.bat
 
@@ -318,11 +326,11 @@ SqlactionDemoSAO.SELECT_ALL_FROM_sqlaction_demo ok
 
 对表的增删改查只需调用前面自动生成的数据库表实体类中的方法即可，而且底层执行代码可随时查看，没有什么秘密，没有什么高深的技术。
 
-工具`sqlaction`只在开发阶段使用，与运行阶段无关，说到底只是在应用与JDBC之间自动生成了薄薄的一层代码而已，把大量手工冗余工作都自动做掉了，让开发者节省大量时间而去关注业务，减少大量机械操作减轻心智负担，提高生产力，早点做完工作回家抱女盆友/老婆 :)
+工具`sqlaction`只在开发阶段使用，与运行阶段无关，说到底只是在应用与JDBC之间自动生成了薄薄的一层代码而已，把大量手工冗余代码都自动生成了，让开发者节省大量时间而去关注业务，减少大量机械操作减轻心智负担，提高生产力，早点做完工作回家抱女盆友/老婆 :)
 
-`sqlaction`简单朴素，无需MyBatis或Hibernate那么复杂、炫耀技术之嫌。简洁就是优秀工具的特质，而不是用一种复杂性解决另一种复杂性。
+# 3. 使用参考
 
-# 3. 配置文件`dbserver.conf.json`
+## 3.1. 配置文件`dbserver.conf.json`
 
 ```
 {
@@ -347,6 +355,8 @@ SqlactionDemoSAO.SELECT_ALL_FROM_sqlaction_demo ok
 `pwd` : DBMS连接密码。
 
 `userDefineDataTypes` : 自定义字段类型转换，比如数据库中的类型`DECIMAL(12,2)`映射到JAVA变量类型是`BigDecimal`，但在某应用系统中希望是`double`，可以在这个配置集中在正式转换前把`DECIMAL(12,2)`强制转换成`DOUBLE`，那么正式转换时`DOUBLE`会映射成JAVA变量类型`double`。
+
+数据库字段类型与sqlaction的JAVA变量类型映射表：
 
 | MySQL字段类型 | sqlaction的JAVA变量类型 |
 |---|---|
@@ -380,7 +390,7 @@ SqlactionDemoSAO.SELECT_ALL_FROM_sqlaction_demo ok
 
 注意：读取JSON配置文件使用到了我的另一个开源项目：okjson，一个简洁易用的JSON解析器/生成器，只有一个类文件，可以很方便的融合到其它项目中。
 
-# 4. 配置文件`sqlaction.conf.json`
+## 3.2. 配置文件`sqlaction.conf.json`
 
 ```
 {
@@ -428,19 +438,616 @@ SQL动作配置文件`sqlaction.conf.json`配置了工具`sqlaction`执行所需
 
 `table` : 表名。
 
-`sqlactions` : SQL语句列表。
+`sqlactions` : SQL语句列表。注意最后一条SQL后不带','以符合JSON规范。
 
 `javaPackage` : JAVA包名，自动生成JAVA类文件时放在最上面。
 
+目前`sqlaction`支持的SQL标准：
 
+**查询**
+```
+SELECT [*|[table_name.|table_alias_name.]column_name[,...][,COUNT(*)]]
+    [ /* hint */ ]
+    FROM table_name [table_alias_name],...
+    [ WHERE [table_name.|table_alias_name.]column_name [=|<>|>|>=|<|<=] [?|const|[table_name2.|table_alias_name2.]column_name2] [AND ...] ]
+    [ GROUP BY [table_name.|table_alias_name.]column[,[table_name2.|table_alias_name.]column2][,...] ]
+    [ HAVING ... ]
+    [ ORDER BY column[,...] [ASC|DESC] ]
+    ...
+```
 
-# 5. 性能压测
+**插入**
+```
+INSERT INTO table_name
+```
 
-# 6. 后续开发
+**更新**
+```
+UPDATE table_name
+    SET column_name = [?|const|column_name2] [,...]
+    [ WHERE column_name [=|<>|>|>=|<|<=] [const|column_name2] [AND ...] ]
+```
 
-TODO
+**删除**
+```
+DELETE FROM table_name
+    [ WHERE column_name [=|<>|>|>=|<|<=] [const|column_name2] [AND ...] ]
+```
 
-1. 目前`sqlaction`支持基本SQL操作（包含SQL），后续还要新增支持函数和子查询，以适应更复杂的SQL。
-2. 目前只支持MySQL数据库，后续将新增支持PostgreSQL和Oracle。
+注意：数据库连接配置文件`sqlaction.conf.json`一般放在JAVA包目录里，以便于自动生成的类打包。
+
+## 3.3. 自动生成规则
+
+工具`sqlaction`读取数据库中的表结构元信息和SQL动作配置文件`sqlaction.conf.json`，在执行目录里自动生成JAVA类文件，类文件包含数据库表实体信息（字段映射属性）和SQL动作对应方法。
+
+数据库表字段映射属性由数据库中的表结构元信息映射生成，转换规则见前面的数据库字段类型与sqlaction的JAVA变量类型映射表。如果DDL中有comment，则在表实体类的对应属性后面加注释。
+
+SQL动作对应缺省方法名为SQL转换而来，具体算法为所有非字母数字字符都转换为'\_'，合并多个'\_'为一个。允许自定义方法名，在SQL动作配置中追加元信息"@@METHOD(自定义方法名)"，如："SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id @@METHOD(queryUserAndOrderByName)"
+
+方法前的注释是原SQL，以便于对照和定位。
+
+方法的第一个参数是数据库连接对象，可以和连接池框架结合使用。
+
+如果SQL动作涉及输出，自动生成的代码在SQL执行后，根据解析出来的输出项（SELECT）自动生成getString等代码，方法参数中也要求给予以便于输出，按表实体类列表对象排列，SQL JOIN多表对应多个表实体类列表对象。
+
+如果SQL动作涉及输入，自动生成的代码将使用JDBC的prepareStatement，并根据解析出来的输入项（SET、WHERE）自动生成setString等代码，方法参数中也要求给予以便于输入，按字段名排列。如果没有输入则使用createStatement。
+
+如果是查询SQL，JAVA方法返回表实体类列表大小。如果是插入、更新、删除SQL，JAVA方法返回受影响记录条数。
+
+表实体类属性列表中额外有"int _count_ ;"，用于查询COUNT(*)时存储输出结果用。
+
+插入方法中会自动识别忽略自增类型。
+
+就这么简单！
+
+## 3.4. 为什么这么设计
+
+数据库应用接口层框架/工具对于表结构的配置源的有两派思路，一派是定义在配置文件中，好处是可以做不同DBMS的统一规范，如同一种数据类型的统一表达，坏处是与数据库之间同步较麻烦，另一派是定义在数据库中，需要用时读数据库中的元信息，好处是可以利用数据库设计工具，图形化界面管理表结构，还能自动生成E-R图，坏处是不同DBMS存在标准差异。`sqlaction`采用后一派思路，在数据类型与JAVA属性类型之间建立多DBMS映射表来解决标准差异。
+
+很多数据库持久化框架对于SQL动作都定义了一套自己的动作语法标准，`sqlaction`坚持采用原SQL来配置，减少开发人员学习负担。在分页查询等差异问题上，`sqlaction`定义一套兼容标准来统一SQL表达。
+
+`sqlaction`坚持采用最小化配置原则，规避一切冗余配置，尽力减少开发人员工作量，推荐用缺省值工作，如果需要自定义再提供额外的配置，如SQL动作方法名默认情况下无需配置，按照缺省规则就能自动根据SQL生成一个含义清晰的名字，开发人员无须为每个SQL动作必须配置方法名，甚至无需繁复的XML替代JAVA语言定义方法的输入输出参数（MyBatis），而且配置错误时只有在运行期才告知。
+
+`sqlaction`朴素，无需MyBatis或Hibernate那么复杂、炫耀技术之嫌；`sqlaction`简单，只是代替手工而自动生成JDBC代码段落，没有运行时框架，不做其它事情（如连接池、事务控制等），保持代码架构简单、透明、可控和高效，便于和其它数据库框架/工具协同工作；`sqlaction`对开发友好，大部分错误都能在预处理期或编译期发现和提示，而不像某些“高端”框架只有到了运行期才警示开发问题。
+
+简洁就是优秀工具的特质，而不是为了解决一种复杂性而带来另一种复杂性。
+
+# 4. 性能压测
+
+由于`sqlaction`自动生成的JDBC代码，与手工代码基本无异，没有低效的反射，没有多坑的热修改字节码，所以稳定性和运行性能都非常出色。下面是`sqlaction`与`MyBatis`的性能测试，可以在源码包的`sqlaction-benchmark`和`mybatis-benchmark`找到所有源代码。
+
+CPU：Intel Core i5-7500 3.4GHz 3.4GHz
+内存：16GB
+操作系统：WINDOWS 10
+JAVA开发工具：Eclipse 2018-12
+数据库：MySQL 8.0.15 Community Server
+数据库连接地址：127.0.0.1:3306
+
+DDL
+
+```
+CREATE TABLE `sqlaction_benchmark` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `name` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT '英文名',
+  `name_cn` varchar(128) COLLATE utf8mb4_bin NOT NULL COMMENT '中文名',
+  `salary` decimal(12,2) NOT NULL COMMENT '薪水',
+  `birthday` date NOT NULL COMMENT '生日',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=42332 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
+```
+
+## 4.1. 准备`sqlaction`
+
+手工编写数据库连接配置文件`dbserver.conf.json`
+
+```
+{
+	"driver" : "com.mysql.jdbc.Driver" ,
+	"url" : "jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" ,
+	"user" : "calvin" ,
+	"pwd" : "calvin"
+}
+```
+
+手工编写SQL动作配置文件`sqlaction.conf.json`
+
+```
+{
+	"database" : "calvindb" ,
+	"tables" : [
+		{
+			"table" : "sqlaction_benchmark" ,
+			"sqlactions" : [
+				"INSERT INTO sqlaction_benchmark" ,
+				"UPDATE sqlaction_benchmark SET salary=? WHERE name=?" ,
+				"SELECT * FROM sqlaction_benchmark WHERE name=?" ,
+				"SELECT * FROM sqlaction_benchmark" ,
+				"DELETE FROM sqlaction_benchmark WHERE name=?" ,
+				"DELETE FROM sqlaction_benchmark"
+			]
+		}
+	] ,
+	"javaPackage" : "xyz.calvinwilliams.sqlaction.benchmark"
+}
+```
+
+运行工具`sqlaction`，自动生成`SqlactionBenchmarkSAO.java`
+
+手工编写性能测试应用类`SqlActionBenchmarkCrud.java`
+
+```
+/*
+ * sqlaction - SQL action object auto-gencode tool based JDBC for Java
+ * author	: calvin
+ * email	: calvinwilliams@163.com
+ *
+ * See the file LICENSE in base directory.
+ */
+
+package xyz.calvinwilliams.sqlaction.benchmark;
+
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+
+public class SqlActionBenchmarkCrud {
+
+	public static void main(String[] args) {
+		Connection					conn = null ;
+		SqlactionBenchmarkSAO		sqlactionBenchmark ;
+		List<SqlactionBenchmarkSAO>	sqlactionBenchmarkList ;
+		long						beginMillisSecondstamp ;
+		long						endMillisSecondstamp ;
+		double						elpaseSecond ;
+		long						i , j , k ;
+		long						count , count2 , count3 ;
+		int							rows = 0 ;
+		
+		// connect to database
+		try {
+			Class.forName( "com.mysql.jdbc.Driver" );
+			conn = DriverManager.getConnection( "jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT", "calvin", "calvin" ) ;
+		} catch (ClassNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			conn.setAutoCommit(false);
+			
+			sqlactionBenchmark = new SqlactionBenchmarkSAO() ;
+			sqlactionBenchmark.name = "Calvin" ;
+			sqlactionBenchmark.nameCn = "卡尔文" ;
+			sqlactionBenchmark.salary = new BigDecimal(0) ;
+			long time = System.currentTimeMillis() ;
+			sqlactionBenchmark.birthday = new java.sql.Date(time) ;
+			count = 500 ;
+			count2 = 5 ;
+			count3 = 1000 ;
+			
+			rows = SqlactionBenchmarkSAO.DELETE_FROM_sqlaction_benchmark( conn ) ;
+			conn.commit();
+			
+			// benchmark for INSERT
+			beginMillisSecondstamp = System.currentTimeMillis() ;
+			for( i = 0 ; i < count ; i++ ) {
+				sqlactionBenchmark.name = "Calvin"+i ;
+				sqlactionBenchmark.nameCn = "卡尔文"+i ;
+				rows = SqlactionBenchmarkSAO.INSERT_INTO_sqlaction_benchmark( conn, sqlactionBenchmark ) ;
+				if( rows != 1 ) {
+					System.out.println( "SqlactionBenchmarkSAO.INSERT_INTO_sqlaction_benchmark failed["+rows+"]" );
+					return;
+				}
+				if( i % 10 == 0 ) {
+					conn.commit();
+				}
+			}
+			conn.commit();
+			endMillisSecondstamp = System.currentTimeMillis() ;
+			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
+			System.out.println( "All sqlaction INSERT done , count["+count+"] elapse["+elpaseSecond+"]s" );
+			
+			// benchmark for UPDATE
+			beginMillisSecondstamp = System.currentTimeMillis() ;
+			for( i = 0 ; i < count ; i++ ) {
+				rows = SqlactionBenchmarkSAO.UPDATE_sqlaction_benchmark_SET_salary_E_WHERE_name_E_( conn, new BigDecimal(i), "Calvin"+i ) ;
+				if( rows != 1 ) {
+					System.out.println( "SqlactionBenchmarkSAO.UPDATE_sqlaction_benchmark_SET_salary_E_WHERE_name_E_ failed["+rows+"]" );
+					return;
+				}
+				if( i % 10 == 0 ) {
+					conn.commit();
+				}
+			}
+			conn.commit();
+			endMillisSecondstamp = System.currentTimeMillis() ;
+			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
+			System.out.println( "All sqlaction UPDATE WHERE done , count["+count+"] elapse["+elpaseSecond+"]s" );
+			
+			// benchmark for SELECT ... WHERE ...
+			beginMillisSecondstamp = System.currentTimeMillis() ;
+			for( j = 0 ; j < count2 ; j++ ) {
+				for( i = 0 ; i < count ; i++ ) {
+					sqlactionBenchmarkList = new LinkedList<SqlactionBenchmarkSAO>() ;
+					rows = SqlactionBenchmarkSAO.SELECT_ALL_FROM_sqlaction_benchmark_WHERE_name_E_( conn, sqlactionBenchmarkList, "Calvin"+i ) ;
+					if( rows != 1 ) {
+						System.out.println( "SqlactionBenchmarkSAO.SELECT_ALL_FROM_sqlaction_benchmark_WHERE_name_E_ failed["+rows+"]" );
+						return;
+					}
+				}
+			}
+			endMillisSecondstamp = System.currentTimeMillis() ;
+			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
+			System.out.println( "All sqlaction SELECT WHERE done , count2["+count2+"] count["+count+"] elapse["+elpaseSecond+"]s" );
+			
+			// benchmark for SELECT
+			beginMillisSecondstamp = System.currentTimeMillis() ;
+			for( k = 0 ; k < count3 ; k++ ) {
+				sqlactionBenchmarkList = new LinkedList<SqlactionBenchmarkSAO>() ;
+				rows = SqlactionBenchmarkSAO.SELECT_ALL_FROM_sqlaction_benchmark( conn, sqlactionBenchmarkList ) ;
+				if( rows != count ) {
+					System.out.println( "SqlactionBenchmarkSAO.SELECT_ALL_FROM_sqlaction_benchmark failed["+rows+"]" );
+					return;
+				}
+			}
+			endMillisSecondstamp = System.currentTimeMillis() ;
+			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
+			System.out.println( "All sqlaction SELECT to LIST done , count3["+count3+"] elapse["+elpaseSecond+"]s" );
+			
+			// benchmark for DELETE
+			beginMillisSecondstamp = System.currentTimeMillis() ;
+			for( i = 0 ; i < count ; i++ ) {
+				rows = SqlactionBenchmarkSAO.DELETE_FROM_sqlaction_benchmark_WHERE_name_E_( conn, "Calvin"+i ) ;
+				if( rows != 1 ) {
+					System.out.println( "SqlactionBenchmarkSAO.DELETE_FROM_sqlaction_benchmark_WHERE_name_E_ failed["+rows+"]" );
+					return;
+				}
+				if( i % 10 == 0 ) {
+					conn.commit();
+				}
+			}
+			conn.commit();
+			endMillisSecondstamp = System.currentTimeMillis() ;
+			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
+			System.out.println( "All sqlaction DELETE WHERE done , count["+count+"] elapse["+elpaseSecond+"]s" );
+		} catch(Exception e) {
+			e.printStackTrace();
+			try {
+				conn.rollback();
+			} catch (Exception e2) {
+				e.printStackTrace();
+				return;
+			}
+		} finally {
+			try {
+				conn.close();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+				return;
+			}
+		}
+		
+		return;
+	}
+}
+```
+
+## 4.2. 准备`MyBatis`
+
+手工编写数据库连接配置文件`mybatis-config.xml`
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!-- default="development" 开发环境 default="work" 发布环境 -->
+	<settings>
+		<setting name="cacheEnabled" value="false" />
+	</settings>
+	<environments default="development">
+		<environment id="development">
+			<!-- 配置事物 -->
+			<transactionManager type="JDBC"></transactionManager>
+			<!-- 配置数据源 -->
+			<dataSource type="POOLED">
+				<property name="driver" value="com.mysql.jdbc.Driver" />
+				<property name="url" value="jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" />
+				<property name="username" value="calvin" />
+				<property name="password" value="calvin" />
+			</dataSource>
+		</environment>
+	</environments>
+	<mappers>
+		<mapper resource="mybatis-mapper.xml" />
+	</mappers>
+</configuration>
+```
+
+手工编写mapper配置文件`mybatis-mapper.xml`
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- 配置SQL语句，与实体类操作的对应关系。 -->
+<!-- 保证唯一性 -->
+<mapper namespace="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAOMapper">
+	<!-- 将返回的数据 与对象对应。将返回的数据，按照配置组装成对应的对象。 -->
+	<insert id="insertOne" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
+		INSERT INTO sqlaction_benchmark (name,name_cn,salary,birthday) VALUES( #{name}, #{name_cn}, #{salary}, #{birthday} )
+	</insert>
+	<update id="updateOneByName" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
+		UPDATE sqlaction_benchmark SET salary=#{salary} WHERE name=#{name}
+	</update>
+	<select id="selectOneByName" parameterType="java.lang.String" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO" flushCache="true" useCache="false">
+		SELECT * FROM sqlaction_benchmark WHERE name=#{name}
+	</select>
+	<select id="selectAll" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO" flushCache="true" useCache="false">
+		SELECT * FROM sqlaction_benchmark
+	</select>
+	<delete id="deleteOneByName" parameterType="java.lang.String">
+		DELETE FROM sqlaction_benchmark WHERE name=#{name}
+	</delete>
+	<delete id="deleteAll">
+		DELETE FROM sqlaction_benchmark
+	</delete>
+</mapper>
+```
+
+手工编写数据库表实体类`SqlactionBenchmarkSAO.java`
+
+```
+package xyz.calvinwilliams.mybatis.benchmark;
+
+import java.math.*;
+
+public class SqlactionBenchmarkSAO {
+
+	int				id ; // 编号
+	String			name ; // 英文名
+	String			name_cn ; // 中文名
+	BigDecimal		salary ; // 薪水
+	java.sql.Date	birthday ; // 生日
+
+	int				count___ ; // defining for 'SELECT COUNT(*)'
+
+}
+```
+
+手工编写数据库表Mapper接口类`SqlactionBenchmarkSAOMapper.java`
+
+```
+package xyz.calvinwilliams.mybatis.benchmark;
+
+import java.util.*;
+
+public interface SqlactionBenchmarkSAOMapper {
+    public void insertOne(SqlactionBenchmarkSAO sqlactionBenchmark);
+    public void updateOneByName(SqlactionBenchmarkSAO sqlactionBenchmark);
+    public SqlactionBenchmarkSAO selectOneByName(String name);
+    public List<SqlactionBenchmarkSAO> selectAll();
+    public void deleteOneByName(String name);
+    public void deleteAll();
+}
+```
+
+手工编写性能测试应用类`MyBatisBenchmarkCrud.java`
+
+```
+/*
+ * sqlaction - SQL action object auto-gencode tool based JDBC for Java
+ * author	: calvin
+ * email	: calvinwilliams@163.com
+ *
+ * See the file LICENSE in base directory.
+ */
+
+package xyz.calvinwilliams.mybatis.benchmark;
+
+import java.io.FileInputStream;
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+import xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO;
+import xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAOMapper;
+
+public class MyBatisBenchmarkCrud {
+
+	public static void main(String[] args) {
+		SqlSession					session = null ;
+		SqlactionBenchmarkSAOMapper	mapper ;
+		List<SqlactionBenchmarkSAO>	sqlactionBenchmarkList ;
+		long						beginMillisSecondstamp ;
+		long						endMillisSecondstamp ;
+		double						elpaseSecond ;
+		long						i , j , k ;
+		long						count , count2 , count3 ;
+		
+		try {
+			FileInputStream in = new FileInputStream("src/main/java/mybatis-config.xml");
+			session = new SqlSessionFactoryBuilder().build(in).openSession();
+			
+			SqlactionBenchmarkSAO	sqlactionBenchmark = new SqlactionBenchmarkSAO() ;
+			sqlactionBenchmark.id = 1 ;
+			sqlactionBenchmark.name = "Calvin" ;
+			sqlactionBenchmark.name_cn = "卡尔文" ;
+			sqlactionBenchmark.salary = new BigDecimal(0) ;
+			long time = System.currentTimeMillis() ;
+			sqlactionBenchmark.birthday = new java.sql.Date(time) ;
+			count = 500 ;
+			count2 = 5 ;
+			count3 = 1000 ;
+			
+			mapper = session.getMapper(SqlactionBenchmarkSAOMapper.class) ;
+			
+			mapper.deleteAll();
+			session.commit();
+			
+			// benchmark for INSERT
+			beginMillisSecondstamp = System.currentTimeMillis() ;
+			for( i = 0 ; i < count ; i++ ) {
+				sqlactionBenchmark.name = "Calvin"+i ;
+				sqlactionBenchmark.name_cn = "卡尔文"+i ;
+				mapper.insertOne(sqlactionBenchmark);
+				if( i % 10 == 0 ) {
+					session.commit();
+				}
+			}
+			session.commit();
+			endMillisSecondstamp = System.currentTimeMillis() ;
+			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
+			System.out.println( "All mybatis INSERT done , count["+count+"] elapse["+elpaseSecond+"]s" );
+			
+			// benchmark for UPDATE
+			beginMillisSecondstamp = System.currentTimeMillis() ;
+			for( i = 0 ; i < count ; i++ ) {
+				sqlactionBenchmark.name = "Calvin"+i ;
+				sqlactionBenchmark.salary = new BigDecimal(i) ;
+				mapper.updateOneByName(sqlactionBenchmark);
+				if( i % 10 == 0 ) {
+					session.commit();
+				}
+			}
+			session.commit();
+			endMillisSecondstamp = System.currentTimeMillis() ;
+			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
+			System.out.println( "All mybatis UPDATE done , count["+count+"] elapse["+elpaseSecond+"]s" );
+			
+			// benchmark for SELECT ... WHERE ...
+			beginMillisSecondstamp = System.currentTimeMillis() ;
+			for( j = 0 ; j < count2 ; j++ ) {
+				for( i = 0 ; i < count ; i++ ) {
+					sqlactionBenchmark = mapper.selectOneByName(sqlactionBenchmark.name) ;
+					if( sqlactionBenchmark == null ) {
+						System.out.println( "mapper.selectOneByName failed" );
+						return;
+					}
+				}
+			}
+			endMillisSecondstamp = System.currentTimeMillis() ;
+			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
+			System.out.println( "All mybatis SELECT WHERE done , count2["+count2+"] count["+count+"] elapse["+elpaseSecond+"]s" );
+			
+			// benchmark for SELECT
+			beginMillisSecondstamp = System.currentTimeMillis() ;
+			for( k = 0 ; k < count3 ; k++ ) {
+				sqlactionBenchmarkList = mapper.selectAll() ;
+				if( sqlactionBenchmarkList == null ) {
+					System.out.println( "mapper.selectAll failed" );
+					return;
+				}
+			}
+			endMillisSecondstamp = System.currentTimeMillis() ;
+			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
+			System.out.println( "All mybatis SELECT to List done , count3["+count3+"] elapse["+elpaseSecond+"]s" );
+			
+			// benchmark for DELETE
+			beginMillisSecondstamp = System.currentTimeMillis() ;
+			for( i = 0 ; i < count ; i++ ) {
+				sqlactionBenchmark.name = "Calvin"+i ;
+				mapper.deleteOneByName(sqlactionBenchmark.name);
+				if( i % 10 == 0 ) {
+					session.commit();
+				}
+			}
+			session.commit();
+			endMillisSecondstamp = System.currentTimeMillis() ;
+			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
+			System.out.println( "All mybatis DELETE done , count["+count+"] elapse["+elpaseSecond+"]s" );
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+}
+```
+
+## 4.3. 测试案例
+
+INSERT表500条记录（每10条提交一次）
+UPDATE表500条记录（每10条提交一次）
+SELECT表单条记录500*5次
+SELECT表所有记录1000次
+DELETE表500条记录（每10条提交一次）
+
+## 4.4. 测试结果
+
+```
+All sqlaction INSERT done , count[500] elapse[4.742]s
+All sqlaction UPDATE WHERE done , count[500] elapse[5.912]s
+All sqlaction SELECT WHERE done , count2[5] count[500] elapse[0.985]s
+All sqlaction SELECT to LIST done , count3[1000] elapse[1.172]s
+All sqlaction DELETE WHERE done , count[500] elapse[5.001]s
+
+All mybatis INSERT done , count[500] elapse[5.869]s
+All mybatis UPDATE WHERE done , count[500] elapse[6.921]s
+All mybatis SELECT WHERE done , count2[5] count[500] elapse[1.239]s
+All mybatis SELECT to List done , count3[1000] elapse[1.792]s
+All mybatis DELETE WHERE done , count[500] elapse[5.382]s
+
+All sqlaction INSERT done , count[500] elapse[5.392]s
+All sqlaction UPDATE WHERE done , count[500] elapse[5.821]s
+All sqlaction SELECT WHERE done , count2[5] count[500] elapse[0.952]s
+All sqlaction SELECT to LIST done , count3[1000] elapse[1.15]s
+All sqlaction DELETE WHERE done , count[500] elapse[5.509]s
+
+All mybatis INSERT done , count[500] elapse[6.066]s
+All mybatis UPDATE WHERE done , count[500] elapse[6.946]s
+All mybatis SELECT WHERE done , count2[5] count[500] elapse[1.183]s
+All mybatis SELECT to List done , count3[1000] elapse[1.804]s
+All mybatis DELETE WHERE done , count[500] elapse[5.958]s
+
+All sqlaction INSERT done , count[500] elapse[5.236]s
+All sqlaction UPDATE WHERE done , count[500] elapse[5.84]s
+All sqlaction SELECT WHERE done , count2[5] count[500] elapse[0.985]s
+All sqlaction SELECT to LIST done , count3[1000] elapse[1.222]s
+All sqlaction DELETE WHERE done , count[500] elapse[4.91]s
+
+All mybatis INSERT done , count[500] elapse[5.448]s
+All mybatis UPDATE WHERE done , count[500] elapse[7.287]s
+All mybatis SELECT WHERE done , count2[5] count[500] elapse[1.149]s
+All mybatis SELECT to List done , count3[1000] elapse[1.873]s
+All mybatis DELETE WHERE done , count[500] elapse[6.035]s
+```
+
+![benchmark_INSERT.png](benchmark_INSERT.png)
+
+![benchmark_UPDATE_WHERE.png](benchmark_UPDATE_WHERE.png)
+
+![benchmark_SELECT_WHERE.png](benchmark_SELECT_WHERE.png)
+
+![benchmark_SELECT_to_LIST.png](benchmark_SELECT_to_LIST.png)
+
+![benchmark_DELETE_WHERE.png](benchmark_DELETE_WHERE.png)
+
+**从以上性能测试图表中可以看出，`sqlaction`运行性能比`MyBatis`快大约20%，这意味着技术选型`sqlaction`的应用系统的交易延迟比`MyBatis`有明显优势。**
+
+**而且从测试前准备来看，无论配置文件、源代码文件数量还是大小，`sqlaction`都比`MyBatis`工作量少，能更快速的展开业务开发，减轻开发人员学习压力和心智负担，且采用的技术更简单更透明更易掌控。**
+
+# 5. 后续开发
+
+TODO：
+
+1. 目前`sqlaction`支持的SQL标准对于联机交易没问题，对于分析型复杂SQL（如函数、子查询）还需后续研发新增支持。
+1. 目前只支持MySQL数据库，后续将新增支持PostgreSQL和Oracle。
+1. 待设计各DBMS的分页查询语法的兼容统一表达。
+
+# 6. 关于开源项目
+
+欢迎使用`sqlaction`，如果你在使用中碰到了问题请告诉我，谢谢 ^_^
+
+源码托管地址 : [开源中国](https://gitee.com/calvinwilliams/sqlaction)、[github](https://github.com/calvinwilliams/sqlaction)
 
 # 7. 关于作者
+
+厉华，右手C，左手JAVA，写过小到性能卓越方便快捷的日志库、HTTP解析器、日志采集器等，大到交易平台/中间件等，分布式系统实践者，容器技术专研者，目前在某城商行负责基础架构。
+
+通过邮箱联系我 : [网易](mailto:calvinwilliams@163.com)、[Gmail](mailto:calvinwilliams.c@gmail.com)

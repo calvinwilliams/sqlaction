@@ -78,7 +78,7 @@ public class MyBatisBenchmarkCrud {
 			session.commit();
 			endMillisSecondstamp = System.currentTimeMillis() ;
 			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
-			System.out.println( "All mybatis UPDATE done , count["+count+"] elapse["+elpaseSecond+"]s" );
+			System.out.println( "All mybatis UPDATE WHERE done , count["+count+"] elapse["+elpaseSecond+"]s" );
 			
 			// benchmark for SELECT ... WHERE ...
 			beginMillisSecondstamp = System.currentTimeMillis() ;
@@ -120,7 +120,7 @@ public class MyBatisBenchmarkCrud {
 			session.commit();
 			endMillisSecondstamp = System.currentTimeMillis() ;
 			elpaseSecond = (endMillisSecondstamp-beginMillisSecondstamp)/1000.0 ;
-			System.out.println( "All mybatis DELETE done , count["+count+"] elapse["+elpaseSecond+"]s" );
+			System.out.println( "All mybatis DELETE WHERE done , count["+count+"] elapse["+elpaseSecond+"]s" );
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

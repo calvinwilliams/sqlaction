@@ -34,9 +34,9 @@ sqlaction is a JDBC code auto-gen tool.
 
 ```
 CREATE TABLE `sqlaction_demo` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '±àºÅ',
-  `name` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT 'Ãû×Ö',
-  `address` varchar(128) COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'µØÖ·',
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ï¿½ï¿½ï¿½',
+  `name` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT 'ï¿½ï¿½ï¿½ï¿½',
+  `address` varchar(128) COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'ï¿½ï¿½Ö·',
   PRIMARY KEY (`id`),
   KEY `sqlaction_demo` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
@@ -133,9 +133,9 @@ import java.sql.ResultSet;
 
 public class SqlactionDemoSAO {
 
-	int				id ; // ±àºÅ
-	String			name ; // Ãû×Ö
-	String			address ; // µØÖ·
+	int				id ; // ï¿½ï¿½ï¿½
+	String			name ; // ï¿½ï¿½ï¿½ï¿½
+	String			address ; // ï¿½ï¿½Ö·
 
 	int				_count_ ; // defining for 'SELECT COUNT(*)'
 
@@ -314,11 +314,11 @@ DDL
 
 ```
 CREATE TABLE `sqlaction_benchmark` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '±àºÅ',
-  `name` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT 'Ó¢ÎÄÃû',
-  `name_cn` varchar(128) COLLATE utf8mb4_bin NOT NULL COMMENT 'ÖÐÎÄÃû',
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ï¿½ï¿½ï¿½',
+  `name` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT 'Ó¢ï¿½ï¿½ï¿½ï¿½',
+  `name_cn` varchar(128) COLLATE utf8mb4_bin NOT NULL COMMENT 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½',
   `salary` decimal(12,2) NOT NULL COMMENT 'Ð½Ë®',
-  `birthday` date NOT NULL COMMENT 'ÉúÈÕ',
+  `birthday` date NOT NULL COMMENT 'ï¿½ï¿½ï¿½ï¿½',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=42332 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
 ```
@@ -410,7 +410,7 @@ public class SqlActionBenchmarkCrud {
 			
 			sqlactionBenchmark = new SqlactionBenchmarkSAO() ;
 			sqlactionBenchmark.name = "Calvin" ;
-			sqlactionBenchmark.nameCn = "¿¨¶ûÎÄ" ;
+			sqlactionBenchmark.nameCn = "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" ;
 			sqlactionBenchmark.salary = new BigDecimal(0) ;
 			long time = System.currentTimeMillis() ;
 			sqlactionBenchmark.birthday = new java.sql.Date(time) ;
@@ -425,7 +425,7 @@ public class SqlActionBenchmarkCrud {
 			beginMillisSecondstamp = System.currentTimeMillis() ;
 			for( i = 0 ; i < count ; i++ ) {
 				sqlactionBenchmark.name = "Calvin"+i ;
-				sqlactionBenchmark.nameCn = "¿¨¶ûÎÄ"+i ;
+				sqlactionBenchmark.nameCn = "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"+i ;
 				rows = SqlactionBenchmarkSAO.INSERT_INTO_sqlaction_benchmark( conn, sqlactionBenchmark ) ;
 				if( rows != 1 ) {
 					System.out.println( "SqlactionBenchmarkSAO.INSERT_INTO_sqlaction_benchmark failed["+rows+"]" );
@@ -533,15 +533,15 @@ Create `mybatis-config.xml`
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
-	<!-- default="development" ¿ª·¢»·¾³ default="work" ·¢²¼»·¾³ -->
+	<!-- default="development" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ default="work" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ -->
 	<settings>
 		<setting name="cacheEnabled" value="false" />
 	</settings>
 	<environments default="development">
 		<environment id="development">
-			<!-- ÅäÖÃÊÂÎï -->
+			<!-- ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ -->
 			<transactionManager type="JDBC"></transactionManager>
-			<!-- ÅäÖÃÊý¾ÝÔ´ -->
+			<!-- ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ -->
 			<dataSource type="POOLED">
 				<property name="driver" value="com.mysql.jdbc.Driver" />
 				<property name="url" value="jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" />
@@ -592,11 +592,11 @@ import java.math.*;
 
 public class SqlactionBenchmarkSAO {
 
-	int				id ; // ±àºÅ
-	String			name ; // Ó¢ÎÄÃû
-	String			name_cn ; // ÖÐÎÄÃû
+	int				id ; // ï¿½ï¿½ï¿½
+	String			name ; // Ó¢ï¿½ï¿½ï¿½ï¿½
+	String			name_cn ; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	BigDecimal		salary ; // Ð½Ë®
-	java.sql.Date	birthday ; // ÉúÈÕ
+	java.sql.Date	birthday ; // ï¿½ï¿½ï¿½ï¿½
 
 	int				count___ ; // defining for 'SELECT COUNT(*)'
 
@@ -662,7 +662,7 @@ public class MyBatisBenchmarkCrud {
 			SqlactionBenchmarkSAO	sqlactionBenchmark = new SqlactionBenchmarkSAO() ;
 			sqlactionBenchmark.id = 1 ;
 			sqlactionBenchmark.name = "Calvin" ;
-			sqlactionBenchmark.name_cn = "¿¨¶ûÎÄ" ;
+			sqlactionBenchmark.name_cn = "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" ;
 			sqlactionBenchmark.salary = new BigDecimal(0) ;
 			long time = System.currentTimeMillis() ;
 			sqlactionBenchmark.birthday = new java.sql.Date(time) ;
@@ -679,7 +679,7 @@ public class MyBatisBenchmarkCrud {
 			beginMillisSecondstamp = System.currentTimeMillis() ;
 			for( i = 0 ; i < count ; i++ ) {
 				sqlactionBenchmark.name = "Calvin"+i ;
-				sqlactionBenchmark.name_cn = "¿¨¶ûÎÄ"+i ;
+				sqlactionBenchmark.name_cn = "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"+i ;
 				mapper.insertOne(sqlactionBenchmark);
 				if( i % 10 == 0 ) {
 					session.commit();
@@ -756,11 +756,11 @@ public class MyBatisBenchmarkCrud {
 
 ## 3.3. Case
 
-INSERT±í500Ìõ¼ÇÂ¼£¨Ã¿10ÌõÌá½»Ò»´Î£©
-UPDATE±í500Ìõ¼ÇÂ¼£¨Ã¿10ÌõÌá½»Ò»´Î£©
-SELECT±íµ¥Ìõ¼ÇÂ¼500*5´Î
-SELECT±íËùÓÐ¼ÇÂ¼1000´Î
-DELETE±í500Ìõ¼ÇÂ¼£¨Ã¿10ÌõÌá½»Ò»´Î£©
+INSERTï¿½ï¿½500ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½Ã¿10ï¿½ï¿½ï¿½á½»Ò»ï¿½Î£ï¿½
+UPDATEï¿½ï¿½500ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½Ã¿10ï¿½ï¿½ï¿½á½»Ò»ï¿½Î£ï¿½
+SELECTï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¼500*5ï¿½ï¿½
+SELECTï¿½ï¿½ï¿½ï¿½ï¿½Ð¼ï¿½Â¼1000ï¿½ï¿½
+DELETEï¿½ï¿½500ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½Ã¿10ï¿½ï¿½ï¿½á½»Ò»ï¿½Î£ï¿½
 
 ## 3.4. Result
 
@@ -822,8 +822,9 @@ All mybatis DELETE WHERE done , count[500] elapse[6.035]s
 
 # 5. About The Project
 
-Get source at : [¿ªÔ´ÖÐ¹ú](https://gitee.com/calvinwilliams/sqlaction)¡¢[github](https://github.com/calvinwilliams/sqlaction)
+Get source at : [ï¿½ï¿½Ô´ï¿½Ð¹ï¿½](https://gitee.com/calvinwilliams/sqlaction)ï¿½ï¿½[github](https://github.com/calvinwilliams/sqlaction)
 
 # 6. About Author
 
-Mailto : [ÍøÒ×](mailto:calvinwilliams@163.com)¡¢[Gmail](mailto:calvinwilliams.c@gmail.com)
+Mailto : [ï¿½ï¿½ï¿½ï¿½](mailto:calvinwilliams@163.com)ï¿½ï¿½[Gmail](mailto:calvinwilliams.c@gmail.com)
+

@@ -15,7 +15,7 @@ import java.util.LinkedList;
 
 public class SqlActionGencode {
 
-	final private static String				SQLACTION_VERSION = "0.1.0.0" ;
+	final private static String				SQLACTION_VERSION = "0.1.1.0" ;
 	
 	final public static String				SELECT_COUNT___ = "count(" ;
 	final private static String				COUNT___ = "_count_" ;
@@ -175,6 +175,7 @@ public class SqlActionGencode {
 				// Parse sql actions and dump gencode
 				for( String sqlaction : tc.sqlactions ) {
 					String					sql ;
+					String					statementSql ;
 					String					methodName ;
 					int						beginMetaData ;
 					int						endMetaData ;
@@ -189,6 +190,8 @@ public class SqlActionGencode {
 					} else {
 						sql = sqlaction ;
 					}
+					
+					statementSql = sql.replace("\r\n"," ").replace("\n"," ").replace("\t"," ").replaceAll("[ ]+"," ").trim() ;
 					
 					beginMetaData = sqlaction.indexOf( "@@METHOD(" ) ;
 					if( beginMetaData >= 0 ) {
@@ -295,7 +298,7 @@ public class SqlActionGencode {
 					System.out.println( "Dump gencode ["+sql+"]" );
 					
 					if( parser.selectColumnTokenList != null && parser.selectColumnTokenList.size() > 0 ) {
-						nret = selectSqlDumpGencode( dbserverConf, sqlactionConf, tc, sql, methodName, parser, database, table, out ) ;
+						nret = selectSqlDumpGencode( dbserverConf, sqlactionConf, tc, sql, statementSql, methodName, database, table, parser, out ) ;
 						if( nret != 0 ) {
 							System.out.println( "\t" + "*** ERROR : SelectSqlDumpGencode failed["+nret+"]" );
 							return;
@@ -303,7 +306,7 @@ public class SqlActionGencode {
 							System.out.println( "\t" + "SelectSqlDumpGencode ok" );
 						}
 					} else if( parser.insertTableName != null ) {
-						nret = insertSqlDumpGencode( dbserverConf, sqlactionConf, tc, sql, methodName, parser, database, table, out ) ;
+						nret = insertSqlDumpGencode( dbserverConf, sqlactionConf, tc, sql, statementSql, methodName, database, table, parser, out ) ;
 						if( nret != 0 ) {
 							System.out.println( "\t" + "*** ERROR : InsertSqlDumpGencode failed["+nret+"]" );
 							return;
@@ -311,7 +314,7 @@ public class SqlActionGencode {
 							System.out.println( "\t" + "InsertSqlDumpGencode ok" );
 						}
 					} else if( parser.updateTableName != null ) {
-						nret = updateSqlDumpGencode( dbserverConf, sqlactionConf, tc, sql, methodName, parser, database, table, out ) ;
+						nret = updateSqlDumpGencode( dbserverConf, sqlactionConf, tc, sql, statementSql, methodName, database, table, parser, out ) ;
 						if( nret != 0 ) {
 							System.out.println( "\t" + "*** ERROR : UpdateSqlDumpGencode failed["+nret+"]" );
 							return;
@@ -319,7 +322,7 @@ public class SqlActionGencode {
 							System.out.println( "\t" + "UpdateSqlDumpGencode ok" );
 						}
 					} else if( parser.deleteTableName != null ) {
-						nret = deleteSqlDumpGencode( dbserverConf, sqlactionConf, tc, sql, methodName, parser, database, table, out ) ;
+						nret = deleteSqlDumpGencode( dbserverConf, sqlactionConf, tc, sql, statementSql, methodName, database, table, parser, out ) ;
 						if( nret != 0 ) {
 							System.out.println( "\t" + "*** ERROR : DeleteSqlDumpGencode failed["+nret+"]" );
 							return;
@@ -349,7 +352,11 @@ public class SqlActionGencode {
 		}
 	}
 
-	public static int selectSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf, String sql, String methodName, SqlActionSyntaxParser parser, SqlActionDatabase database, SqlActionTable table, StringBuilder out ) {
+	public static int selectSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf,
+											String sql, String statementSql, String methodName,
+											SqlActionDatabase database, SqlActionTable table,
+											SqlActionSyntaxParser parser,
+											StringBuilder out ) {
 		
 		StringBuilder		methodParameters = new StringBuilder() ;
 		int					columnIndex ;
@@ -367,10 +374,10 @@ public class SqlActionGencode {
 		}
 		
 		out.append( "\n" );
-		out.append( "\t" + "// "+sql+"\n" );
+		OutAppendSql( out, sql );
 		if( parser.whereColumnTokenList.size() > 0 ) {
 			out.append( "\t" + "public static int " + methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
-			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
+			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+statementSql+"\") ;\n" );
 			columnIndex = 0 ;
 			for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
 				columnIndex++;
@@ -384,7 +391,7 @@ public class SqlActionGencode {
 		} else {
 			out.append( "\t" + "public static int " + methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
 			out.append( "\t\t" + "Statement stmt = conn.createStatement() ;\n" );
-			out.append( "\t\t" + "ResultSet rs = stmt.executeQuery(\""+sql+"\") ;\n" );
+			out.append( "\t\t" + "ResultSet rs = stmt.executeQuery(\""+statementSql+"\") ;\n" );
 		}
 		out.append( "\t\t" + "while( rs.next() ) {\n" );
 		for( SqlActionFromTableToken ct : parser.fromTableTokenList ) {
@@ -415,47 +422,51 @@ public class SqlActionGencode {
 		return 0;
 	}
 	
-	public static int insertSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf, String sql, String methodName, SqlActionSyntaxParser parser, SqlActionDatabase database, SqlActionTable table, StringBuilder out ) {
+	public static int insertSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf,
+											String sql, String statementSql, String methodName,
+											SqlActionDatabase database, SqlActionTable table,
+											SqlActionSyntaxParser parser,
+											StringBuilder out ) {
 		
-		StringBuilder		sqlBuilder = new StringBuilder() ;
+		StringBuilder		statementSqlBuilder = new StringBuilder() ;
 		StringBuilder		methodParameters = new StringBuilder() ;
 		int					columnIndex ;
 		int					nret = 0 ;
 		
-		sqlBuilder.append( sql + " (" );
+		statementSqlBuilder.append( statementSql + " (" );
 		
 		columnIndex = 0 ;
 		for( SqlActionColumn c : table.columnList ) {
 			if( c.isAutoIncrement == false ) {
 				columnIndex++;
 				if( columnIndex > 1 )
-					sqlBuilder.append( "," );
-				sqlBuilder.append( c.columnName );
+					statementSqlBuilder.append( "," );
+				statementSqlBuilder.append( c.columnName );
 			}
 		}
 		
-		sqlBuilder.append( ") VALUES (" );
+		statementSqlBuilder.append( ") VALUES (" );
 		
 		columnIndex = 0 ;
 		for( SqlActionColumn c : table.columnList ) {
 			if( c.isAutoIncrement == false ) {
 				columnIndex++;
 				if( columnIndex > 1 )
-					sqlBuilder.append( "," );
-				sqlBuilder.append( "?" );
+					statementSqlBuilder.append( "," );
+				statementSqlBuilder.append( "?" );
 			}
 		}
 		
-		sqlBuilder.append( ")" );
+		statementSqlBuilder.append( ")" );
 		
-		sql = sqlBuilder.toString() ;
+		sql = statementSqlBuilder.toString() ;
 		
 		methodParameters.append( "Connection conn, " + table.javaClassName + " " + table.javaObjectName );
 		
 		out.append( "\n" );
-		out.append( "\t" + "// "+sql+"\n" );
+		OutAppendSql( out, sql );
 		out.append( "\t" + "public static int " + methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
-		out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
+		out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+statementSqlBuilder+"\") ;\n" );
 		columnIndex = 0 ;
 		for( SqlActionColumn c : table.columnList ) {
 			if( c.isAutoIncrement == false ) {
@@ -473,7 +484,11 @@ public class SqlActionGencode {
 		return 0;
 	}
 	
-	public static int updateSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf, String sql, String methodName, SqlActionSyntaxParser parser, SqlActionDatabase database, SqlActionTable table, StringBuilder out ) {
+	public static int updateSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf,
+											String sql, String statementSql, String methodName,
+											SqlActionDatabase database, SqlActionTable table,
+											SqlActionSyntaxParser parser,
+											StringBuilder out ) {
 		
 		StringBuilder		methodParameters = new StringBuilder() ;
 		int					setColumnIndex ;
@@ -499,10 +514,10 @@ public class SqlActionGencode {
 		}
 		
 		out.append( "\n" );
-		out.append( "\t" + "// "+sql+"\n" );
+		OutAppendSql( out, sql );
 		if( parser.setColumnTokenList.size() > 0 || parser.whereColumnTokenList.size() > 0 ) {
 			out.append( "\t" + "public static int " + methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
-			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
+			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+statementSql+"\") ;\n" );
 			setColumnIndex = 0 ;
 			columnTokenIndex = 0 ;
 			for( SqlActionSetColumnToken ct : parser.setColumnTokenList ) {
@@ -529,7 +544,7 @@ public class SqlActionGencode {
 			out.append( "\t\t" + "return prestmt.executeUpdate() ;\n" );
 		} else {
 			out.append( "\t" + "public static int " + methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
-			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
+			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+statementSql+"\") ;\n" );
 			setColumnIndex = 0 ;
 			columnTokenIndex = 0 ;
 			for( SqlActionSetColumnToken ct : parser.setColumnTokenList ) {
@@ -550,7 +565,11 @@ public class SqlActionGencode {
 		return 0;
 	}
 	
-	public static int deleteSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf, String sql, String methodName, SqlActionSyntaxParser parser, SqlActionDatabase database, SqlActionTable table, StringBuilder out ) {
+	public static int deleteSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf,
+											String sql, String statementSql, String methodName,
+											SqlActionDatabase database, SqlActionTable table,
+											SqlActionSyntaxParser parser,
+											StringBuilder out ) {
 		
 		StringBuilder		methodParameters = new StringBuilder() ;
 		int					columnIndex ;
@@ -565,10 +584,10 @@ public class SqlActionGencode {
 		}
 		
 		out.append( "\n" );
-		out.append( "\t" + "// "+sql+"\n" );
+		OutAppendSql( out, sql );
 		if( parser.whereColumnTokenList.size() > 0 ) {
 			out.append( "\t" + "public static int " + methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
-			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
+			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+statementSql+"\") ;\n" );
 			columnIndex = 0 ;
 			for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
 				columnIndex++;
@@ -581,7 +600,7 @@ public class SqlActionGencode {
 			out.append( "\t\t" + "return prestmt.executeUpdate() ;\n" );
 		} else {
 			out.append( "\t" + "public static int " + methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
-			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+sql+"\") ;\n" );
+			out.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement(\""+statementSql+"\") ;\n" );
 			columnIndex = 0 ;
 			for( SqlActionSetColumnToken ct : parser.setColumnTokenList ) {
 				columnIndex++;
@@ -600,4 +619,12 @@ public class SqlActionGencode {
 		return 0;
 	}
 	
+	private static void OutAppendSql( StringBuilder out, String sql ) {
+		String[] sa = sql.split( "\n" ) ;
+		for( String s : sa ) {
+			if( s.trim().replaceAll("\t","").isEmpty() )
+				continue;
+			out.append( "\t" + "// "+s+"\n" );
+		}
+	}
 }

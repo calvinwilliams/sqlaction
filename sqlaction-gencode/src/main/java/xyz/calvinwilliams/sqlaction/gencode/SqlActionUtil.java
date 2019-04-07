@@ -90,7 +90,7 @@ public class SqlActionUtil {
 		sql = new String( charArray );
 		
 		while(true) {
-			String sql2 = sql.replaceAll( "__", "_" ) ;
+			String sql2 = sql.replaceAll( "_+", "_" ) ;
 			if( sql2.length() == sql.length() ) {
 				sql = sql2 ;
 				break;

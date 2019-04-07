@@ -5,3 +5,5 @@ git.exe checkout     release --
 git.exe merge  test
 
 git.exe checkout     deve --
+
+pause

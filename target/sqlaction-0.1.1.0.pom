@@ -1,12 +1,24 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>xyz.calvinwilliams</groupId>
-    <artifactId>sqlaction</artifactId>
-    <version>0.1.1.0</version>
-  </parent>
-  <artifactId>sqlaction-gencode</artifactId>
-
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>xyz.calvinwilliams</groupId>
+	<artifactId>sqlaction</artifactId>
+	<version>0.1.1.0</version>
+	<packaging>pom</packaging>
+	<modules>
+		<module>sqlaction-gencode</module>
+		<module>sqlaction-test</module>
+		<module>sqlaction-demo</module>
+		<module>sqlaction-benchmark</module>
+		<module>mybatis-benchmark</module>
+	</modules>
+	
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -39,13 +51,4 @@
 			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
 		</repository>
 	</distributionManagement>
-
-	<dependencies>
-		<dependency>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-compiler-plugin</artifactId>
-			<version>2.3.2</version>
-		</dependency>
-	</dependencies>
-
 </project>

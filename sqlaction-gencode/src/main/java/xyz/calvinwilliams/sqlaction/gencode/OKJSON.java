@@ -11,13 +11,13 @@ package xyz.calvinwilliams.sqlaction.gencode;
 import java.util.*;
 import java.lang.reflect.*;
 
-/**
- * @ClassName   : OKJSON
- * @Description : Util tool class for serialing/deserialing object
- * @author      : calvin
- * @date        : 2019-03-17
- *
- */
+///**
+// * @ClassName   : OKJSON
+// * @Description : Util tool class for serialing/deserialing object
+// * @author      : calvin
+// * @date        : 2019-03-17
+// *
+// */
 public class OKJSON {
 	final public static int	OKJSON_OTIONS_DIRECT_ACCESS_PROPERTY_ENABLE = 1 ;
 	final public static int	OKJSON_OTIONS_PRETTY_FORMAT_ENABLE = 2 ;
@@ -39,13 +39,13 @@ public class OKJSON {
 		return errorDesc.get();
 	}
 	
-	/**
-	 * @Title         : objectToString 
-	 * @Description   : Convert object to json string
-	 * @param object  : Input object 
-	 * @param options : Convert options in OKJSON_OTIONS_DIRECT_ACCESS_PROPERTY_ENABLE|OKJSON_OTIONS_PRETTY_FORMAT_ENABLE
-	 * @return        : 0 if convert successful , not 0 if failed
-	 */
+//	/**
+//	 * @Title         : objectToString 
+//	 * @Description   : Convert object to json string
+//	 * @param object  : Input object 
+//	 * @param options : Convert options in OKJSON_OTIONS_DIRECT_ACCESS_PROPERTY_ENABLE|OKJSON_OTIONS_PRETTY_FORMAT_ENABLE
+//	 * @return        : 0 if convert successful , not 0 if failed
+//	 */
 	public static String objectToString( Object object, int options ) {
 		OkJsonGenerator okjsonGenerator ;
 		
@@ -80,14 +80,14 @@ public class OKJSON {
 		return string;
 	}
 	
-	/**
-	 * @Title         : stringToObject 
-	 * @Description   : Convert json string to object
-	 * @param string  : Input json string 
-	 * @param clazz   : output object for clazz
-	 * @param options : Convert options in OKJSON_OTIONS_DIRECT_ACCESS_PROPERTY_ENABLE|OKJSON_OTIONS_STRICT_POLICY
-	 * @return        : 0 if convert successful , not 0 if failed
-	 */
+//	/**
+//	 * @Title         : stringToObject 
+//	 * @Description   : Convert json string to object
+//	 * @param string  : Input json string 
+//	 * @param clazz   : output object for clazz
+//	 * @param options : Convert options in OKJSON_OTIONS_DIRECT_ACCESS_PROPERTY_ENABLE|OKJSON_OTIONS_STRICT_POLICY
+//	 * @return        : 0 if convert successful , not 0 if failed
+//	 */
 	public static <T> T stringToObject( String string, Class<T> clazz, int options ) {
 		OkJsonParser okjsonParser ;
 		
@@ -131,13 +131,13 @@ public class OKJSON {
 	}
 }
 
-/**
- * @ClassName   : OkJsonParser
- * @Description : Util tool class for deserialing to object
- * @author      : calvin
- * @date        : 2019-03-17
- *
- */
+///**
+// * @ClassName   : OkJsonParser
+// * @Description : Util tool class for deserialing to object
+// * @author      : calvin
+// * @date        : 2019-03-17
+// *
+// */
 class OkJsonParser {
 	private boolean				strictPolicyEnable ;
 	private boolean				directAccessPropertyEnable ;
@@ -184,12 +184,12 @@ class OkJsonParser {
 	final private static int	OKJSON_ERROR_NAME_NOT_FOUND_IN_OBJECT = -28 ;
 	final private static int	OKJSON_ERROR_NEW_OBJECT = -31 ;
 	
-	/**
-	 * @Title               : tokenJsonString 
-	 * @Description         : Token out a string from json char array
-	 * @param jsonCharArray : Input json char array 
-	 * @return              : 0 if convert successful , not 0 if failed
-	 */
+//	/**
+//	 * @Title               : tokenJsonString 
+//	 * @Description         : Token out a string from json char array
+//	 * @param jsonCharArray : Input json char array 
+//	 * @return              : 0 if convert successful , not 0 if failed
+//	 */
 	private int tokenJsonString( char[] jsonCharArray ) {
 		StringBuilder	fieldStringBuilder ;
 		char			ch ;
@@ -316,12 +316,12 @@ class OkJsonParser {
 		return OKJSON_ERROR_END_OF_BUFFER;
 	}
 	
-	/**
-	 * @Title               : tokenJsonNumber 
-	 * @Description         : Token out a number from json char array
-	 * @param jsonCharArray : Input json char array 
-	 * @return              : 0 if convert successful , not 0 if failed
-	 */
+//	/**
+//	 * @Title               : tokenJsonNumber 
+//	 * @Description         : Token out a number from json char array
+//	 * @param jsonCharArray : Input json char array 
+//	 * @return              : 0 if convert successful , not 0 if failed
+//	 */
 	private int tokenJsonNumber( char[] jsonCharArray ) {
 		char	ch ;
 		boolean	decimalPointFlag ;
@@ -365,12 +365,12 @@ class OkJsonParser {
 		return OKJSON_ERROR_END_OF_BUFFER;
 	}
 	
-	/**
-	 * @Title               : tokenJsonWord 
-	 * @Description         : Token out a word from json char array
-	 * @param jsonCharArray : Input json char array 
-	 * @return              : 0 if convert successful , not 0 if failed
-	 */
+//	/**
+//	 * @Title               : tokenJsonWord 
+//	 * @Description         : Token out a word from json char array
+//	 * @param jsonCharArray : Input json char array 
+//	 * @return              : 0 if convert successful , not 0 if failed
+//	 */
 	private int tokenJsonWord( char[] jsonCharArray ) {
 		char	ch ;
 		
@@ -518,17 +518,17 @@ class OkJsonParser {
 		return OKJSON_ERROR_END_OF_BUFFER;
 	}
 	
-	/**
-	 * @Title                  : addArrayObject 
-	 * @Description            : Add a element to List object
-	 * @param jsonCharArray    : Input json char array 
-	 * @param valueTokenType   : List element type enum
-	 * @param valueBeginOffset : Token begin offset from json char array
-	 * @param valueEndOffset   : Token end offset from json char array
-	 * @param object           : List object wait for add
-	 * @param field            : List element type
-	 * @return                 : 0 if convert successful , not 0 if failed
-	 */
+//	/**
+//	 * @Title                  : addArrayObject 
+//	 * @Description            : Add a element to List object
+//	 * @param jsonCharArray    : Input json char array 
+//	 * @param valueTokenType   : List element type enum
+//	 * @param valueBeginOffset : Token begin offset from json char array
+//	 * @param valueEndOffset   : Token end offset from json char array
+//	 * @param object           : List object wait for add
+//	 * @param field            : List element type
+//	 * @return                 : 0 if convert successful , not 0 if failed
+//	 */
 	private int addArrayObject( char[] jsonCharArray, TokenType valueTokenType, int valueBeginOffset, int valueEndOffset, Object object, Field field ) {
 
 		try {
@@ -610,14 +610,14 @@ class OkJsonParser {
 		return 0;
 	}
 
-	/**
-	 * @Title                  : stringToArrayObject 
-	 * @Description            : array data convert to list object
-	 * @param jsonCharArray    : Input json char array 
-	 * @param object           : List object wait for converting
-	 * @param field            : List element type
-	 * @return                 : 0 if convert successful , not 0 if failed
-	 */
+//	/**
+//	 * @Title                  : stringToArrayObject 
+//	 * @Description            : array data convert to list object
+//	 * @param jsonCharArray    : Input json char array 
+//	 * @param object           : List object wait for converting
+//	 * @param field            : List element type
+//	 * @return                 : 0 if convert successful , not 0 if failed
+//	 */
 	private int stringToArrayObject( char[] jsonCharArray, Object object, Field field ) {
 		
 		TokenType			valueTokenType ;
@@ -701,18 +701,18 @@ class OkJsonParser {
 		return 0;
 	}
 		
-	/**
-	 * @Title                  : setObjectProperty 
-	 * @Description            : set property in object
-	 * @param jsonCharArray    : Input json char array 
-	 * @param valueTokenType   : List element type enum
-	 * @param valueBeginOffset : Token begin offset from json char array
-	 * @param valueEndOffset   : Token end offset from json char array
-	 * @param object           : List object wait for converting
-	 * @param field            : List element type
-	 * @param method           : 
-	 * @return                 : 0 if convert successful , not 0 if failed
-	 */
+//	/**
+//	 * @Title                  : setObjectProperty 
+//	 * @Description            : set property in object
+//	 * @param jsonCharArray    : Input json char array 
+//	 * @param valueTokenType   : List element type enum
+//	 * @param valueBeginOffset : Token begin offset from json char array
+//	 * @param valueEndOffset   : Token end offset from json char array
+//	 * @param object           : List object wait for converting
+//	 * @param field            : List element type
+//	 * @param method           : 
+//	 * @return                 : 0 if convert successful , not 0 if failed
+//	 */
 	private int setObjectProperty( char[] jsonCharArray, TokenType valueTokenType, int valueBeginOffset, int valueEndOffset, Object object, Field field, Method method ) {
 		
 		StringBuilder	fieldStringBuilder ;
@@ -938,13 +938,13 @@ class OkJsonParser {
 		return 0;
 	}
 	
-	/**
-	 * @Title                  : stringToObjectProperties 
-	 * @Description            : convert json char array to object's properties 
-	 * @param jsonCharArray    : Input json char array 
-	 * @param object           : List object wait for converting
-	 * @return                 : 0 if convert successful , not 0 if failed
-	 */
+//	/**
+//	 * @Title                  : stringToObjectProperties 
+//	 * @Description            : convert json char array to object's properties 
+//	 * @param jsonCharArray    : Input json char array 
+//	 * @param object           : List object wait for converting
+//	 * @return                 : 0 if convert successful , not 0 if failed
+//	 */
 	private int stringToObjectProperties( char[] jsonCharArray, Object object ) {
 		
 		Class					clazz ;
@@ -1135,13 +1135,13 @@ class OkJsonParser {
 		return 0;
 	}
 	
-	/**
-	 * @Title                  : stringToObject 
-	 * @Description            : convert json char array to object 
-	 * @param jsonCharArray    : Input json char array 
-	 * @param object           : object wait for converting
-	 * @return                 : 0 if convert successful , not 0 if failed
-	 */
+//	/**
+//	 * @Title                  : stringToObject 
+//	 * @Description            : convert json char array to object 
+//	 * @param jsonCharArray    : Input json char array 
+//	 * @param object           : object wait for converting
+//	 * @return                 : 0 if convert successful , not 0 if failed
+//	 */
 	public <T> T stringToObject( String jsonString, T object ) {
 		
 		char[]	jsonCharArray ;
@@ -1246,13 +1246,13 @@ class OkJsonParser {
 	}
 }
 
-/**
- * @ClassName   : OkJsonGenerator
- * @Description : Util tool class for serialing from object
- * @author      : calvin
- * @date        : 2019-03-17
- *
- */
+///**
+// * @ClassName   : OkJsonGenerator
+// * @Description : Util tool class for serialing from object
+// * @author      : calvin
+// * @date        : 2019-03-17
+// *
+// */
 class OkJsonGenerator {
 	
 	enum ClassFieldType {
@@ -1299,15 +1299,15 @@ class OkJsonGenerator {
 	final private static char	ENTER_CHAR = '\n' ;
 	final private static String	NULL_STRING = "null" ;
 	
-	/**
-	 * @Title                      : objectToListString 
-	 * @Description                : Convert list object to json char array
-	 * #param array                : List elements in object 
-	 * @param arrayCount           : List element count
-	 * @param jsonCharArrayBuilder : Output to json char array 
-	 * @param depth                : Output depth layout
-	 * @return                     : 0 if convert successful , not 0 if failed
-	 */
+//	/**
+//	 * @Title                      : objectToListString 
+//	 * @Description                : Convert list object to json char array
+//	 * #param array                : List elements in object 
+//	 * @param arrayCount           : List element count
+//	 * @param jsonCharArrayBuilder : Output to json char array 
+//	 * @param depth                : Output depth layout
+//	 * @return                     : 0 if convert successful , not 0 if failed
+//	 */
 	private int objectToListString( List<Object> array, int arrayCount, Field field, OkJsonCharArrayBuilder jsonCharArrayBuilder, int depth ) {
 		
 		HashMap<Class,Boolean>	basicTypeClassMapBoolean = basicTypeClassMapBooleanCache.get();
@@ -1379,12 +1379,12 @@ class OkJsonGenerator {
 		return 0;
 	}
 	
-	/**
-	 * @Title                      : unfoldEscape 
-	 * @Description                : Unfold json escape char to json char array 
-	 * #param value                : source string 
-	 * @return                     : null if convert failed, string if convert successful
-	 */
+//	/**
+//	 * @Title                      : unfoldEscape 
+//	 * @Description                : Unfold json escape char to json char array 
+//	 * #param value                : source string 
+//	 * @return                     : null if convert failed, string if convert successful
+//	 */
 	private String unfoldEscape( String value ) {
 		
 		OkJsonCharArrayBuilder	fieldCharArrayBuilder = fieldByteArrayBuilderCache.get() ;
@@ -1468,14 +1468,14 @@ class OkJsonGenerator {
 			return fieldCharArrayBuilder.toString();
 	}
 	
-	/**
-	 * @Title                      : objectToPropertiesString 
-	 * @Description                : Convert object to json char array
-	 * #param object               : source object
-	 * @param jsonCharArrayBuilder : Output to json char array 
-	 * @param depth                : Output depth layout
-	 * @return                     : 0 if convert successful , not 0 if failed
-	 */
+//	/**
+//	 * @Title                      : objectToPropertiesString 
+//	 * @Description                : Convert object to json char array
+//	 * #param object               : source object
+//	 * @param jsonCharArrayBuilder : Output to json char array 
+//	 * @param depth                : Output depth layout
+//	 * @return                     : 0 if convert successful , not 0 if failed
+//	 */
 	private int objectToPropertiesString( Object object, OkJsonCharArrayBuilder jsonCharArrayBuilder, int depth ) {
 		
 		HashMap<Class,Boolean>			basicTypeClassMapBoolean = basicTypeClassMapBooleanCache.get();
@@ -1700,12 +1700,12 @@ class OkJsonGenerator {
 		return 0;
 	}
 	
-	/**
-	 * @Title                      : objectToString 
-	 * @Description                : Convert object to json char array
-	 * #param object               : source object
-	 * @return                     : null if convert failed , not object if convert successful
-	 */
+//	/**
+//	 * @Title                      : objectToString 
+//	 * @Description                : Convert object to json char array
+//	 * #param object               : source object
+//	 * @return                     : null if convert failed , not object if convert successful
+//	 */
 	public String objectToString( Object object ) {
 		
 		OkJsonCharArrayBuilder	jsonCharArrayBuilder ;
@@ -1849,13 +1849,13 @@ class OkJsonGenerator {
 	}
 }
 
-/**
- * @ClassName   : OkJsonCharArrayBuilder
- * @Description : Util tool class for appending char array on serialing
- * @author      : calvin
- * @date        : 2019-03-17
- *
- */
+///**
+// * @ClassName   : OkJsonCharArrayBuilder
+// * @Description : Util tool class for appending char array on serialing
+// * @author      : calvin
+// * @date        : 2019-03-17
+// *
+// */
 class OkJsonCharArrayBuilder {
 	
 	private char[]		buf ;

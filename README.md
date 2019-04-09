@@ -34,9 +34,9 @@ sqlaction is a JDBC code auto-gen tool.
 
 ```
 CREATE TABLE `sqlaction_demo` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '���',
-  `name` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT '����',
-  `address` varchar(128) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '��ַ',
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `name` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT '名字',
+  `address` varchar(128) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '地址',
   PRIMARY KEY (`id`),
   KEY `sqlaction_demo` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
@@ -133,9 +133,9 @@ import java.sql.ResultSet;
 
 public class SqlactionDemoSAO {
 
-	int				id ; // ���
-	String			name ; // ����
-	String			address ; // ��ַ
+	int				id ; // 编号
+	String			name ; // 名字
+	String			address ; // 地址
 
 	int				_count_ ; // defining for 'SELECT COUNT(*)'
 
@@ -314,11 +314,11 @@ DDL
 
 ```
 CREATE TABLE `sqlaction_benchmark` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '���',
-  `name` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT 'Ӣ����',
-  `name_cn` varchar(128) COLLATE utf8mb4_bin NOT NULL COMMENT '������',
-  `salary` decimal(12,2) NOT NULL COMMENT 'нˮ',
-  `birthday` date NOT NULL COMMENT '����',
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `name` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT '英文名',
+  `name_cn` varchar(128) COLLATE utf8mb4_bin NOT NULL COMMENT '中文名',
+  `salary` decimal(12,2) NOT NULL COMMENT '薪水',
+  `birthday` date NOT NULL COMMENT '生日',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=42332 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
 ```
@@ -410,7 +410,7 @@ public class SqlActionBenchmarkCrud {
 			
 			sqlactionBenchmark = new SqlactionBenchmarkSAO() ;
 			sqlactionBenchmark.name = "Calvin" ;
-			sqlactionBenchmark.nameCn = "������" ;
+			sqlactionBenchmark.nameCn = "卡尔文" ;
 			sqlactionBenchmark.salary = new BigDecimal(0) ;
 			long time = System.currentTimeMillis() ;
 			sqlactionBenchmark.birthday = new java.sql.Date(time) ;
@@ -425,7 +425,7 @@ public class SqlActionBenchmarkCrud {
 			beginMillisSecondstamp = System.currentTimeMillis() ;
 			for( i = 0 ; i < count ; i++ ) {
 				sqlactionBenchmark.name = "Calvin"+i ;
-				sqlactionBenchmark.nameCn = "������"+i ;
+				sqlactionBenchmark.nameCn = "卡尔文"+i ;
 				rows = SqlactionBenchmarkSAO.INSERT_INTO_sqlaction_benchmark( conn, sqlactionBenchmark ) ;
 				if( rows != 1 ) {
 					System.out.println( "SqlactionBenchmarkSAO.INSERT_INTO_sqlaction_benchmark failed["+rows+"]" );
@@ -533,15 +533,12 @@ Create `mybatis-config.xml`
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
-	<!-- default="development" �������� default="work" �������� -->
 	<settings>
 		<setting name="cacheEnabled" value="false" />
 	</settings>
 	<environments default="development">
 		<environment id="development">
-			<!-- �������� -->
 			<transactionManager type="JDBC"></transactionManager>
-			<!-- ��������Դ -->
 			<dataSource type="POOLED">
 				<property name="driver" value="com.mysql.jdbc.Driver" />
 				<property name="url" value="jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" />
@@ -592,11 +589,11 @@ import java.math.*;
 
 public class SqlactionBenchmarkSAO {
 
-	int				id ; // ���
-	String			name ; // Ӣ����
-	String			name_cn ; // ������
-	BigDecimal		salary ; // нˮ
-	java.sql.Date	birthday ; // ����
+	int				id ; // 编号
+	String			name ; // 英文名
+	String			name_cn ; // 中文名
+	BigDecimal		salary ; // 薪水
+	java.sql.Date	birthday ; // 生日
 
 	int				count___ ; // defining for 'SELECT COUNT(*)'
 
@@ -662,7 +659,7 @@ public class MyBatisBenchmarkCrud {
 			SqlactionBenchmarkSAO	sqlactionBenchmark = new SqlactionBenchmarkSAO() ;
 			sqlactionBenchmark.id = 1 ;
 			sqlactionBenchmark.name = "Calvin" ;
-			sqlactionBenchmark.name_cn = "������" ;
+			sqlactionBenchmark.name_cn = "卡尔文" ;
 			sqlactionBenchmark.salary = new BigDecimal(0) ;
 			long time = System.currentTimeMillis() ;
 			sqlactionBenchmark.birthday = new java.sql.Date(time) ;
@@ -679,7 +676,7 @@ public class MyBatisBenchmarkCrud {
 			beginMillisSecondstamp = System.currentTimeMillis() ;
 			for( i = 0 ; i < count ; i++ ) {
 				sqlactionBenchmark.name = "Calvin"+i ;
-				sqlactionBenchmark.name_cn = "������"+i ;
+				sqlactionBenchmark.name_cn = "卡尔文"+i ;
 				mapper.insertOne(sqlactionBenchmark);
 				if( i % 10 == 0 ) {
 					session.commit();
@@ -756,11 +753,11 @@ public class MyBatisBenchmarkCrud {
 
 ## 3.3. Case
 
-INSERT��500����¼��ÿ10���ύһ�Σ�
-UPDATE��500����¼��ÿ10���ύһ�Σ�
-SELECT������¼500*5��
-SELECT�����м�¼1000��
-DELETE��500����¼��ÿ10���ύһ�Σ�
+INSERT table for 500 records
+UPDATE table for 500 records
+SELECT table for 500*5 records
+SELECT table to List for 1000 records
+DELETE table for 500 records
 
 ## 3.4. Result
 
@@ -822,9 +819,9 @@ All mybatis DELETE WHERE done , count[500] elapse[6.035]s
 
 # 5. About The Project
 
-Get source at : [��Դ�й�](https://gitee.com/calvinwilliams/sqlaction)��[github](https://github.com/calvinwilliams/sqlaction)
+Get source at : [gitee](https://gitee.com/calvinwilliams/sqlaction),[github](https://github.com/calvinwilliams/sqlaction)
 
 # 6. About Author
 
-Mailto : [����](mailto:calvinwilliams@163.com)��[Gmail](mailto:calvinwilliams.c@gmail.com)
+Mailto : [netease](mailto:calvinwilliams@163.com)��[Gmail](mailto:calvinwilliams.c@gmail.com)
 

@@ -6,16 +6,16 @@ sqlaction - JDBC code auto-gen tool
 - [sqlaction - JDBC code auto-gen tool](#sqlaction---jdbc-code-auto-gen-tool)
 - [1. overview](#1-overview)
 - [2. A demo](#2-a-demo)
-  - [2.1. Create Table DDL](#21-create-table-ddl)
-  - [2.2. Create Java Project](#22-create-java-project)
-  - [2.3. Executing sqlaction](#23-executing-sqlaction)
-  - [2.4. Beginning to write your first line application code](#24-beginning-to-write-your-first-line-application-code)
-  - [2.5. Executing your application](#25-executing-your-application)
+	- [2.1. Create Table DDL](#21-create-table-ddl)
+	- [2.2. Create Java Project](#22-create-java-project)
+	- [2.3. Executing sqlaction](#23-executing-sqlaction)
+	- [2.4. Beginning to write your first line application code](#24-beginning-to-write-your-first-line-application-code)
+	- [2.5. Executing your application](#25-executing-your-application)
 - [3. Benchmark](#3-benchmark)
-  - [3.1. Prepare `sqlaction`](#31-prepare-sqlaction)
-  - [3.2. Prepare `MyBatis`](#32-prepare-mybatis)
-  - [3.3. Case](#33-case)
-  - [3.4. Result](#34-result)
+	- [3.1. Prepare `sqlaction`](#31-prepare-sqlaction)
+	- [3.2. Prepare `MyBatis`](#32-prepare-mybatis)
+	- [3.3. Case](#33-case)
+	- [3.4. Result](#34-result)
 - [4. TODO](#4-todo)
 - [5. About The Project](#5-about-the-project)
 - [6. About Author](#6-about-author)
@@ -315,8 +315,8 @@ DDL
 ```
 CREATE TABLE `sqlaction_benchmark` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
-  `name` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT '英文名',
-  `name_cn` varchar(128) COLLATE utf8mb4_bin NOT NULL COMMENT '中文名',
+  `name` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT '英文各1�7',
+  `name_cn` varchar(128) COLLATE utf8mb4_bin NOT NULL COMMENT '中文各1�7',
   `salary` decimal(12,2) NOT NULL COMMENT '薪水',
   `birthday` date NOT NULL COMMENT '生日',
   PRIMARY KEY (`id`)
@@ -410,7 +410,7 @@ public class SqlActionBenchmarkCrud {
 			
 			sqlactionBenchmark = new SqlactionBenchmarkSAO() ;
 			sqlactionBenchmark.name = "Calvin" ;
-			sqlactionBenchmark.nameCn = "卡尔文" ;
+			sqlactionBenchmark.nameCn = "卡尔斄1�7" ;
 			sqlactionBenchmark.salary = new BigDecimal(0) ;
 			long time = System.currentTimeMillis() ;
 			sqlactionBenchmark.birthday = new java.sql.Date(time) ;
@@ -425,7 +425,7 @@ public class SqlActionBenchmarkCrud {
 			beginMillisSecondstamp = System.currentTimeMillis() ;
 			for( i = 0 ; i < count ; i++ ) {
 				sqlactionBenchmark.name = "Calvin"+i ;
-				sqlactionBenchmark.nameCn = "卡尔文"+i ;
+				sqlactionBenchmark.nameCn = "卡尔斄1�7"+i ;
 				rows = SqlactionBenchmarkSAO.INSERT_INTO_sqlaction_benchmark( conn, sqlactionBenchmark ) ;
 				if( rows != 1 ) {
 					System.out.println( "SqlactionBenchmarkSAO.INSERT_INTO_sqlaction_benchmark failed["+rows+"]" );
@@ -590,8 +590,8 @@ import java.math.*;
 public class SqlactionBenchmarkSAO {
 
 	int				id ; // 编号
-	String			name ; // 英文名
-	String			name_cn ; // 中文名
+	String			name ; // 英文各1�7
+	String			name_cn ; // 中文各1�7
 	BigDecimal		salary ; // 薪水
 	java.sql.Date	birthday ; // 生日
 
@@ -659,7 +659,7 @@ public class MyBatisBenchmarkCrud {
 			SqlactionBenchmarkSAO	sqlactionBenchmark = new SqlactionBenchmarkSAO() ;
 			sqlactionBenchmark.id = 1 ;
 			sqlactionBenchmark.name = "Calvin" ;
-			sqlactionBenchmark.name_cn = "卡尔文" ;
+			sqlactionBenchmark.name_cn = "卡尔斄1�7" ;
 			sqlactionBenchmark.salary = new BigDecimal(0) ;
 			long time = System.currentTimeMillis() ;
 			sqlactionBenchmark.birthday = new java.sql.Date(time) ;
@@ -676,7 +676,7 @@ public class MyBatisBenchmarkCrud {
 			beginMillisSecondstamp = System.currentTimeMillis() ;
 			for( i = 0 ; i < count ; i++ ) {
 				sqlactionBenchmark.name = "Calvin"+i ;
-				sqlactionBenchmark.name_cn = "卡尔文"+i ;
+				sqlactionBenchmark.name_cn = "卡尔斄1�7"+i ;
 				mapper.insertOne(sqlactionBenchmark);
 				if( i % 10 == 0 ) {
 					session.commit();
@@ -819,7 +819,21 @@ All mybatis DELETE WHERE done , count[500] elapse[6.035]s
 
 # 5. About The Project
 
-Get source at : [gitee](https://gitee.com/calvinwilliams/sqlaction),[github](https://github.com/calvinwilliams/sqlaction)
+Download source at : [gitee](https://gitee.com/calvinwilliams/sqlaction),[github](https://github.com/calvinwilliams/sqlaction)
+
+Apache Maven
+```
+<dependency>
+  <groupId>xyz.calvinwilliams</groupId>
+  <artifactId>sqlaction</artifactId>
+  <version>0.2.0.0</version>
+</dependency>
+```
+
+Gradle Kotlin DSL
+```
+compile("xyz.calvinwilliams:sqlaction:0.2.0.0")
+```
 
 # 6. About Author
 

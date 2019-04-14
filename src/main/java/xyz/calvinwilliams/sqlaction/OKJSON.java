@@ -1,5 +1,5 @@
 /*
- * okjson - A easy JSON parser/generator for Java
+ * okjson - A small efficient flexible JSON parser/generator for Java
  * author	: calvin
  * email	: calvinwilliams@163.com
  *
@@ -9,21 +9,32 @@
 package xyz.calvinwilliams.sqlaction;
 
 import java.util.*;
+import java.io.IOException;
 import java.lang.reflect.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
-///**
-// * @ClassName   : OKJSON
-// * @Description : Util tool class for serialing/deserialing object
-// * @author      : calvin
-// * @date        : 2019-03-17
-// *
-// */
 public class OKJSON {
-	final public static int	OKJSON_OTIONS_DIRECT_ACCESS_PROPERTY_ENABLE = 1 ;
-	final public static int	OKJSON_OTIONS_PRETTY_FORMAT_ENABLE = 2 ;
-	final public static int	OKJSON_OTIONS_STRICT_POLICY = 4 ;
+	final public static int	OPTIONS_DIRECT_ACCESS_PROPERTY_ENABLE = 1 ;
+	final public static int	OPTIONS_PRETTY_FORMAT_ENABLE = 2 ;
+	final public static int	OPTIONS_STRICT_POLICY = 4 ;
 	
-	final private static int	OKJSON_ERROR_NEW_OBJECT = -31 ;
+	final public static int	OKJSON_ERROR_END_OF_BUFFER = OkJsonParser.OKJSON_ERROR_END_OF_BUFFER ;
+	final public static int	OKJSON_ERROR_UNEXPECT = OkJsonParser.OKJSON_ERROR_UNEXPECT ;
+	final public static int	OKJSON_ERROR_EXCEPTION = OkJsonParser.OKJSON_ERROR_EXCEPTION ;
+	final public static int	OKJSON_ERROR_INVALID_BYTE = OkJsonParser.OKJSON_ERROR_INVALID_BYTE ;
+	final public static int	OKJSON_ERROR_FIND_FIRST_LEFT_BRACE = OkJsonParser.OKJSON_ERROR_FIND_FIRST_LEFT_BRACE ;
+	final public static int	OKJSON_ERROR_NAME_INVALID = OkJsonParser.OKJSON_ERROR_NAME_INVALID ;
+	final public static int	OKJSON_ERROR_EXPECT_COLON_AFTER_NAME = OkJsonParser.OKJSON_ERROR_EXPECT_COLON_AFTER_NAME ;
+	final public static int	OKJSON_ERROR_UNEXPECT_TOKEN_AFTER_LEFT_BRACE = OkJsonParser.OKJSON_ERROR_UNEXPECT_TOKEN_AFTER_LEFT_BRACE ;
+	final public static int	OKJSON_ERROR_PORPERTY_TYPE_NOT_MATCH_IN_OBJECT = OkJsonParser.OKJSON_ERROR_PORPERTY_TYPE_NOT_MATCH_IN_OBJECT ;
+	final public static int	OKJSON_ERROR_NAME_NOT_FOUND_IN_OBJECT = OkJsonParser.OKJSON_ERROR_NAME_NOT_FOUND_IN_OBJECT ;
+	final public static int	OKJSON_ERROR_NEW_OBJECT = OkJsonParser.OKJSON_ERROR_NEW_OBJECT ;
 	
 	private static ThreadLocal<OkJsonGenerator>			okjsonGeneratorCache ;
 	private static ThreadLocal<OkJsonParser>			okjsonParserCache ;
@@ -39,13 +50,16 @@ public class OKJSON {
 		return errorDesc.get();
 	}
 	
-//	/**
-//	 * @Title         : objectToString 
-//	 * @Description   : Convert object to json string
-//	 * @param object  : Input object 
-//	 * @param options : Convert options in OKJSON_OTIONS_DIRECT_ACCESS_PROPERTY_ENABLE|OKJSON_OTIONS_PRETTY_FORMAT_ENABLE
-//	 * @return        : 0 if convert successful , not 0 if failed
-//	 */
+	public static int objectToFile( Object object, String filePath, int options ) {
+		String jsonString = objectToString( object, options ) ;
+		try {
+			Files.write(Paths.get(filePath), jsonString.getBytes(), StandardOpenOption.CREATE);
+			return 0;
+		} catch (IOException e) {
+			return -1;
+		}
+	}
+	
 	public static String objectToString( Object object, int options ) {
 		OkJsonGenerator okjsonGenerator ;
 		
@@ -67,10 +81,14 @@ public class OKJSON {
 			okjsonGenerator = okjsonGeneratorCache.get();
 		}
 		
-		if( (options&OKJSON_OTIONS_DIRECT_ACCESS_PROPERTY_ENABLE) != 0 )
+		if( (options&OPTIONS_DIRECT_ACCESS_PROPERTY_ENABLE) != 0 )
 			okjsonGenerator.setDirectAccessPropertyEnable(true);
-		if( (options&OKJSON_OTIONS_PRETTY_FORMAT_ENABLE) != 0 )
+		else
+			okjsonGenerator.setDirectAccessPropertyEnable(false);
+		if( (options&OPTIONS_PRETTY_FORMAT_ENABLE) != 0 )
 			okjsonGenerator.setPrettyFormatEnable(true);
+		else
+			okjsonGenerator.setPrettyFormatEnable(false);
 		
 		String string = okjsonGenerator.objectToString(object) ;
 		
@@ -80,15 +98,19 @@ public class OKJSON {
 		return string;
 	}
 	
-//	/**
-//	 * @Title         : stringToObject 
-//	 * @Description   : Convert json string to object
-//	 * @param string  : Input json string 
-//	 * @param clazz   : output object for clazz
-//	 * @param options : Convert options in OKJSON_OTIONS_DIRECT_ACCESS_PROPERTY_ENABLE|OKJSON_OTIONS_STRICT_POLICY
-//	 * @return        : 0 if convert successful , not 0 if failed
-//	 */
-	public static <T> T stringToObject( String string, Class<T> clazz, int options ) {
+	public static <T> T fileToObject( String filePath, Class<T> clazz, int options ) {
+		String jsonString = null ;
+		
+		try {
+			jsonString = new String(Files.readAllBytes(Paths.get(filePath))) ;
+		} catch(IOException e) {
+			return null;
+		}
+		
+		return stringToObject( jsonString, clazz, options );
+	}
+	
+	public static <T> T stringToObject( String jsonString, Class<T> clazz, int options ) {
 		OkJsonParser okjsonParser ;
 		
 		if( okjsonParserCache == null ) {
@@ -109,10 +131,14 @@ public class OKJSON {
 			okjsonParser = okjsonParserCache.get();
 		}
 		
-		if( (options&OKJSON_OTIONS_DIRECT_ACCESS_PROPERTY_ENABLE) != 0 )
+		if( (options&OPTIONS_DIRECT_ACCESS_PROPERTY_ENABLE) != 0 )
 			okjsonParser.setDirectAccessPropertyEnable(true);
-		if( (options&OKJSON_OTIONS_STRICT_POLICY) != 0 )
+		else
+			okjsonParser.setDirectAccessPropertyEnable(false);
+		if( (options&OPTIONS_STRICT_POLICY) != 0 )
 			okjsonParser.setStrictPolicyEnable(true);
+		else
+			okjsonParser.setStrictPolicyEnable(false);
 		
 		T object ;
 		try {
@@ -122,7 +148,7 @@ public class OKJSON {
 			return null;
 		}
 		
-		object = okjsonParser.stringToObject(string, object);
+		object = okjsonParser.stringToObject(jsonString, object);
 		
 		errorCode.set(okjsonParser.getErrorCode());
 		errorDesc.set(okjsonParser.getErrorDesc());
@@ -131,13 +157,6 @@ public class OKJSON {
 	}
 }
 
-///**
-// * @ClassName   : OkJsonParser
-// * @Description : Util tool class for deserialing to object
-// * @author      : calvin
-// * @date        : 2019-03-17
-// *
-// */
 class OkJsonParser {
 	private boolean				strictPolicyEnable ;
 	private boolean				directAccessPropertyEnable ;
@@ -172,24 +191,18 @@ class OkJsonParser {
 	private int					endOffset ;
 	private boolean				booleanValue ;
 	
-	final private static int	OKJSON_ERROR_END_OF_BUFFER = 1 ;
-	final private static int	OKJSON_ERROR_UNEXPECT = -4 ;
-	final private static int	OKJSON_ERROR_EXCEPTION = -8 ;
-	final private static int	OKJSON_ERROR_INVALID_BYTE = -11 ;
-	final private static int	OKJSON_ERROR_FIND_FIRST_LEFT_BRACE = -21 ;
-	final private static int	OKJSON_ERROR_NAME_INVALID = -22 ;
-	final private static int	OKJSON_ERROR_EXPECT_COLON_AFTER_NAME = -23 ;
-	final private static int	OKJSON_ERROR_UNEXPECT_TOKEN_AFTER_LEFT_BRACE = -24 ;
-	final private static int	OKJSON_ERROR_PORPERTY_TYPE_NOT_MATCH_IN_OBJECT = -26 ;
-	final private static int	OKJSON_ERROR_NAME_NOT_FOUND_IN_OBJECT = -28 ;
-	final private static int	OKJSON_ERROR_NEW_OBJECT = -31 ;
+	final public static int	OKJSON_ERROR_END_OF_BUFFER = 1 ;
+	final public static int	OKJSON_ERROR_UNEXPECT = -4 ;
+	final public static int	OKJSON_ERROR_EXCEPTION = -8 ;
+	final public static int	OKJSON_ERROR_INVALID_BYTE = -11 ;
+	final public static int	OKJSON_ERROR_FIND_FIRST_LEFT_BRACE = -21 ;
+	final public static int	OKJSON_ERROR_NAME_INVALID = -22 ;
+	final public static int	OKJSON_ERROR_EXPECT_COLON_AFTER_NAME = -23 ;
+	final public static int	OKJSON_ERROR_UNEXPECT_TOKEN_AFTER_LEFT_BRACE = -24 ;
+	final public static int	OKJSON_ERROR_PORPERTY_TYPE_NOT_MATCH_IN_OBJECT = -26 ;
+	final public static int	OKJSON_ERROR_NAME_NOT_FOUND_IN_OBJECT = -28 ;
+	final public static int	OKJSON_ERROR_NEW_OBJECT = -31 ;
 	
-//	/**
-//	 * @Title               : tokenJsonString 
-//	 * @Description         : Token out a string from json char array
-//	 * @param jsonCharArray : Input json char array 
-//	 * @return              : 0 if convert successful , not 0 if failed
-//	 */
 	private int tokenJsonString( char[] jsonCharArray ) {
 		StringBuilder	fieldStringBuilder ;
 		char			ch ;
@@ -203,14 +216,10 @@ class OkJsonParser {
 			ch = jsonCharArray[jsonOffset] ;
 			if( ch == '"' ) {
 				tokenType = TokenType.TOKEN_TYPE_STRING ;
-				if( fieldStringBuilder.length() > 0 ) {
-					if( jsonOffset > beginOffset ) {
-						if( fieldStringBuilder.length() > 0 )
-							fieldStringBuilder.append( jsonCharArray, beginOffset, jsonOffset-beginOffset );
-					}
-				} else {
-					endOffset = jsonOffset-1 ;
+				if( jsonOffset > beginOffset ) {
+					fieldStringBuilder.append( jsonCharArray, beginOffset, jsonOffset-beginOffset );
 				}
+				endOffset = jsonOffset-1 ;
 				jsonOffset++;
 				return 0;
 			} else if ( ch == '\\' ) {
@@ -220,39 +229,47 @@ class OkJsonParser {
 				}
 				ch = jsonCharArray[jsonOffset] ;
 				if( ch == '"' ) {
-					if( fieldStringBuilder.length() == 0 )
+					if( jsonOffset > beginOffset+1 )
 						fieldStringBuilder.append( jsonCharArray, beginOffset, jsonOffset-beginOffset-1 );
 					fieldStringBuilder.append( '"' );
+					beginOffset = jsonOffset + 1 ;
 				} else if( ch == '\\' ) {
-					if( fieldStringBuilder.length() == 0 )
+					if( jsonOffset > beginOffset+1 )
 						fieldStringBuilder.append( jsonCharArray, beginOffset, jsonOffset-beginOffset-1 );
-					fieldStringBuilder.append( '\\' );
+					fieldStringBuilder.append( "\\" );
+					beginOffset = jsonOffset + 1 ;
 				} else if( ch == '/' ) {
-					if( fieldStringBuilder.length() == 0 )
+					if( jsonOffset > beginOffset+1 )
 						fieldStringBuilder.append( jsonCharArray, beginOffset, jsonOffset-beginOffset-1 );
-					fieldStringBuilder.append( "\\/" );
+					fieldStringBuilder.append( '/' );
+					beginOffset = jsonOffset + 1 ;
 				} else if( ch == 'b' ) {
-					if( fieldStringBuilder.length() == 0 )
+					if( jsonOffset > beginOffset+1 )
 						fieldStringBuilder.append( jsonCharArray, beginOffset, jsonOffset-beginOffset-1 );
 					fieldStringBuilder.append( '\b' );
+					beginOffset = jsonOffset + 1 ;
 				} else if( ch == 'f' ) {
-					if( fieldStringBuilder.length() == 0 )
+					if( jsonOffset > beginOffset+1 )
 						fieldStringBuilder.append( jsonCharArray, beginOffset, jsonOffset-beginOffset-1 );
 					fieldStringBuilder.append( '\f' );
+					beginOffset = jsonOffset + 1 ;
 				} else if( ch == 'n' ) {
-					if( fieldStringBuilder.length() == 0 )
+					if( jsonOffset > beginOffset+1 )
 						fieldStringBuilder.append( jsonCharArray, beginOffset, jsonOffset-beginOffset-1 );
 					fieldStringBuilder.append( '\n' );
+					beginOffset = jsonOffset + 1 ;
 				} else if( ch == 'r' ) {
-					if( fieldStringBuilder.length() == 0 )
+					if( jsonOffset > beginOffset+1 )
 						fieldStringBuilder.append( jsonCharArray, beginOffset, jsonOffset-beginOffset-1 );
 					fieldStringBuilder.append( '\r' );
+					beginOffset = jsonOffset + 1 ;
 				} else if( ch == 't' ) {
-					if( fieldStringBuilder.length() == 0 )
+					if( jsonOffset > beginOffset+1 )
 						fieldStringBuilder.append( jsonCharArray, beginOffset, jsonOffset-beginOffset-1 );
 					fieldStringBuilder.append( '\t' );
+					beginOffset = jsonOffset + 1 ;
 				} else if( ch == 'u' ) {
-					if( fieldStringBuilder.length() == 0 )
+					if( jsonOffset > beginOffset+1 )
 						fieldStringBuilder.append( jsonCharArray, beginOffset, jsonOffset-beginOffset-1 );
 					jsonOffset++;
 					if( jsonOffset >= jsonLength ) {
@@ -316,12 +333,6 @@ class OkJsonParser {
 		return OKJSON_ERROR_END_OF_BUFFER;
 	}
 	
-//	/**
-//	 * @Title               : tokenJsonNumber 
-//	 * @Description         : Token out a number from json char array
-//	 * @param jsonCharArray : Input json char array 
-//	 * @return              : 0 if convert successful , not 0 if failed
-//	 */
 	private int tokenJsonNumber( char[] jsonCharArray ) {
 		char	ch ;
 		boolean	decimalPointFlag ;
@@ -365,12 +376,6 @@ class OkJsonParser {
 		return OKJSON_ERROR_END_OF_BUFFER;
 	}
 	
-//	/**
-//	 * @Title               : tokenJsonWord 
-//	 * @Description         : Token out a word from json char array
-//	 * @param jsonCharArray : Input json char array 
-//	 * @return              : 0 if convert successful , not 0 if failed
-//	 */
 	private int tokenJsonWord( char[] jsonCharArray ) {
 		char	ch ;
 		
@@ -518,17 +523,6 @@ class OkJsonParser {
 		return OKJSON_ERROR_END_OF_BUFFER;
 	}
 	
-//	/**
-//	 * @Title                  : addArrayObject 
-//	 * @Description            : Add a element to List object
-//	 * @param jsonCharArray    : Input json char array 
-//	 * @param valueTokenType   : List element type enum
-//	 * @param valueBeginOffset : Token begin offset from json char array
-//	 * @param valueEndOffset   : Token end offset from json char array
-//	 * @param object           : List object wait for add
-//	 * @param field            : List element type
-//	 * @return                 : 0 if convert successful , not 0 if failed
-//	 */
 	private int addArrayObject( char[] jsonCharArray, TokenType valueTokenType, int valueBeginOffset, int valueEndOffset, Object object, Field field ) {
 
 		try {
@@ -592,6 +586,54 @@ class OkJsonParser {
 					} else if( valueTokenType == TokenType.TOKEN_TYPE_NULL ) {
 						;
 					}
+				} else if( typeClass == LocalDate.class ) {
+					if( valueTokenType == TokenType.TOKEN_TYPE_STRING ) {
+						OkJsonDateTimeFormatter	okjsonDateTimeFormatter ;
+						String defaultDateTimeFormatter ;
+						LocalDate localDate ;
+						if( field.isAnnotationPresent(OkJsonDateTimeFormatter.class) ) {
+							okjsonDateTimeFormatter = field.getAnnotation(OkJsonDateTimeFormatter.class) ;
+							defaultDateTimeFormatter = okjsonDateTimeFormatter.format() ;
+						} else {
+							defaultDateTimeFormatter = "yyyy-MM-dd" ;
+						}
+						localDate = LocalDate.parse( new String(jsonCharArray,valueBeginOffset,valueEndOffset-valueBeginOffset+1), DateTimeFormatter.ofPattern(defaultDateTimeFormatter) ) ;
+						((List<Object>) object).add( localDate );
+					} else if( valueTokenType == TokenType.TOKEN_TYPE_NULL ) {
+						;
+					}
+				} else if( typeClass == LocalTime.class ) {
+					if( valueTokenType == TokenType.TOKEN_TYPE_STRING ) {
+						OkJsonDateTimeFormatter	okjsonDateTimeFormatter ;
+						String defaultDateTimeFormatter ;
+						LocalTime localTime ;
+						if( field.isAnnotationPresent(OkJsonDateTimeFormatter.class) ) {
+							okjsonDateTimeFormatter = field.getAnnotation(OkJsonDateTimeFormatter.class) ;
+							defaultDateTimeFormatter = okjsonDateTimeFormatter.format() ;
+						} else {
+							defaultDateTimeFormatter = "HH:mm:ss" ;
+						}
+						localTime = LocalTime.parse( new String(jsonCharArray,valueBeginOffset,valueEndOffset-valueBeginOffset+1), DateTimeFormatter.ofPattern(defaultDateTimeFormatter) ) ;
+						((List<Object>) object).add( localTime );
+					} else if( valueTokenType == TokenType.TOKEN_TYPE_NULL ) {
+						;
+					}
+				} else if( typeClass == LocalDateTime.class ) {
+					if( valueTokenType == TokenType.TOKEN_TYPE_STRING ) {
+						OkJsonDateTimeFormatter	okjsonDateTimeFormatter ;
+						String defaultDateTimeFormatter ;
+						LocalDateTime localDateTime ;
+						if( field.isAnnotationPresent(OkJsonDateTimeFormatter.class) ) {
+							okjsonDateTimeFormatter = field.getAnnotation(OkJsonDateTimeFormatter.class) ;
+							defaultDateTimeFormatter = okjsonDateTimeFormatter.format() ;
+						} else {
+							defaultDateTimeFormatter = "yyyy-MM-dd HH:mm:ss" ;
+						}
+						localDateTime = LocalDateTime.parse( new String(jsonCharArray,valueBeginOffset,valueEndOffset-valueBeginOffset+1), DateTimeFormatter.ofPattern(defaultDateTimeFormatter) ) ;
+						((List<Object>) object).add( localDateTime );
+					} else if( valueTokenType == TokenType.TOKEN_TYPE_NULL ) {
+						;
+					}
 				} else if( valueTokenType == TokenType.TOKEN_TYPE_NULL ) {
 					;
 				} else {
@@ -610,14 +652,6 @@ class OkJsonParser {
 		return 0;
 	}
 
-//	/**
-//	 * @Title                  : stringToArrayObject 
-//	 * @Description            : array data convert to list object
-//	 * @param jsonCharArray    : Input json char array 
-//	 * @param object           : List object wait for converting
-//	 * @param field            : List element type
-//	 * @return                 : 0 if convert successful , not 0 if failed
-//	 */
 	private int stringToArrayObject( char[] jsonCharArray, Object object, Field field ) {
 		
 		TokenType			valueTokenType ;
@@ -701,18 +735,6 @@ class OkJsonParser {
 		return 0;
 	}
 		
-//	/**
-//	 * @Title                  : setObjectProperty 
-//	 * @Description            : set property in object
-//	 * @param jsonCharArray    : Input json char array 
-//	 * @param valueTokenType   : List element type enum
-//	 * @param valueBeginOffset : Token begin offset from json char array
-//	 * @param valueEndOffset   : Token end offset from json char array
-//	 * @param object           : List object wait for converting
-//	 * @param field            : List element type
-//	 * @param method           : 
-//	 * @return                 : 0 if convert successful , not 0 if failed
-//	 */
 	private int setObjectProperty( char[] jsonCharArray, TokenType valueTokenType, int valueBeginOffset, int valueEndOffset, Object object, Field field, Method method ) {
 		
 		StringBuilder	fieldStringBuilder ;
@@ -919,6 +941,87 @@ class OkJsonParser {
 				e.printStackTrace();
 				return OKJSON_ERROR_EXCEPTION;
 			}
+		} else if( field.getType() == LocalDate.class ) {
+			if( valueTokenType == TokenType.TOKEN_TYPE_STRING ) {
+				try {
+					OkJsonDateTimeFormatter	okjsonDateTimeFormatter ;
+					String defaultDateTimeFormatter ;
+					LocalDate localDate ;
+					if( field.isAnnotationPresent(OkJsonDateTimeFormatter.class) ) {
+						okjsonDateTimeFormatter = field.getAnnotation(OkJsonDateTimeFormatter.class) ;
+						defaultDateTimeFormatter = okjsonDateTimeFormatter.format() ;
+					} else {
+						defaultDateTimeFormatter = "yyyy-MM-dd" ;
+					}
+					if( fieldStringBuilder.length() > 0 ) {
+						localDate = LocalDate.parse( fieldStringBuilder.toString(), DateTimeFormatter.ofPattern(defaultDateTimeFormatter) );
+					} else {
+						localDate = LocalDate.parse( new String(jsonCharArray,valueBeginOffset,valueEndOffset-valueBeginOffset+1), DateTimeFormatter.ofPattern(defaultDateTimeFormatter) ) ;
+					}
+					if( method != null ) {
+						method.invoke(object, localDate);
+					} else if( directAccessPropertyEnable == true ) {
+						field.set( object, localDate );
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					return OKJSON_ERROR_EXCEPTION;
+				}
+			}
+		} else if( field.getType() == LocalTime.class ) {
+			if( valueTokenType == TokenType.TOKEN_TYPE_STRING ) {
+				try {
+					OkJsonDateTimeFormatter	okjsonDateTimeFormatter ;
+					String defaultDateTimeFormatter ;
+					LocalTime localTime ;
+					if( field.isAnnotationPresent(OkJsonDateTimeFormatter.class) ) {
+						okjsonDateTimeFormatter = field.getAnnotation(OkJsonDateTimeFormatter.class) ;
+						defaultDateTimeFormatter = okjsonDateTimeFormatter.format() ;
+					} else {
+						defaultDateTimeFormatter = "HH:mm:ss" ;
+					}
+					if( fieldStringBuilder.length() > 0 ) {
+						localTime = LocalTime.parse( fieldStringBuilder.toString(), DateTimeFormatter.ofPattern(defaultDateTimeFormatter) );
+					} else {
+						localTime = LocalTime.parse( new String(jsonCharArray,valueBeginOffset,valueEndOffset-valueBeginOffset+1), DateTimeFormatter.ofPattern(defaultDateTimeFormatter) ) ;
+					}
+					if( method != null ) {
+						method.invoke(object, localTime);
+					} else if( directAccessPropertyEnable == true ) {
+						field.set( object, localTime );
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					return OKJSON_ERROR_EXCEPTION;
+				}
+			}
+		} else if( field.getType() == LocalDateTime.class ) {
+			if( valueTokenType == TokenType.TOKEN_TYPE_STRING ) {
+				try {
+					OkJsonDateTimeFormatter	okjsonDateTimeFormatter ;
+					String defaultDateTimeFormatter ;
+					LocalDateTime localDateTime ;
+					if( field.isAnnotationPresent(OkJsonDateTimeFormatter.class) ) {
+						okjsonDateTimeFormatter = field.getAnnotation(OkJsonDateTimeFormatter.class) ;
+						defaultDateTimeFormatter = okjsonDateTimeFormatter.format() ;
+					} else {
+						defaultDateTimeFormatter = "yyyy-MM-dd HH:mm:ss" ;
+					}
+					if( fieldStringBuilder.length() > 0 ) {
+						localDateTime = LocalDateTime.parse( fieldStringBuilder.toString(), DateTimeFormatter.ofPattern(defaultDateTimeFormatter) );
+					} else {
+						localDateTime = LocalDateTime.parse( new String(jsonCharArray,valueBeginOffset,valueEndOffset-valueBeginOffset+1), DateTimeFormatter.ofPattern(defaultDateTimeFormatter) ) ;
+					}
+					if( method != null ) {
+						method.invoke(object, localDateTime);
+					} else if( directAccessPropertyEnable == true ) {
+						field.set( object, localDateTime );
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					return OKJSON_ERROR_EXCEPTION;
+				}
+			}
 		} else if( valueTokenType == TokenType.TOKEN_TYPE_NULL ) {
 			try {
 				if( method != null ) {
@@ -938,13 +1041,6 @@ class OkJsonParser {
 		return 0;
 	}
 	
-//	/**
-//	 * @Title                  : stringToObjectProperties 
-//	 * @Description            : convert json char array to object's properties 
-//	 * @param jsonCharArray    : Input json char array 
-//	 * @param object           : List object wait for converting
-//	 * @return                 : 0 if convert successful , not 0 if failed
-//	 */
 	private int stringToObjectProperties( char[] jsonCharArray, Object object ) {
 		
 		Class					clazz ;
@@ -1135,16 +1231,20 @@ class OkJsonParser {
 		return 0;
 	}
 	
-//	/**
-//	 * @Title                  : stringToObject 
-//	 * @Description            : convert json char array to object 
-//	 * @param jsonCharArray    : Input json char array 
-//	 * @param object           : object wait for converting
-//	 * @return                 : 0 if convert successful , not 0 if failed
-//	 */
-	public <T> T stringToObject( String jsonString, T object ) {
+	public <T> T fileToObject( String filePath, T object ) {
+		String jsonString = null ;
 		
-		char[]	jsonCharArray ;
+		try {
+			jsonString = new String(Files.readAllBytes(Paths.get(filePath))) ;
+		} catch(IOException e) {
+			return null;
+		}
+		
+		return stringToObject( jsonString, object );
+	}
+	
+	public <T> T stringToObject( String jsonString, T object ) {
+		char[] jsonCharArray ;
 		
 		jsonCharArray = jsonString.toCharArray() ;
 		jsonOffset = 0 ;
@@ -1196,7 +1296,7 @@ class OkJsonParser {
 		
 		return object;
 	}
-	
+		
 	public boolean isStrictPolicyEnable() {
 		return strictPolicyEnable;
 	}
@@ -1246,28 +1346,25 @@ class OkJsonParser {
 	}
 }
 
-///**
-// * @ClassName   : OkJsonGenerator
-// * @Description : Util tool class for serialing from object
-// * @author      : calvin
-// * @date        : 2019-03-17
-// *
-// */
 class OkJsonGenerator {
 	
 	enum ClassFieldType {
 		CLASSFIELDTYPE_STRING ,
 		CLASSFIELDTYPE_NOT_STRING ,
+		CLASSFIELDTYPE_LOCALDATE ,
+		CLASSFIELDTYPE_LOCALTIME ,
+		CLASSFIELDTYPE_LOCALDATETIME ,
 		CLASSFIELDTYPE_LIST ,
 		CLASSFIELDTYPE_SUBCLASS
 	}
 	
 	class OkJsonClassField {
-		char[]			fieldName ;
-		char[]			fieldNameQM ;
-		ClassFieldType	type ;
-		Field			field ;
-		Method			getMethod ;
+		char[]					fieldName ;
+		char[]					fieldNameQM ;
+		ClassFieldType			type ;
+		Field					field ;
+		Method					getMethod ;
+		OkJsonDateTimeFormatter	okjsonDateTimeFormatter ;
 	}
 	
 	private static ThreadLocal<HashMap<String,LinkedList<OkJsonClassField>>>	classMapFieldListCache ;
@@ -1282,32 +1379,14 @@ class OkJsonGenerator {
 	private Integer				errorCode ;
 	private String				errorDesc ;
 	
-	final private static int	OKJSON_ERROR_END_OF_BUFFER = 1 ;
-	final private static int	OKJSON_ERROR_UNEXPECT = -4 ;
-	final private static int	OKJSON_ERROR_EXCEPTION = -8 ;
-	final private static int	OKJSON_ERROR_INVALID_BYTE = -11 ;
-	final private static int	OKJSON_ERROR_FIND_FIRST_LEFT_BRACE = -21 ;
-	final private static int	OKJSON_ERROR_NAME_INVALID = -22 ;
-	final private static int	OKJSON_ERROR_EXPECT_COLON_AFTER_NAME = -23 ;
-	final private static int	OKJSON_ERROR_UNEXPECT_TOKEN_AFTER_LEFT_BRACE = -24 ;
-	final private static int	OKJSON_ERROR_PORPERTY_TYPE_NOT_MATCH_IN_OBJECT = -26 ;
-	final private static int	OKJSON_ERROR_NAME_NOT_FOUND_IN_OBJECT = -28 ;
-	final private static int	OKJSON_ERROR_NEW_OBJECT = -31 ;
+	final public static int	OKJSON_ERROR_EXCEPTION = -8 ;
+	final public static int	OKJSON_ERROR_NEW_OBJECT = -31 ;
 	
 	final private static char	SEPFIELD_CHAR = ',' ;
-	final private static char[]	SEPFIELD_CHAR_PRETTY = ", \n".toCharArray() ;
+	final private static char[]	SEPFIELD_CHAR_PRETTY = " ,\n".toCharArray() ;
 	final private static char	ENTER_CHAR = '\n' ;
 	final private static String	NULL_STRING = "null" ;
 	
-//	/**
-//	 * @Title                      : objectToListString 
-//	 * @Description                : Convert list object to json char array
-//	 * #param array                : List elements in object 
-//	 * @param arrayCount           : List element count
-//	 * @param jsonCharArrayBuilder : Output to json char array 
-//	 * @param depth                : Output depth layout
-//	 * @return                     : 0 if convert successful , not 0 if failed
-//	 */
 	private int objectToListString( List<Object> array, int arrayCount, Field field, OkJsonCharArrayBuilder jsonCharArrayBuilder, int depth ) {
 		
 		HashMap<Class,Boolean>	basicTypeClassMapBoolean = basicTypeClassMapBooleanCache.get();
@@ -1327,17 +1406,21 @@ class OkJsonGenerator {
 							arrayIndex++;
 							if( arrayIndex > 1 ) {
 								if( prettyFormatEnable ) {
-									jsonCharArrayBuilder.appendCharArrayWith3( SEPFIELD_CHAR_PRETTY );
+									jsonCharArrayBuilder.appendCharArrayWith3(SEPFIELD_CHAR_PRETTY).appendTabs(depth+1);
 								} else {
 									jsonCharArrayBuilder.appendChar(SEPFIELD_CHAR);
+								}
+							} else {
+								if( prettyFormatEnable ) {
+									jsonCharArrayBuilder.appendTabs(depth+1);
 								}
 							}
 							
 							if( typeClazz == String.class && object != null ) {
 								String str = (String)object ;
-								jsonCharArrayBuilder.appendTabs(depth+1).appendJsonQmStringQm(str);
+								jsonCharArrayBuilder.appendJsonQmStringQm(str);
 							} else {
-								jsonCharArrayBuilder.appendTabs(depth+1).appendJsonString(object.toString());
+								jsonCharArrayBuilder.appendJsonString(object.toString());
 							}
 						}
 				} else {
@@ -1364,7 +1447,7 @@ class OkJsonGenerator {
 							if( prettyFormatEnable ) {
 								jsonCharArrayBuilder.appendTabs(depth+1).appendString("}");
 							} else {
-								jsonCharArrayBuilder.appendTabs(depth+1).appendChar('}');
+								jsonCharArrayBuilder.appendChar('}');
 							}
 						}
 					}
@@ -1374,17 +1457,13 @@ class OkJsonGenerator {
 			return OKJSON_ERROR_EXCEPTION;
 		}
 		
-		jsonCharArrayBuilder.appendChar(ENTER_CHAR);
+		if( prettyFormatEnable ) {
+			jsonCharArrayBuilder.appendChar(ENTER_CHAR);
+		}
 		
 		return 0;
 	}
 	
-//	/**
-//	 * @Title                      : unfoldEscape 
-//	 * @Description                : Unfold json escape char to json char array 
-//	 * #param value                : source string 
-//	 * @return                     : null if convert failed, string if convert successful
-//	 */
 	private String unfoldEscape( String value ) {
 		
 		OkJsonCharArrayBuilder	fieldCharArrayBuilder = fieldByteArrayBuilderCache.get() ;
@@ -1468,14 +1547,6 @@ class OkJsonGenerator {
 			return fieldCharArrayBuilder.toString();
 	}
 	
-//	/**
-//	 * @Title                      : objectToPropertiesString 
-//	 * @Description                : Convert object to json char array
-//	 * #param object               : source object
-//	 * @param jsonCharArrayBuilder : Output to json char array 
-//	 * @param depth                : Output depth layout
-//	 * @return                     : 0 if convert successful , not 0 if failed
-//	 */
 	private int objectToPropertiesString( Object object, OkJsonCharArrayBuilder jsonCharArrayBuilder, int depth ) {
 		
 		HashMap<Class,Boolean>			basicTypeClassMapBoolean = basicTypeClassMapBooleanCache.get();
@@ -1510,6 +1581,12 @@ class OkJsonGenerator {
 					classField.type = ClassFieldType.CLASSFIELDTYPE_STRING ;
 				else if( basicTypeClassMapBoolean.get( f.getType() ) != null || f.getType().isPrimitive() )
 					classField.type = ClassFieldType.CLASSFIELDTYPE_NOT_STRING ;
+				else if( f.getType() == LocalDate.class )
+					classField.type = ClassFieldType.CLASSFIELDTYPE_LOCALDATE ;
+				else if( f.getType() == LocalTime.class )
+					classField.type = ClassFieldType.CLASSFIELDTYPE_LOCALTIME ;
+				else if( f.getType() == LocalDateTime.class )
+					classField.type = ClassFieldType.CLASSFIELDTYPE_LOCALDATETIME ;
 				else if( f.getType() == ArrayList.class || f.getType() == LinkedList.class )
 					classField.type = ClassFieldType.CLASSFIELDTYPE_LIST ;
 				else
@@ -1527,7 +1604,13 @@ class OkJsonGenerator {
 					;
 				} catch (Exception e) {
 					e.printStackTrace();
-					return OKJSON_ERROR_UNEXPECT;
+					return OKJSON_ERROR_EXCEPTION;
+				}
+				
+				if( f.isAnnotationPresent(OkJsonDateTimeFormatter.class) ) {
+					classField.okjsonDateTimeFormatter = f.getAnnotation(OkJsonDateTimeFormatter.class) ;
+				} else {
+					classField.okjsonDateTimeFormatter = null ;
 				}
 				
 				classFieldList.add(classField);
@@ -1539,7 +1622,7 @@ class OkJsonGenerator {
 			fieldIndex++;
 			if( fieldIndex > 1 ) {
 				if( prettyFormatEnable ) {
-					jsonCharArrayBuilder.appendCharArrayWith3( SEPFIELD_CHAR_PRETTY );
+					jsonCharArrayBuilder.appendCharArrayWith3(SEPFIELD_CHAR_PRETTY);
 				} else {
 					jsonCharArrayBuilder.appendChar( SEPFIELD_CHAR );
 				}
@@ -1600,6 +1683,118 @@ class OkJsonGenerator {
 							jsonCharArrayBuilder.appendTabs(depth+1).appendJsonNameAndColonAndStringPretty(classField.fieldName,value.toString());
 						} else {
 							jsonCharArrayBuilder.appendJsonNameAndColonAndString(classField.fieldName,value.toString());
+						}
+					} else {
+						if( prettyFormatEnable ) {
+							jsonCharArrayBuilder.appendTabs(depth+1).appendJsonNameAndColonAndStringPretty(classField.fieldName,NULL_STRING);
+						} else {
+							jsonCharArrayBuilder.appendJsonNameAndColonAndString(classField.fieldName,NULL_STRING);
+						}
+					}
+					break;
+				case CLASSFIELDTYPE_LOCALDATE :
+					LocalDate localDate ;
+					String defaultDateTimeFormatter ;
+					if( classField.getMethod != null ) {
+						try {
+							localDate = (LocalDate)(classField.getMethod.invoke( object )) ;
+						} catch (Exception e) {
+							e.printStackTrace();
+							return OKJSON_ERROR_EXCEPTION;
+						}
+					} else {
+						try {
+							localDate = (LocalDate)(classField.field.get( object ));
+						} catch (Exception e) {
+							e.printStackTrace();
+							return OKJSON_ERROR_EXCEPTION;
+						}
+					}
+					if( classField.okjsonDateTimeFormatter != null ) {
+						defaultDateTimeFormatter = classField.okjsonDateTimeFormatter.format() ;
+					} else {
+						defaultDateTimeFormatter = "yyyy-MM-dd" ;
+					}
+					String localDateString = DateTimeFormatter.ofPattern(defaultDateTimeFormatter).format(localDate) ;
+					if( localDateString != null ) {
+						if( prettyFormatEnable ) {
+							jsonCharArrayBuilder.appendTabs(depth+1).appendJsonNameAndColonAndQmStringQmPretty(classField.fieldName,localDateString);
+						} else {
+							jsonCharArrayBuilder.appendJsonNameAndColonAndQmStringQm(classField.fieldName,localDateString);
+						}
+					} else {
+						if( prettyFormatEnable ) {
+							jsonCharArrayBuilder.appendTabs(depth+1).appendJsonNameAndColonAndStringPretty(classField.fieldName,NULL_STRING);
+						} else {
+							jsonCharArrayBuilder.appendJsonNameAndColonAndString(classField.fieldName,NULL_STRING);
+						}
+					}
+					break;
+				case CLASSFIELDTYPE_LOCALTIME :
+					LocalTime localTime = null ;
+					if( classField.getMethod != null ) {
+						try {
+							localTime = (LocalTime)(classField.getMethod.invoke( object )) ;
+						} catch (Exception e) {
+							e.printStackTrace();
+							return OKJSON_ERROR_EXCEPTION;
+						}
+					} else {
+						try {
+							localTime = (LocalTime)(classField.field.get( object ));
+						} catch (Exception e) {
+							e.printStackTrace();
+							return OKJSON_ERROR_EXCEPTION;
+						}
+					}
+					if( classField.okjsonDateTimeFormatter != null ) {
+						defaultDateTimeFormatter = classField.okjsonDateTimeFormatter.format() ;
+					} else {
+						defaultDateTimeFormatter = "HH:mm:ss" ;
+					}
+					String localTimeString = DateTimeFormatter.ofPattern(defaultDateTimeFormatter).format(localTime) ;
+					if( localTimeString != null ) {
+						if( prettyFormatEnable ) {
+							jsonCharArrayBuilder.appendTabs(depth+1).appendJsonNameAndColonAndQmStringQmPretty(classField.fieldName,localTimeString);
+						} else {
+							jsonCharArrayBuilder.appendJsonNameAndColonAndQmStringQm(classField.fieldName,localTimeString);
+						}
+					} else {
+						if( prettyFormatEnable ) {
+							jsonCharArrayBuilder.appendTabs(depth+1).appendJsonNameAndColonAndStringPretty(classField.fieldName,NULL_STRING);
+						} else {
+							jsonCharArrayBuilder.appendJsonNameAndColonAndString(classField.fieldName,NULL_STRING);
+						}
+					}
+					break;
+				case CLASSFIELDTYPE_LOCALDATETIME :
+					LocalDateTime localDateTime = null ;
+					if( classField.getMethod != null ) {
+						try {
+							localDateTime = (LocalDateTime)(classField.getMethod.invoke( object )) ;
+						} catch (Exception e) {
+							e.printStackTrace();
+							return OKJSON_ERROR_EXCEPTION;
+						}
+					} else {
+						try {
+							localDateTime = (LocalDateTime)(classField.field.get( object ));
+						} catch (Exception e) {
+							e.printStackTrace();
+							return OKJSON_ERROR_EXCEPTION;
+						}
+					}
+					if( classField.okjsonDateTimeFormatter != null ) {
+						defaultDateTimeFormatter = classField.okjsonDateTimeFormatter.format() ;
+					} else {
+						defaultDateTimeFormatter = "yyyy-MM-dd HH:mm:ss" ;
+					}
+					String localDateTimeString = DateTimeFormatter.ofPattern(defaultDateTimeFormatter).format(localDateTime) ;
+					if( localDateTimeString != null ) {
+						if( prettyFormatEnable ) {
+							jsonCharArrayBuilder.appendTabs(depth+1).appendJsonNameAndColonAndQmStringQmPretty(classField.fieldName,localDateTimeString);
+						} else {
+							jsonCharArrayBuilder.appendJsonNameAndColonAndQmStringQm(classField.fieldName,localDateTimeString);
 						}
 					} else {
 						if( prettyFormatEnable ) {
@@ -1700,12 +1895,16 @@ class OkJsonGenerator {
 		return 0;
 	}
 	
-//	/**
-//	 * @Title                      : objectToString 
-//	 * @Description                : Convert object to json char array
-//	 * #param object               : source object
-//	 * @return                     : null if convert failed , not object if convert successful
-//	 */
+	public int objectToFile( Object object, String filePath ) {
+		String jsonString = objectToString( object ) ;
+		try {
+			Files.write(Paths.get(filePath), jsonString.getBytes(), StandardOpenOption.WRITE);
+			return 0;
+		} catch (IOException e) {
+			return -1;
+		}
+	}
+	
 	public String objectToString( Object object ) {
 		
 		OkJsonCharArrayBuilder	jsonCharArrayBuilder ;
@@ -1849,18 +2048,11 @@ class OkJsonGenerator {
 	}
 }
 
-///**
-// * @ClassName   : OkJsonCharArrayBuilder
-// * @Description : Util tool class for appending char array on serialing
-// * @author      : calvin
-// * @date        : 2019-03-17
-// *
-// */
 class OkJsonCharArrayBuilder {
 	
-	private char[]		buf ;
-	private int			bufSize ;
-	private int			bufLength ;
+	public char[]		buf ;
+	public int			bufSize ;
+	public int			bufLength ;
 	
 	final private static String	TABS = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" ;
 	
@@ -1935,7 +2127,7 @@ class OkJsonCharArrayBuilder {
 		buf[bufLength] = charArray[0] ; bufLength++;
 		buf[bufLength] = charArray[1] ; bufLength++;
 		buf[bufLength] = charArray[2] ; bufLength++;
-		buf[bufLength] = charArray[4] ; bufLength++;
+		buf[bufLength] = charArray[3] ; bufLength++;
 		
 		return this;
 	}
@@ -1947,7 +2139,7 @@ class OkJsonCharArrayBuilder {
 		if( newBufLength > bufSize )
 			resize( newBufLength );
 		
-		str.getChars(0, strLength, buf, bufLength); bufLength = strLength ;
+		str.getChars(0, strLength, buf, bufLength); bufLength = newBufLength ;
 		
 		return this;
 	}
@@ -2074,7 +2266,7 @@ class OkJsonCharArrayBuilder {
 	
 	public OkJsonCharArrayBuilder appendJsonNameAndColonAndStringPretty( char[] name, String str ) {
 		int		strLength = str.length() ;
-		int		newBufLength = bufLength + name.length+strLength+6 ;
+		int		newBufLength = bufLength + name.length+strLength+5 ;
 		
 		if( newBufLength > bufSize )
 			resize( newBufLength );
@@ -2086,7 +2278,7 @@ class OkJsonCharArrayBuilder {
 		buf[bufLength] = ':' ; bufLength++;
 		buf[bufLength] = ' ' ; bufLength++;
 		str.getChars(0, strLength, buf, bufLength); bufLength+=strLength;
-		buf[bufLength] = ' ' ; bufLength++;
+		// buf[bufLength] = ' ' ; bufLength++;
 		
 		return this;
 	}

@@ -42,7 +42,7 @@ sqlaction - JDBC代码自动生成工具
 
 # 2. 一个DEMO
 
-放一个DEMO感受一下：（可以在源码包的`sqlaction-demo`找到所有源代码）
+放一个DEMO感受一下：
 
 ## 2.1. 建表DDL
 
@@ -516,7 +516,7 @@ SQL动作对应缺省方法名为SQL转换而来，具体算法为所有非字�
 
 # 4. 性能压测
 
-由于`sqlaction`自动生成的JDBC代码，与手工代码基本无异，没有低效的反射，没有多坑的热修改字节码，所以稳定性和运行性能都非常出色。下面是`sqlaction`与`MyBatis`的性能测试，可以在源码包的`sqlaction-benchmark`和`mybatis-benchmark`找到所有源代码。
+由于`sqlaction`自动生成的JDBC代码，与手工代码基本无异，没有低效的反射，没有多坑的热修改字节码，所以稳定性和运行性能都非常出色，下面是`sqlaction`与`MyBatis`的性能测试。
 
 CPU : Intel Core i5-7500 3.4GHz 3.4GHz
 内存 : 16GB

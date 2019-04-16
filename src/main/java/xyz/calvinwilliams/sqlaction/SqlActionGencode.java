@@ -12,6 +12,7 @@ import java.io.*;
 import java.nio.file.*;
 import java.sql.*;
 import java.util.LinkedList;
+import xyz.calvinwilliams.okjson.*;
 
 public class SqlActionGencode {
 
@@ -109,7 +110,7 @@ public class SqlActionGencode {
 			
 			System.out.println( "--- sqlactionConf ---" );
 			System.out.println( " database["+sqlactionConf.database+"]" );
-			for( SqlActionTableConf tc : sqlactionConf.tables ) {
+			for( SqlActionConfTable tc : sqlactionConf.tables ) {
 				System.out.println( "\t" + "table["+tc.table+"]" );
 				for( String s : tc.sqlactions ) {
 					System.out.println( "\t\t" + "sqlaction["+s+"]" );
@@ -125,7 +126,7 @@ public class SqlActionGencode {
 			database.tableList = new LinkedList<SqlActionTable>() ;
 			
 			// Generate class code
-			for( SqlActionTableConf tc : sqlactionConf.tables ) {
+			for( SqlActionConfTable tc : sqlactionConf.tables ) {
 				// Get the table in the database
 				System.out.println( "SqlActionTable.getTableInDatabase["+tc.table+"] ..." );
 				table = SqlActionTable.fetchTableMetadataInDatabase( dbserverConf, sqlactionConf, conn, database, null, tc.table ) ;
@@ -352,7 +353,7 @@ public class SqlActionGencode {
 		}
 	}
 
-	public static int selectSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf,
+	public static int selectSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionConfTable sqlactionConfTable,
 											String sql, String statementSql, String methodName,
 											SqlActionDatabase database, SqlActionTable table,
 											SqlActionSyntaxParser parser,
@@ -422,7 +423,7 @@ public class SqlActionGencode {
 		return 0;
 	}
 	
-	public static int insertSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf,
+	public static int insertSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionConfTable sqlactionConfTable,
 											String sql, String statementSql, String methodName,
 											SqlActionDatabase database, SqlActionTable table,
 											SqlActionSyntaxParser parser,
@@ -484,7 +485,7 @@ public class SqlActionGencode {
 		return 0;
 	}
 	
-	public static int updateSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf,
+	public static int updateSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionConfTable sqlactionConfTable,
 											String sql, String statementSql, String methodName,
 											SqlActionDatabase database, SqlActionTable table,
 											SqlActionSyntaxParser parser,
@@ -565,7 +566,7 @@ public class SqlActionGencode {
 		return 0;
 	}
 	
-	public static int deleteSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionTableConf sqlactionTableConf,
+	public static int deleteSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionConfTable sqlactionConfTable,
 											String sql, String statementSql, String methodName,
 											SqlActionDatabase database, SqlActionTable table,
 											SqlActionSyntaxParser parser,

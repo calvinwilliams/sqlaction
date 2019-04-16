@@ -31,7 +31,7 @@ public class SqlActionColumn {
 		if( dbserverConf.userDefineDataTypes == null )
 			return null;
 		
-		for( UserDefineDataTypes t : dbserverConf.userDefineDataTypes ) {
+		for( DbServerConfUserDefineDataTypes t : dbserverConf.userDefineDataTypes ) {
 			if( SqlActionUtil.wildcardMatch( t.source, sourceDataTypeAndLength ) == 0 )
 				return t.redefine;
 		}

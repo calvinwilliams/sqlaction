@@ -8,10 +8,9 @@
 
 package xyz.calvinwilliams.sqlaction;
 
-import java.util.*;
+import java.util.LinkedList;
 
-public class SqlActionConf {
-	public String							database ;
-	public LinkedList<SqlActionConfTable>	tables ;
-	public String							javaPackage ;
+public class DbServerConfUserDefineDataTypes {
+	public String		source ;
+	public String		redefine ;
 }

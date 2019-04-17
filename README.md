@@ -826,13 +826,13 @@ Apache Maven
 <dependency>
   <groupId>xyz.calvinwilliams</groupId>
   <artifactId>sqlaction</artifactId>
-  <version>0.2.0.0</version>
+  <version>0.2.1.0</version>
 </dependency>
 ```
 
 Gradle Kotlin DSL
 ```
-compile("xyz.calvinwilliams:sqlaction:0.2.0.0")
+compile("xyz.calvinwilliams:sqlaction:0.2.1.0")
 ```
 
 # 6. About Author

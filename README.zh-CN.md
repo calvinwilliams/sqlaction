@@ -14,7 +14,11 @@ sqlaction - JDBC代码自动生成工具
     - [3.1. 配置文件`dbserver.conf.json`](#31-配置文件dbserverconfjson)
     - [3.2. 配置文件`sqlaction.conf.json`](#32-配置文件sqlactionconfjson)
     - [3.3. 自动生成规则](#33-自动生成规则)
-    - [3.4. 为什么这么设计](#34-为什么这么设计)
+    - [3.4. 配置元](#34-配置元)
+        - [3.4.1. 自定义SQL动作方法名](#341-自定义sql动作方法名)
+        - [3.4.2. 拦截器](#342-拦截器)
+            - [3.4.2.1. SQL拦截器](#3421-sql拦截器)
+    - [3.5. 为什么这么设计](#35-为什么这么设计)
 - [4. 性能压测](#4-性能压测)
     - [4.1. 准备`sqlaction`](#41-准备sqlaction)
     - [4.2. 准备`MyBatis`](#42-准备mybatis)
@@ -418,9 +422,12 @@ SqlactionDemoSAO.SELECT_ALL_FROM_sqlaction_demo ok
 		{
 			"table" : "user_order" ,
 			"sqlactions" : [
-				"SELECT /* blablabla~ */ * FROM user_order" ,
+				"SELECT /* blablabla~ */ * FROM user_order @@STATEMENT_INTERCEPTOR()" ,
 				"SELECT * FROM user_order WHERE user_id=?" ,
-				"SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id @@METHOD(queryUserAndOrderByName)" ,
+				"SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price
+					FROM user,user_order
+					WHERE user.name=? AND user.id=user_order.user_id
+					@@METHOD(queryUserAndOrderByName) @@STATEMENT_INTERCEPTOR(statementInterceptorForQueryUserAndOrderByName)" ,
 				"SELECT u.name,u.address,o.item_name,o.amount,o.total_price FROM user u,user_order o WHERE u.name=? AND u.id=o.user_id" ,
 				"INSERT INTO user_order" ,
 				"UPDATE user_order SET total_price=? WHERE user_id=?" ,
@@ -480,11 +487,11 @@ DELETE FROM table_name
 
 ## 3.3. 自动生成规则
 
-工具`sqlaction`读取数据库中的表结构元信息和SQL动作配置文件`sqlaction.conf.json`，在执行目录里自动生成JAVA类文件，类文件包含数据库表实体信息（字段映射属性）和SQL动作对应方法。
+工具`sqlaction`读取数据库中的表结构元信息和SQL动作配置文件`sqlaction.conf.json`，在执行目录里自动生成JAVA类源代码文件`XxxSao.java`和`XxxSau.java`。类源代码文件`XxxSao.java`包含数据库表实体信息（字段映射属性）和SQL动作对应方法，每次运行`sqlaction`都会刷新该类源代码文件，所以不要修改此文件。类源代码文件`XxxSau.java`包含用户自定义代码，首次运行`sqlaction`会生成该类源代码文件，所以用户增加的代码可写到此文件中。
 
 数据库表字段映射属性由数据库中的表结构元信息映射生成，转换规则见前面的数据库字段类型与sqlaction的JAVA变量类型映射表。如果DDL中有comment，则在表实体类的对应属性后面加注释。
 
-SQL动作对应缺省方法名为SQL转换而来，具体算法为所有非字母数字字符都转换为'\_'，合并多个'\_'为一个。允许自定义方法名，在SQL动作配置中追加元信息"@@METHOD(自定义方法名)"，如："SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id @@METHOD(queryUserAndOrderByName)"
+SQL动作对应缺省方法名为SQL转换而来，具体算法为所有非字母数字字符都转换为'\_'，合并多个'\_'为一个。
 
 方法前的注释是原SQL，以便于对照和定位。
 
@@ -502,7 +509,52 @@ SQL动作对应缺省方法名为SQL转换而来，具体算法为所有非字�
 
 就这么简单！
 
-## 3.4. 为什么这么设计
+## 3.4. 配置元
+
+SQL中可追加一些以"@@"开头的配置元以实现一些额外的功能。
+
+### 3.4.1. 自定义SQL动作方法名
+
+允许自定义SQL动作方法名，在SQL动作配置中追加元信息"@@METHOD(自定义方法名)"，如：
+```
+SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id @@METHOD(queryUserAndOrderByName)
+```
+
+### 3.4.2. 拦截器
+
+#### 3.4.2.1. SQL拦截器
+
+如果需要SQL真正执行前微调一下SQL（如分库分表修改hint），可加入拦截器"@@STATEMENT_INTERCEPTOR(拦截器方法名，填空则自动生成一个)"，配置示例：
+```
+SELECT /* blablabla~ */ * FROM user_order @@STATEMENT_INTERCEPTOR()
+```
+或自定义拦截器方法名
+```
+SELECT u.name,u.address,o.item_name,o.amount,o.total_price FROM user u,user_order o WHERE u.name=? AND u.id=o.user_id @@STATEMENT_INTERCEPTOR(statementInterceptorForQueryUserAndOrderByName)
+```
+在另一个JAVA自动生成源码文件XxxSau.java中出现
+```
+public class UserOrderSAU {
+	
+	// SELECT /* blablabla~ */ * FROM user_order 
+	public static String STATEMENT_INTERCEPTOR_for_SELECT_HT_blablabla_TH_ALL_FROM_user_order_( String statementSql ) {
+		return statementSql;
+	}
+	
+	// SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price
+	// 					FROM user,user_order
+	// 					WHERE user.name=? AND user.id=user_order.user_id
+	public static String statementInterceptorForQueryUserAndOrderByName( String statementSql ) {
+		return statementSql;
+	}
+
+}
+```
+开发者可微调SQL，新SQL作为返回值返回。
+
+由于`XxxSau.java`只有在首次执行`sqlaction`才会自动生成，后面增加的拦截器方法框架源代码虽然不会自动添加到`XxxSau.java`中，但会作为注释出现在`XxxSao.java`中，方便开发者复制粘贴过去。
+
+## 3.5. 为什么这么设计
 
 数据库应用接口层框架/工具对于表结构的配置源的有两派思路，一派是定义在配置文件中，好处是可以做不同DBMS的统一规范，如同一种数据类型的统一表达，坏处是与数据库之间同步较麻烦，另一派是定义在数据库中，需要用时读数据库中的元信息，好处是可以利用数据库设计工具，图形化界面管理表结构，还能自动生成E-R图，坏处是不同DBMS存在标准差异。`sqlaction`采用后一派思路，在数据类型与JAVA属性类型之间建立多DBMS映射表来解决标准差异。
 
@@ -1031,8 +1083,8 @@ All mybatis DELETE WHERE done , count[500] elapse[6.035]s
 # 5. 后续开发
 
 1. 目前`sqlaction`支持的SQL标准对于联机交易没问题，对于分析型复杂SQL（如函数、子查询）还需后续研发新增支持。
-1. 目前只支持MySQL数据库，后续将新增支持PostgreSQL和Oracle。
-1. 待设计各DBMS的分页查询语法的兼容统一表达。
+2. 目前只支持MySQL数据库，后续将新增支持PostgreSQL和Oracle。
+3. 待设计各DBMS的分页查询语法的兼容统一表达。
 
 # 6. 关于本项目
 

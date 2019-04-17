@@ -16,9 +16,11 @@ public class SqlActionTable {
 	List<SqlActionColumn>	columnList ;
 	List<SqlActionIndex>	indexList ;
 
-	String					javaClassName ;
+	String					javaSaoClassName ;
+	String					javaSauClassName ;
+	String					javaSaoFileName ;
+	String					javaSauFileName ;
 	String					javaObjectName ;
-	String					javaFileName ;
 	
 	public static SqlActionTable fetchTableMetadataInDatabase( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable tableCache, String tableName ) throws Exception {
 		SqlActionTable		table ;
@@ -70,9 +72,11 @@ public class SqlActionTable {
 		for( String s : sa ) {
 			sb.append( s.substring(0,1).toUpperCase(Locale.getDefault()) + s.substring(1) );
 		}
-		table.javaClassName = sb.toString() + "SAO" ;
+		table.javaSaoClassName = sb.toString() + "SAO" ;
+		table.javaSauClassName = sb.toString() + "SAU" ;
+		table.javaSaoFileName = table.javaSaoClassName + ".java" ;
+		table.javaSauFileName = table.javaSauClassName + ".java" ;
 		table.javaObjectName = sb.toString().substring(0,1).toLowerCase(Locale.getDefault()) + sb.toString().substring(1) ;
-		table.javaFileName = table.javaClassName + ".java" ;
 		
 		return table;
 	}

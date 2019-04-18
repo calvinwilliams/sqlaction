@@ -1,9 +1,8 @@
-sqlaction - JDBC code auto-gen tool
+sqlaction - Database persistence layer tool based auto-gen JDBC code
 ===================================
 
 <!-- TOC -->
 
-- [sqlaction - JDBC code auto-gen tool](#sqlaction---jdbc-code-auto-gen-tool)
 - [1. overview](#1-overview)
 - [2. A demo](#2-a-demo)
 	- [2.1. Create Table DDL](#21-create-table-ddl)
@@ -24,7 +23,7 @@ sqlaction - JDBC code auto-gen tool
 
 # 1. overview
 
-sqlaction is a JDBC code auto-gen tool.
+sqlaction is a Database persistence layer tool based auto-gen JDBC code.
 
 # 2. A demo
 
@@ -814,8 +813,8 @@ All mybatis DELETE WHERE done , count[500] elapse[6.035]s
 # 4. TODO
 
 1. Support Complex SQL.
-1. Support PostgreSQL and Oracle.
-1. Support page-query SQL
+2. Support PostgreSQL and Oracle.
+3. Support page-query SQL
 
 # 5. About The Project
 

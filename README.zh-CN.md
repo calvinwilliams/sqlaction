@@ -11,14 +11,15 @@ sqlaction - 通过自动生成JDBC代码的数据库持久层工具
     - [2.4. 到目前为止，一行JAVA代码都没写，现在开始写应用代码](#24-到目前为止一行java代码都没写现在开始写应用代码)
     - [2.5. 执行](#25-执行)
 - [3. 使用参考](#3-使用参考)
-    - [3.1. 配置文件`dbserver.conf.json`](#31-配置文件dbserverconfjson)
-    - [3.2. 配置文件`sqlaction.conf.json`](#32-配置文件sqlactionconfjson)
-    - [3.3. 自动生成规则](#33-自动生成规则)
-    - [3.4. 配置元](#34-配置元)
-        - [3.4.1. 自定义SQL动作方法名](#341-自定义sql动作方法名)
-        - [3.4.2. 拦截器](#342-拦截器)
-            - [3.4.2.1. SQL拦截器](#3421-sql拦截器)
-    - [3.5. 为什么这么设计](#35-为什么这么设计)
+    - [3.1. 开发流程](#31-开发流程)
+    - [3.2. 配置文件`dbserver.conf.json`](#32-配置文件dbserverconfjson)
+    - [3.3. 配置文件`sqlaction.conf.json`](#33-配置文件sqlactionconfjson)
+    - [3.4. 自动生成规则](#34-自动生成规则)
+    - [3.5. 配置元](#35-配置元)
+        - [3.5.1. 自定义SQL动作方法名](#351-自定义sql动作方法名)
+        - [3.5.2. 拦截器](#352-拦截器)
+            - [3.5.2.1. SQL拦截器](#3521-sql拦截器)
+    - [3.6. 为什么这么设计](#36-为什么这么设计)
 - [4. 性能压测](#4-性能压测)
     - [4.1. 准备`sqlaction`](#41-准备sqlaction)
     - [4.2. 准备`MyBatis`](#42-准备mybatis)
@@ -359,7 +360,16 @@ SqlactionDemoSAO.SELECT_ALL_FROM_sqlaction_demo ok
 
 # 3. 使用参考
 
-## 3.1. 配置文件`dbserver.conf.json`
+## 3.1. 开发流程
+
+```
+                                         sqlaction
+dbserver.conf.json、sqlaction.conf.json -----------> XxxSao.java、XxxSau.java(JDBC code) --\
+                                                                                            ---> Zzz.jar
+                                                                                Yyy.java --/
+```
+
+## 3.2. 配置文件`dbserver.conf.json`
 
 ```
 {
@@ -419,7 +429,7 @@ SqlactionDemoSAO.SELECT_ALL_FROM_sqlaction_demo ok
 
 注意：读取JSON配置文件使用到了我的另一个开源项目：okjson，一个简洁易用的JSON解析器/生成器，只有一个类文件，可以很方便的融合到其它项目中。
 
-## 3.2. 配置文件`sqlaction.conf.json`
+## 3.3. 配置文件`sqlaction.conf.json`
 
 ```
 {
@@ -508,7 +518,7 @@ DELETE FROM table_name
 
 注意：数据库连接配置文件`sqlaction.conf.json`一般放在JAVA包目录里，以便于自动生成的类打包。
 
-## 3.3. 自动生成规则
+## 3.4. 自动生成规则
 
 工具`sqlaction`读取数据库中的表结构元信息和SQL动作配置文件`sqlaction.conf.json`，在执行目录里自动生成JAVA类源代码文件`XxxSao.java`和`XxxSau.java`。类源代码文件`XxxSao.java`包含数据库表实体信息（字段映射属性）和SQL动作对应方法，每次运行`sqlaction`都会刷新该类源代码文件，所以不要修改此文件。类源代码文件`XxxSau.java`包含用户自定义代码，首次运行`sqlaction`会生成该类源代码文件，所以用户增加的代码可写到此文件中。
 
@@ -532,20 +542,20 @@ SQL动作对应缺省方法名为SQL转换而来，具体算法为所有非字�
 
 就这么简单！
 
-## 3.4. 配置元
+## 3.5. 配置元
 
 SQL中可追加一些以"@@"开头的配置元以实现一些额外的功能。
 
-### 3.4.1. 自定义SQL动作方法名
+### 3.5.1. 自定义SQL动作方法名
 
 允许自定义SQL动作方法名，在SQL动作配置中追加元信息"@@METHOD(自定义方法名)"，如：
 ```
 SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id @@METHOD(queryUserAndOrderByName)
 ```
 
-### 3.4.2. 拦截器
+### 3.5.2. 拦截器
 
-#### 3.4.2.1. SQL拦截器
+#### 3.5.2.1. SQL拦截器
 
 如果需要SQL真正执行前微调一下SQL（如分库分表修改hint），可加入拦截器"@@STATEMENT_INTERCEPTOR(拦截器方法名，填空则自动生成一个)"，配置示例：
 ```
@@ -577,7 +587,7 @@ public class UserOrderSAU {
 
 由于`XxxSau.java`只有在首次执行`sqlaction`才会自动生成，后面增加的拦截器方法框架源代码虽然不会自动添加到`XxxSau.java`中，但会作为注释出现在`XxxSao.java`中，方便开发者复制粘贴过去。
 
-## 3.5. 为什么这么设计
+## 3.6. 为什么这么设计
 
 数据库应用接口层框架/工具对于表结构的配置源的有两派思路，一派是定义在配置文件中，好处是可以做不同DBMS的统一规范，如同一种数据类型的统一表达，坏处是与数据库之间同步较麻烦，另一派是定义在数据库中，需要用时读数据库中的元信息，好处是可以利用数据库设计工具，图形化界面管理表结构，还能自动生成E-R图，坏处是不同DBMS存在标准差异。`sqlaction`采用后一派思路，在数据类型与JAVA属性类型之间建立多DBMS映射表来解决标准差异。
 

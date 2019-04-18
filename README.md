@@ -3,6 +3,7 @@ sqlaction - Database persistence layer tool based auto-gen JDBC code
 
 <!-- TOC -->
 
+- [sqlaction - Database persistence layer tool based auto-gen JDBC code](#sqlaction---database-persistence-layer-tool-based-auto-gen-jdbc-code)
 - [1. overview](#1-overview)
 - [2. A demo](#2-a-demo)
 	- [2.1. Create Table DDL](#21-create-table-ddl)
@@ -10,14 +11,16 @@ sqlaction - Database persistence layer tool based auto-gen JDBC code
 	- [2.3. Executing sqlaction](#23-executing-sqlaction)
 	- [2.4. Beginning to write your first line application code](#24-beginning-to-write-your-first-line-application-code)
 	- [2.5. Executing your application](#25-executing-your-application)
-- [3. Benchmark](#3-benchmark)
-	- [3.1. Prepare `sqlaction`](#31-prepare-sqlaction)
-	- [3.2. Prepare `MyBatis`](#32-prepare-mybatis)
-	- [3.3. Case](#33-case)
-	- [3.4. Result](#34-result)
-- [4. TODO](#4-todo)
-- [5. About The Project](#5-about-the-project)
-- [6. About Author](#6-about-author)
+- [3. Reference](#3-reference)
+	- [3.1. Process flow](#31-process-flow)
+- [4. Benchmark](#4-benchmark)
+	- [4.1. Prepare `sqlaction`](#41-prepare-sqlaction)
+	- [4.2. Prepare `MyBatis`](#42-prepare-mybatis)
+	- [4.3. Case](#43-case)
+	- [4.4. Result](#44-result)
+- [5. TODO](#5-todo)
+- [6. About The Project](#6-about-the-project)
+- [7. About Author](#7-about-author)
 
 <!-- /TOC -->
 
@@ -300,7 +303,18 @@ SqlactionDemoSAO.SELECT_ALL_FROM_sqlaction_demo ok
     id[15] name[Calvin] address[My address 2]
 ```
 
-# 3. Benchmark
+# 3. Reference
+
+## 3.1. Process flow
+
+```
+                                         sqlaction
+dbserver.conf.json¡¢sqlaction.conf.json -----------> XxxSao.java¡¢XxxSau.java(JDBC code) --\
+                                                                                            ---> Zzz.jar
+                                                                                Yyy.java --/
+```
+
+# 4. Benchmark
 
 CPU : Intel Core i5-7500 3.4GHz 3.4GHz
 Momey : 16GB
@@ -322,7 +336,7 @@ CREATE TABLE `sqlaction_benchmark` (
 ) ENGINE=InnoDB AUTO_INCREMENT=42332 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
 ```
 
-## 3.1. Prepare `sqlaction`
+## 4.1. Prepare `sqlaction`
 
 Create `dbserver.conf.json`
 
@@ -524,7 +538,7 @@ public class SqlActionBenchmarkCrud {
 }
 ```
 
-## 3.2. Prepare `MyBatis`
+## 4.2. Prepare `MyBatis`
 
 Create `mybatis-config.xml`
 
@@ -750,7 +764,7 @@ public class MyBatisBenchmarkCrud {
 }
 ```
 
-## 3.3. Case
+## 4.3. Case
 
 INSERT table for 500 records
 UPDATE table for 500 records
@@ -758,7 +772,7 @@ SELECT table for 500*5 records
 SELECT table to List for 1000 records
 DELETE table for 500 records
 
-## 3.4. Result
+## 4.4. Result
 
 ```
 All sqlaction INSERT done , count[500] elapse[4.742]s
@@ -810,13 +824,13 @@ All mybatis DELETE WHERE done , count[500] elapse[6.035]s
 
 **`sqlaction`'s performance fast 20% than `MyBatis`**
 
-# 4. TODO
+# 5. TODO
 
 1. Support Complex SQL.
 2. Support PostgreSQL and Oracle.
 3. Support page-query SQL
 
-# 5. About The Project
+# 6. About The Project
 
 Download source at : [gitee](https://gitee.com/calvinwilliams/sqlaction),[github](https://github.com/calvinwilliams/sqlaction)
 
@@ -834,7 +848,7 @@ Gradle Kotlin DSL
 compile("xyz.calvinwilliams:sqlaction:0.2.1.0")
 ```
 
-# 6. About Author
+# 7. About Author
 
 Mailto : [netease](mailto:calvinwilliams@163.com)ï¿½ï¿½[Gmail](mailto:calvinwilliams.c@gmail.com)
 

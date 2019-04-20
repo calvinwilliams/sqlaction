@@ -12,7 +12,9 @@ import java.util.*;
 
 public class SqlActionDatabase {
 	
-	final public static String	SQLACTION_DBMS_MYSQL = "mysql" ;
+	final public static String	DBMS_MYSQL = "MySql" ;
+	final public static String	DBMS_POSTGRESQL = "PostgreSQL" ;
+	final public static String	DBMS_ORACLE = "Oracle" ;
 	
 	String						databaseName ;
 	List<SqlActionTable>		tableList ;

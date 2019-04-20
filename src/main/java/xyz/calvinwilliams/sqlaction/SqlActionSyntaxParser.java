@@ -13,23 +13,30 @@ import java.util.*;
 
 public class SqlActionSyntaxParser {
 
-	public String							selectHint = null ;
-	public boolean							selectAllColumn = false ;
-	public List<SqlActionSelectColumnToken>	selectColumnTokenList = null ;
-	public List<SqlActionFromTableToken>	fromTableTokenList = null ;
+	public String							selectHint ;
+	public boolean							selectAllColumn ;
+	public List<SqlActionSelectColumnToken>	selectColumnTokenList ;
+	public List<SqlActionFromTableToken>	fromTableTokenList ;
 	
-	public String							insertTableName = null ;
+	public String							insertTableName ;
 	
-	public String							updateTableName = null ;
-	public List<SqlActionSetColumnToken>	setColumnTokenList = null ;
+	public String							updateTableName ;
+	public List<SqlActionSetColumnToken>	setColumnTokenList ;
 	
-	public String							deleteTableName = null ;
+	public String							deleteTableName ;
 	
-	public List<SqlActionWhereColumnToken>	whereColumnTokenList = null ;
+	public List<SqlActionWhereColumnToken>	whereColumnTokenList ;
 	
-	public String							otherTokens = null ;
+	public String							otherTokens ;
 	
-	public int parseStatementSyntax_FROM( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table, String sql ) throws Exception {
+	String									sqlaction ;
+	String									sql ;
+	String									statementSql ;
+	String									methodName ;
+	String									statementInterceptorMethodName ;
+	String									selectKey ;
+	
+	public int parseStatementSyntax_FROM( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception {
 		SqlActionLexicalParser	lexicalParser ;
 		String					token ;
 		SqlActionFromTableToken fromTableToken ;
@@ -149,7 +156,7 @@ public class SqlActionSyntaxParser {
 		return 0;
 	}
 	
-	public int parseSyntaxExceptFROM( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table, String sql ) {
+	public int parseSyntaxExceptFROM( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) {
 		SqlActionSelectColumnToken	selectColumnToken = null ;
 		SqlActionSetColumnToken		setColumnToken = null ;
 		SqlActionWhereColumnToken	whereColumnToken = null ;

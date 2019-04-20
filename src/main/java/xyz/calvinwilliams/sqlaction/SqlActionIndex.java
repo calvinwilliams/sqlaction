@@ -25,7 +25,7 @@ public class SqlActionIndex {
 		
 		table.indexList = new LinkedList<SqlActionIndex>() ;
 		
-		if( dbserverConf.dbms.equals(SqlActionDatabase.SQLACTION_DBMS_MYSQL) ) {
+		if( dbserverConf.dbms == SqlActionDatabase.DBMS_MYSQL ) {
 			prestmt = conn.prepareStatement("SELECT non_unique,index_name FROM information_schema.STATISTICS WHERE table_schema=? AND table_name=? AND seq_in_index=1 ORDER BY index_name ASC") ;
 			prestmt.setString( 1, database.databaseName );
 			prestmt.setString( 2, table.tableName );
@@ -47,7 +47,7 @@ public class SqlActionIndex {
 		for( SqlActionIndex i : table.indexList ) {
 			i.columnList = new LinkedList<SqlActionColumn>() ;
 			
-			if( dbserverConf.dbms.equals(SqlActionDatabase.SQLACTION_DBMS_MYSQL) ) {
+			if( dbserverConf.dbms == SqlActionDatabase.DBMS_MYSQL ) {
 				prestmt = conn.prepareStatement("SELECT column_name FROM information_schema.STATISTICS WHERE table_schema=? AND table_name=? AND index_name=? ORDER BY seq_in_index ASC") ;
 				prestmt.setString( 1, database.databaseName );
 				prestmt.setString( 2, table.tableName );
@@ -64,7 +64,7 @@ public class SqlActionIndex {
 			rs.close();
 			
 			for( SqlActionColumn c : i.columnList ) {
-				if( dbserverConf.dbms.equals(SqlActionDatabase.SQLACTION_DBMS_MYSQL) ) {
+				if( dbserverConf.dbms == SqlActionDatabase.DBMS_MYSQL ) {
 					prestmt = conn.prepareStatement("SELECT column_name,column_default,is_nullable,data_type,character_maximum_length,numeric_precision,numeric_scale,column_key,extra,column_comment FROM information_schema.COLUMNS WHERE table_schema=? AND table_name=? AND column_name=?") ;
 					prestmt.setString( 1, database.databaseName );
 					prestmt.setString( 2, table.tableName );

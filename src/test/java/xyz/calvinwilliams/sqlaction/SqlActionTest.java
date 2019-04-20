@@ -150,7 +150,7 @@ public class SqlActionTest {
 				System.out.println( "\t" + "INSERT_INTO_user failed["+nret+"]" );
 				return -11;
 			} else {
-				System.out.println( "\t" + "INSERT_INTO_user ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "INSERT_INTO_user ok , rows["+nret+"] effected , id["+user.id+"]" );
 			}
 
 			user = new UserSAO() ;
@@ -164,7 +164,7 @@ public class SqlActionTest {
 				System.out.println( "\t" + "INSERT_INTO_user failed["+nret+"]" );
 				return -12;
 			} else {
-				System.out.println( "\t" + "INSERT_INTO_user ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "INSERT_INTO_user ok , rows["+nret+"] effected , id["+user.id+"]" );
 			}
 
 			user = new UserSAO() ;
@@ -178,7 +178,7 @@ public class SqlActionTest {
 				System.out.println( "\t" + "INSERT_INTO_user failed["+nret+"]" );
 				return -13;
 			} else {
-				System.out.println( "\t" + "INSERT_INTO_user ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "INSERT_INTO_user ok , rows["+nret+"] effected , id["+user.id+"]" );
 			}
 
 			userList = new LinkedList<UserSAO>() ;
@@ -205,7 +205,7 @@ public class SqlActionTest {
 				System.out.println( "\t" + "INSERT_INTO_user_order failed["+nret+"]" );
 				return -21;
 			} else {
-				System.out.println( "\t" + "INSERT_INTO_user_order ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "INSERT_INTO_user_order ok , rows["+nret+"] effected , id["+userOrder.id+"]" );
 			}
 
 			conn.commit();

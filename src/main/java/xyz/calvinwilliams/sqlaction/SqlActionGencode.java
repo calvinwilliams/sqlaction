@@ -16,7 +16,7 @@ import xyz.calvinwilliams.okjson.*;
 
 public class SqlActionGencode {
 
-	final private static String				SQLACTION_VERSION = "0.2.1.0" ;
+	final private static String				SQLACTION_VERSION = "0.2.2.0" ;
 	
 	final public static String				SELECT_COUNT___ = "count(" ;
 	final private static String				COUNT___ = "_count_" ;
@@ -42,30 +42,8 @@ public class SqlActionGencode {
 			System.out.println( "/// Copyright by calvin<calvinwilliams@163.com,calvinwilliams@gmail.com>" );
 			System.out.println( "//////////////////////////////////////////////////////////////////////////////" );
 			
-			// Load sqlaction.conf.json
-			currentPath = Paths.get(System.getProperty("user.dir")) ;
-			
-			while( true ) {
-				try {
-					sqlactionConfJsonFilePath = Paths.get(currentPath.toString(),"sqlaction.conf.json") ;
-					sqlactionConfJsonFileContent = new String(Files.readAllBytes(sqlactionConfJsonFilePath)) ;
-					break;
-				} catch (IOException e) {
-					currentPath = currentPath.getParent() ;
-					if( currentPath == null ) {
-						System.out.println( "*** ERROR : sqlaction.conf.json not found" );
-						return;
-					}
-				}
-			}
-			
-			sqlactionConf = OKJSON.stringToObject( sqlactionConfJsonFileContent, SqlActionConf.class, OKJSON.OPTIONS_DIRECT_ACCESS_PROPERTY_ENABLE ) ;
-			if( sqlactionConf == null ) {
-				System.out.println(sqlactionConfJsonFilePath+" content invalid , errcode["+OKJSON.getErrorCode()+"] errdesc["+OKJSON.getErrorCode()+"]");
-				return;
-			}
-			
 			// Load dbserver.conf.json
+			currentPath = Paths.get(System.getProperty("user.dir")) ;
 			while( true ) {
 				try {
 					dbserverConfJsonFilePath = Paths.get(currentPath.toString(),"dbserver.conf.json") ;
@@ -86,17 +64,19 @@ public class SqlActionGencode {
 				return;
 			}
 			
-			if( dbserverConf.dbms == null ) {
-				String[] sa = dbserverConf.url.split( ":" ) ;
-				if( sa.length < 3 ) {
-					System.out.println( "dbserverConf.url["+dbserverConf.dbms+"] invalid" );
-					return;
-				}
-				
-				dbserverConf.dbms = sa[1] ;
+			if( dbserverConf.url == null ) {
+				System.out.println( "dbserverConf.url["+dbserverConf.dbms+"] invalid" );
+				return;
 			}
 			
-			if( ! dbserverConf.dbms.equals("mysql") ) {
+			if( dbserverConf.dbms == null ) {
+				if( dbserverConf.url.indexOf("mysql") >= 0 )
+					dbserverConf.dbms = SqlActionDatabase.DBMS_MYSQL ;
+			}
+			
+			if( dbserverConf.dbms == null ) {
+				System.out.println( "dbserverConf.dbms null" );
+			} else if( dbserverConf.dbms != SqlActionDatabase.DBMS_MYSQL ) {
 				System.out.println( "dbserverConf.dbms["+dbserverConf.dbms+"] not support" );
 				return;
 			}
@@ -107,6 +87,28 @@ public class SqlActionGencode {
 			System.out.println( "   url["+dbserverConf.url+"]" );
 			System.out.println( "  user["+dbserverConf.user+"]" );
 			System.out.println( "   pwd["+dbserverConf.pwd+"]" );
+			
+			// Load sqlaction.conf.json
+			currentPath = Paths.get(System.getProperty("user.dir")) ;
+			while( true ) {
+				try {
+					sqlactionConfJsonFilePath = Paths.get(currentPath.toString(),"sqlaction.conf.json") ;
+					sqlactionConfJsonFileContent = new String(Files.readAllBytes(sqlactionConfJsonFilePath)) ;
+					break;
+				} catch (IOException e) {
+					currentPath = currentPath.getParent() ;
+					if( currentPath == null ) {
+						System.out.println( "*** ERROR : sqlaction.conf.json not found" );
+						return;
+					}
+				}
+			}
+			
+			sqlactionConf = OKJSON.stringToObject( sqlactionConfJsonFileContent, SqlActionConf.class, OKJSON.OPTIONS_DIRECT_ACCESS_PROPERTY_ENABLE ) ;
+			if( sqlactionConf == null ) {
+				System.out.println(sqlactionConfJsonFilePath+" content invalid , errcode["+OKJSON.getErrorCode()+"] errdesc["+OKJSON.getErrorCode()+"]");
+				return;
+			}
 			
 			System.out.println( "--- sqlactionConf ---" );
 			System.out.println( " database["+sqlactionConf.database+"]" );
@@ -192,61 +194,24 @@ public class SqlActionGencode {
 				
 				// Parse sql actions and dump gencode
 				for( String sqlaction : tc.sqlactions ) {
-					String					sql ;
-					String					statementSql ;
-					String					methodName ;
-					String					statementInterceptorMethodName = null ;
 					int						beginMetaData ;
 					int						endMetaData ;
 					
-					SqlActionSyntaxParser	parser ;
+					SqlActionSyntaxParser	parser = new SqlActionSyntaxParser() ;
 					
-					sqlaction = sqlaction.trim() ;
+					parser.sqlaction = sqlaction.trim() ;
 					
 					beginMetaData = sqlaction.indexOf( "@@" ) ;
 					if( beginMetaData >= 0 ) {
-						sql = sqlaction.substring( 0, beginMetaData ) ;
+						parser.sql = sqlaction.substring( 0, beginMetaData ) ;
 					} else {
-						sql = sqlaction ;
+						parser.sql = sqlaction ;
 					}
-					
-					statementSql = sql.replace("\r\n"," ").replace("\n"," ").replace("\t"," ").replaceAll("[ ]+"," ").trim() ;
-					
-					beginMetaData = sqlaction.indexOf( "@@METHOD(" ) ;
-					if( beginMetaData >= 0 ) {
-						endMetaData = sqlaction.indexOf( ")", beginMetaData ) ;
-						if( endMetaData == -1 ) {
-							System.out.println( "sql["+sql+"] invalid" );
-							return;
-						}
-						methodName = sqlaction.substring( beginMetaData+9, endMetaData ) ;
-					} else {
-						methodName = SqlActionUtil.sqlConvertToMethodName(statementSql) ;
-					}
-					
-					String interceptorType = null ;
-					beginMetaData = sqlaction.indexOf( "@@STATEMENT_INTERCEPTOR(" ) ;
-					if( beginMetaData >= 0 ) {
-						endMetaData = sqlaction.indexOf( ")", beginMetaData ) ;
-						if( endMetaData == -1 ) {
-							System.out.println( "*** ERROR : sql["+sql+"] invalid" );
-							return;
-						}
-						statementInterceptorMethodName = sqlaction.substring( beginMetaData+24, endMetaData ) ;
-						if( statementInterceptorMethodName.equals("") )
-							statementInterceptorMethodName = "STATEMENT_INTERCEPTOR_for_"+methodName ;
-					}
-					
-					System.out.println( "Parse sql action ["+sqlaction+"]" );
-					System.out.println( "\t" + "sql["+sql+"]" );
-					System.out.println( "\t" + "methodName["+methodName+"]" );
 					
 					// Parse sql FROM statement
-					System.out.println( "Parse sql FROM statement ["+sql+"]" );
+					System.out.println( "Parse sql FROM statement ["+parser.sql+"]" );
 					
-					parser = new SqlActionSyntaxParser() ;
-					
-					nret = parser.parseStatementSyntax_FROM( dbserverConf, sqlactionConf, conn, database, table, sql ) ;
+					nret = parser.parseStatementSyntax_FROM( dbserverConf, sqlactionConf, conn, database, table ) ;
 					if( nret != 0 ) {
 						System.out.println( "*** ERROR : SqlActionSyntaxParser.parseStatementSyntax_FROM failed["+nret+"]" );
 						return;
@@ -255,7 +220,7 @@ public class SqlActionGencode {
 					}
 					
 					// Show all databases and tables and columns and indexes
-					System.out.println( "Show all databases and tables and columns and indexes ["+sql+"]" );
+					System.out.println( "Show all databases and tables and columns and indexes ["+parser.sql+"]" );
 					
 					for( SqlActionFromTableToken ct : parser.fromTableTokenList ) {
 						nret = SqlActionTable.travelTable( dbserverConf, sqlactionConf, database, ct.tableName, 1 ) ;
@@ -268,9 +233,9 @@ public class SqlActionGencode {
 					}
 					
 					// Parse sql statements except FROM
-					System.out.println( "Parse sql statements except FROM ["+sql+"]" );
+					System.out.println( "Parse sql statements except FROM ["+parser.sql+"]" );
 					
-					nret = parser.parseSyntaxExceptFROM( dbserverConf, sqlactionConf, conn, database, table, sql ) ;
+					nret = parser.parseSyntaxExceptFROM( dbserverConf, sqlactionConf, conn, database, table ) ;
 					if( nret != 0 ) {
 						System.out.println( "*** ERROR : SqlActionSyntaxParser.parseSyntaxExceptFROM failed["+nret+"]" );
 						return;
@@ -278,8 +243,50 @@ public class SqlActionGencode {
 						System.out.println( "SqlActionSyntaxParser.parseSyntaxExceptFROM ok" );
 					}
 					
+					parser.statementSql = parser.sql.replace("\r\n"," ").replace("\n"," ").replace("\t"," ").replaceAll("[ ]+"," ").trim() ;
+					
+					beginMetaData = sqlaction.indexOf( "@@METHOD(" ) ;
+					if( beginMetaData >= 0 ) {
+						endMetaData = sqlaction.indexOf( ")", beginMetaData ) ;
+						if( endMetaData == -1 ) {
+							System.out.println( "sql["+parser.sql+"] invalid" );
+							return;
+						}
+						parser.methodName = sqlaction.substring( beginMetaData+9, endMetaData ) ;
+					} else {
+						parser.methodName = SqlActionUtil.sqlConvertToMethodName(parser.statementSql) ;
+					}
+					
+					beginMetaData = sqlaction.indexOf( "@@STATEMENT_INTERCEPTOR(" ) ;
+					if( beginMetaData >= 0 ) {
+						endMetaData = sqlaction.indexOf( ")", beginMetaData ) ;
+						if( endMetaData == -1 ) {
+							System.out.println( "*** ERROR : sql["+parser.sql+"] invalid" );
+							return;
+						}
+						parser.statementInterceptorMethodName = sqlaction.substring( beginMetaData+24, endMetaData ) ;
+						if( parser.statementInterceptorMethodName.equals("") )
+							parser.statementInterceptorMethodName = "STATEMENT_INTERCEPTOR_for_"+parser.methodName ;
+					}
+					
+					beginMetaData = sqlaction.indexOf( "@@SELECTKEY(" ) ;
+					if( beginMetaData >= 0 ) {
+						endMetaData = sqlaction.indexOf( ")", beginMetaData ) ;
+						if( endMetaData == -1 ) {
+							System.out.println( "*** ERROR : sql["+parser.sql+"] invalid" );
+							return;
+						}
+						parser.selectKey = sqlaction.substring( beginMetaData+12, endMetaData ) ;
+					}
+					
+					System.out.println( "Parse sql action ["+sqlaction+"]" );
+					System.out.println( "\t" + "                           sql["+parser.sql+"]" );
+					System.out.println( "\t" + "                    methodName["+parser.methodName+"]" );
+					System.out.println( "\t" + "statementInterceptorMethodName["+parser.statementInterceptorMethodName+"]" );
+					System.out.println( "\t" + "                     selectKey["+parser.selectKey+"]" );
+					
 					// Fixed SELECT * by fill all column to parser.selectColumnTokenList
-					System.out.println( "Fixed SELECT * by fill all column to parser.selectColumnTokenList ["+sql+"]" );
+					System.out.println( "Fixed SELECT * by fill all column to parser.selectColumnTokenList ["+parser.sql+"]" );
 					
 					if( parser.selectAllColumn == true ) {
 						for( SqlActionFromTableToken tt : parser.fromTableTokenList ) {
@@ -296,7 +303,7 @@ public class SqlActionGencode {
 					}
 					
 					// Show parser result
-					System.out.println( "Show parser result ["+sql+"]" );
+					System.out.println( "Show parser result ["+parser.sql+"]" );
 					
 					System.out.println( "\t" + "selectHint["+parser.selectHint+"]" );
 					
@@ -327,10 +334,10 @@ public class SqlActionGencode {
 					System.out.println( "\t" + "parser.otherTokens["+parser.otherTokens+"]" );
 					
 					// Dump gencode
-					System.out.println( "Dump gencode ["+sql+"]" );
+					System.out.println( "Dump gencode ["+parser.sql+"]" );
 					
 					if( parser.selectColumnTokenList != null && parser.selectColumnTokenList.size() > 0 ) {
-						nret = selectSqlDumpGencode( dbserverConf, sqlactionConf, tc, sql, statementSql, methodName, statementInterceptorMethodName, database, table, parser, saoFileBuffer, sauFileBuffer ) ;
+						nret = selectSqlDumpGencode( dbserverConf, sqlactionConf, tc, database, table, parser, saoFileBuffer, sauFileBuffer ) ;
 						if( nret != 0 ) {
 							System.out.println( "\t" + "*** ERROR : SelectSqlDumpGencode failed["+nret+"]" );
 							return;
@@ -338,7 +345,7 @@ public class SqlActionGencode {
 							System.out.println( "\t" + "SelectSqlDumpGencode ok" );
 						}
 					} else if( parser.insertTableName != null ) {
-						nret = insertSqlDumpGencode( dbserverConf, sqlactionConf, tc, sql, statementSql, methodName, statementInterceptorMethodName, database, table, parser, saoFileBuffer, sauFileBuffer ) ;
+						nret = insertSqlDumpGencode( dbserverConf, sqlactionConf, tc, database, table, parser, saoFileBuffer, sauFileBuffer ) ;
 						if( nret != 0 ) {
 							System.out.println( "\t" + "*** ERROR : InsertSqlDumpGencode failed["+nret+"]" );
 							return;
@@ -346,7 +353,7 @@ public class SqlActionGencode {
 							System.out.println( "\t" + "InsertSqlDumpGencode ok" );
 						}
 					} else if( parser.updateTableName != null ) {
-						nret = updateSqlDumpGencode( dbserverConf, sqlactionConf, tc, sql, statementSql, methodName, statementInterceptorMethodName, database, table, parser, saoFileBuffer, sauFileBuffer ) ;
+						nret = updateSqlDumpGencode( dbserverConf, sqlactionConf, tc, database, table, parser, saoFileBuffer, sauFileBuffer ) ;
 						if( nret != 0 ) {
 							System.out.println( "\t" + "*** ERROR : UpdateSqlDumpGencode failed["+nret+"]" );
 							return;
@@ -354,7 +361,7 @@ public class SqlActionGencode {
 							System.out.println( "\t" + "UpdateSqlDumpGencode ok" );
 						}
 					} else if( parser.deleteTableName != null ) {
-						nret = deleteSqlDumpGencode( dbserverConf, sqlactionConf, tc, sql, statementSql, methodName, statementInterceptorMethodName, database, table, parser, saoFileBuffer, sauFileBuffer ) ;
+						nret = deleteSqlDumpGencode( dbserverConf, sqlactionConf, tc, database, table, parser, saoFileBuffer, sauFileBuffer ) ;
 						if( nret != 0 ) {
 							System.out.println( "\t" + "*** ERROR : DeleteSqlDumpGencode failed["+nret+"]" );
 							return;
@@ -396,8 +403,6 @@ public class SqlActionGencode {
 	}
 
 	public static int selectSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionConfTable sqlactionConfTable,
-											String sql, String statementSql, String methodName,
-											String statementInterceptorMethodName,
 											SqlActionDatabase database, SqlActionTable table,
 											SqlActionSyntaxParser parser,
 											StringBuilder saoFileBuffer, StringBuilder sauFileBuffer ) {
@@ -418,26 +423,28 @@ public class SqlActionGencode {
 		}
 		
 		saoFileBuffer.append( "\n" );
-		OutAppendSql( saoFileBuffer, sql );
-		if( statementInterceptorMethodName != null ) {
+		OutAppendSql( saoFileBuffer, parser.sqlaction );
+		if( parser.statementInterceptorMethodName != null ) {
 			saoFileBuffer.append( "\t" + "/*\n" );
-			saoFileBuffer.append( "\t" + "public static String "+statementInterceptorMethodName+"( String statementSql ) {\n" );
+			saoFileBuffer.append( "\t" + "public static String "+parser.statementInterceptorMethodName+"( String statementSql ) {\n" );
+			saoFileBuffer.append( "\t\t" + "\n" );
 			saoFileBuffer.append( "\t\t" + "return statementSql;\n" );
 			saoFileBuffer.append( "\t" + "}\n" );
 			saoFileBuffer.append( "\t" + "*/\n" );
 			
 			sauFileBuffer.append( "\t" + "\n" );
-			OutAppendSql( sauFileBuffer, sql );
-			sauFileBuffer.append( "\t" + "public static String "+statementInterceptorMethodName+"( String statementSql ) {\n" );
+			OutAppendSql( sauFileBuffer, parser.sqlaction );
+			sauFileBuffer.append( "\t" + "public static String "+parser.statementInterceptorMethodName+"( String statementSql ) {\n" );
+			sauFileBuffer.append( "\t\t" + "\n" );
 			sauFileBuffer.append( "\t\t" + "return statementSql;\n" );
 			sauFileBuffer.append( "\t" + "}\n" );
 		}
 		if( parser.whereColumnTokenList.size() > 0 ) {
-			saoFileBuffer.append( "\t" + "public static int " + methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
-			if( statementInterceptorMethodName != null ) {
-				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( "+table.javaSauClassName+"."+statementInterceptorMethodName+"(\""+statementSql+"\") ) ;\n" );
+			saoFileBuffer.append( "\t" + "public static int " + parser.methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
+			if( parser.statementInterceptorMethodName != null ) {
+				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( "+table.javaSauClassName+"."+parser.statementInterceptorMethodName+"(\""+parser.statementSql+"\") ) ;\n" );
 			} else {
-				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( \""+statementSql+"\" ) ;\n" );
+				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( \""+parser.statementSql+"\" ) ;\n" );
 			}
 			columnIndex = 0 ;
 			for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
@@ -450,12 +457,12 @@ public class SqlActionGencode {
 			}
 			saoFileBuffer.append( "\t\t" + "ResultSet rs = prestmt.executeQuery() ;\n" );
 		} else {
-			saoFileBuffer.append( "\t" + "public static int " + methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
+			saoFileBuffer.append( "\t" + "public static int " + parser.methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
 			saoFileBuffer.append( "\t\t" + "Statement stmt = conn.createStatement() ;\n" );
-			if( statementInterceptorMethodName != null ) {
-				saoFileBuffer.append( "\t\t" + "ResultSet rs = stmt.executeQuery( "+table.javaSauClassName+"."+statementInterceptorMethodName+"(\""+statementSql+"\") ) ;\n" );
+			if( parser.statementInterceptorMethodName != null ) {
+				saoFileBuffer.append( "\t\t" + "ResultSet rs = stmt.executeQuery( "+table.javaSauClassName+"."+parser.statementInterceptorMethodName+"(\""+parser.statementSql+"\") ) ;\n" );
 			} else {
-				saoFileBuffer.append( "\t\t" + "ResultSet rs = stmt.executeQuery( \""+statementSql+"\" ) ;\n" );
+				saoFileBuffer.append( "\t\t" + "ResultSet rs = stmt.executeQuery( \""+parser.statementSql+"\" ) ;\n" );
 			}
 		}
 		saoFileBuffer.append( "\t\t" + "while( rs.next() ) {\n" );
@@ -469,7 +476,7 @@ public class SqlActionGencode {
 				if( ct.columnName.equalsIgnoreCase(SqlActionGencode.SELECT_COUNT___) ) {
 					saoFileBuffer.append("\t\t\t").append(ct.table.javaObjectName+"."+COUNT___).append(" = rs.getInt( "+columnIndex+" ) ;\n" );
 				} else {
-					nret = SqlActionColumn.dumpSelectOutputColumn( columnIndex, ct.column, ct.table.javaObjectName+"."+ct.column.javaPropertyName, saoFileBuffer ) ;
+					nret = SqlActionColumn.dumpSelectOutputColumn( "\t\t\t", columnIndex, ct.column, ct.table.javaObjectName+"."+ct.column.javaPropertyName, saoFileBuffer ) ;
 					if( nret != 0 ) {
 						System.out.println( "DumpSelectOutputColumn["+table.tableName+"]["+ct.columnName+"] failed["+nret+"]" );
 						return nret;
@@ -481,6 +488,12 @@ public class SqlActionGencode {
 			saoFileBuffer.append( "\t\t\t" + ct.table.javaObjectName+"ListForSelectOutput.add("+ct.table.javaObjectName+") ;\n" );
 		}
 		saoFileBuffer.append( "\t\t" + "}\n" );
+		saoFileBuffer.append( "\t\t" + "rs.close();\n" );
+		if( parser.whereColumnTokenList.size() > 0 ) {
+			saoFileBuffer.append( "\t\t" + "prestmt.close();\n" );
+		} else {
+			saoFileBuffer.append( "\t\t" + "stmt.close();\n" );
+		}
 		saoFileBuffer.append( "\t\t" + "return "+parser.fromTableTokenList.get(0).table.javaObjectName+"ListForSelectOutput.size();\n" );
 		saoFileBuffer.append( "\t" + "}\n" );
 		
@@ -488,8 +501,6 @@ public class SqlActionGencode {
 	}
 	
 	public static int insertSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionConfTable sqlactionConfTable,
-											String sql, String statementSql, String methodName,
-											String statementInterceptorMethodName,
 											SqlActionDatabase database, SqlActionTable table,
 											SqlActionSyntaxParser parser,
 											StringBuilder saoFileBuffer, StringBuilder sauFileBuffer ) {
@@ -499,7 +510,7 @@ public class SqlActionGencode {
 		int					columnIndex ;
 		int					nret = 0 ;
 		
-		statementSqlBuilder.append( statementSql + " (" );
+		statementSqlBuilder.append( parser.statementSql + " (" );
 		
 		columnIndex = 0 ;
 		for( SqlActionColumn c : table.columnList ) {
@@ -525,28 +536,30 @@ public class SqlActionGencode {
 		
 		statementSqlBuilder.append( ")" );
 		
-		sql = statementSqlBuilder.toString() ;
+		parser.sql = statementSqlBuilder.toString() ;
 		
 		methodParameters.append( "Connection conn, " + table.javaSaoClassName + " " + table.javaObjectName );
 		
 		saoFileBuffer.append( "\n" );
-		OutAppendSql( saoFileBuffer, sql );
-		if( statementInterceptorMethodName != null ) {
+		OutAppendSql( saoFileBuffer, parser.sqlaction );
+		if( parser.statementInterceptorMethodName != null ) {
 			saoFileBuffer.append( "\t" + "/*\n" );
-			saoFileBuffer.append( "\t" + "public static String "+statementInterceptorMethodName+"( String statementSql ) {\n" );
+			saoFileBuffer.append( "\t" + "public static String "+parser.statementInterceptorMethodName+"( String statementSql ) {\n" );
+			saoFileBuffer.append( "\t\t" + "\n" );
 			saoFileBuffer.append( "\t\t" + "return statementSql;\n" );
 			saoFileBuffer.append( "\t" + "}\n" );
 			saoFileBuffer.append( "\t" + "*/\n" );
 			
 			sauFileBuffer.append( "\t" + "\n" );
-			OutAppendSql( sauFileBuffer, sql );
-			sauFileBuffer.append( "\t" + "public static String "+statementInterceptorMethodName+"( String statementSql ) {\n" );
+			OutAppendSql( sauFileBuffer, parser.sqlaction );
+			sauFileBuffer.append( "\t" + "public static String "+parser.statementInterceptorMethodName+"( String statementSql ) {\n" );
+			sauFileBuffer.append( "\t\t" + "\n" );
 			sauFileBuffer.append( "\t\t" + "return statementSql;\n" );
 			sauFileBuffer.append( "\t" + "}\n" );
 		}
-		saoFileBuffer.append( "\t" + "public static int " + methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
-		if( statementInterceptorMethodName != null ) {
-			saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( "+table.javaSauClassName+"."+statementInterceptorMethodName+"(\""+statementSql+"\") ) ;\n" );
+		saoFileBuffer.append( "\t" + "public static int " + parser.methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
+		if( parser.statementInterceptorMethodName != null ) {
+			saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( "+table.javaSauClassName+"."+parser.statementInterceptorMethodName+"(\""+parser.statementSql+"\") ) ;\n" );
 		} else {
 			saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( \""+statementSqlBuilder+"\" ) ;\n" );
 		}
@@ -561,15 +574,35 @@ public class SqlActionGencode {
 				}
 			}
 		}
-		saoFileBuffer.append( "\t\t" + "return prestmt.executeUpdate() ;\n" );
+		if( parser.selectKey == null || table.primaryKey == null ) {
+			saoFileBuffer.append( "\t\t" + "int count = prestmt.executeUpdate() ;\n" );
+			saoFileBuffer.append( "\t\t" + "prestmt.close();\n" );
+			saoFileBuffer.append( "\t\t" + "return count;\n" );
+		} else {
+			saoFileBuffer.append( "\t\t" + "int count = prestmt.executeUpdate() ;\n" );
+			saoFileBuffer.append( "\t\t" + "prestmt.close();\n" );
+			saoFileBuffer.append( "\t\t" + "if( count == 0 )\n" );
+			saoFileBuffer.append( "\t\t" + "	return 0;\n" );
+			saoFileBuffer.append( "\t\t" + "\n" );
+			saoFileBuffer.append( "\t\t" + "Statement stmt = conn.createStatement() ;\n" );
+			saoFileBuffer.append( "\t\t" + "ResultSet rs = stmt.executeQuery( \"SELECT LAST_INSERT_ID()\" ) ;\n" );
+			saoFileBuffer.append( "\t\t" + "rs.next();\n" );
+			nret = SqlActionColumn.dumpSelectOutputColumn( "\t\t", 1, table.primaryKey, table.javaObjectName+"."+table.primaryKey.javaPropertyName, saoFileBuffer ) ;
+			if( nret != 0 ) {
+				System.out.println( "DumpSelectOutputColumn["+table.tableName+"]["+table.primaryKey.columnName+"] failed["+nret+"]" );
+				return nret;
+			}
+			saoFileBuffer.append( "\t\t" + "rs.close();\n" );
+			saoFileBuffer.append( "\t\t" + "stmt.close();\n" );
+			saoFileBuffer.append( "\t\t" + "\n" );
+			saoFileBuffer.append( "\t\t" + "return count;\n" );
+		}
 		saoFileBuffer.append( "\t" + "}\n" );
 		
 		return 0;
 	}
 	
 	public static int updateSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionConfTable sqlactionConfTable,
-											String sql, String statementSql, String methodName,
-											String statementInterceptorMethodName,
 											SqlActionDatabase database, SqlActionTable table,
 											SqlActionSyntaxParser parser,
 											StringBuilder saoFileBuffer, StringBuilder sauFileBuffer ) {
@@ -598,26 +631,28 @@ public class SqlActionGencode {
 		}
 		
 		saoFileBuffer.append( "\n" );
-		OutAppendSql( saoFileBuffer, sql );
-		if( statementInterceptorMethodName != null ) {
+		OutAppendSql( saoFileBuffer, parser.sqlaction );
+		if( parser.statementInterceptorMethodName != null ) {
 			saoFileBuffer.append( "\t" + "/*\n" );
-			saoFileBuffer.append( "\t" + "public static String "+statementInterceptorMethodName+"( String statementSql ) {\n" );
+			saoFileBuffer.append( "\t" + "public static String "+parser.statementInterceptorMethodName+"( String statementSql ) {\n" );
+			saoFileBuffer.append( "\t\t" + "\n" );
 			saoFileBuffer.append( "\t\t" + "return statementSql;\n" );
 			saoFileBuffer.append( "\t" + "}\n" );
 			saoFileBuffer.append( "\t" + "*/\n" );
 			
 			sauFileBuffer.append( "\t" + "\n" );
-			OutAppendSql( sauFileBuffer, sql );
-			sauFileBuffer.append( "\t" + "public static String "+statementInterceptorMethodName+"( String statementSql ) {\n" );
+			OutAppendSql( sauFileBuffer, parser.sqlaction );
+			sauFileBuffer.append( "\t" + "public static String "+parser.statementInterceptorMethodName+"( String statementSql ) {\n" );
+			sauFileBuffer.append( "\t\t" + "\n" );
 			sauFileBuffer.append( "\t\t" + "return statementSql;\n" );
 			sauFileBuffer.append( "\t" + "}\n" );
 		}
 		if( parser.setColumnTokenList.size() > 0 || parser.whereColumnTokenList.size() > 0 ) {
-			saoFileBuffer.append( "\t" + "public static int " + methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
-			if( statementInterceptorMethodName != null ) {
-				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( "+table.javaSauClassName+"."+statementInterceptorMethodName+"(\""+statementSql+"\") ) ;\n" );
+			saoFileBuffer.append( "\t" + "public static int " + parser.methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
+			if( parser.statementInterceptorMethodName != null ) {
+				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( "+table.javaSauClassName+"."+parser.statementInterceptorMethodName+"(\""+parser.statementSql+"\") ) ;\n" );
 			} else {
-				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( \""+statementSql+"\" ) ;\n" );
+				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( \""+parser.statementSql+"\" ) ;\n" );
 			}
 			setColumnIndex = 0 ;
 			columnTokenIndex = 0 ;
@@ -642,13 +677,12 @@ public class SqlActionGencode {
 					return nret;
 				}
 			}
-			saoFileBuffer.append( "\t\t" + "return prestmt.executeUpdate() ;\n" );
 		} else {
-			saoFileBuffer.append( "\t" + "public static int " + methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
-			if( statementInterceptorMethodName != null ) {
-				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( "+table.javaSauClassName+"."+statementInterceptorMethodName+"(\""+statementSql+"\") ) ;\n" );
+			saoFileBuffer.append( "\t" + "public static int " + parser.methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
+			if( parser.statementInterceptorMethodName != null ) {
+				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( "+table.javaSauClassName+"."+parser.statementInterceptorMethodName+"(\""+parser.statementSql+"\") ) ;\n" );
 			} else {
-				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( \""+statementSql+"\" ) ;\n" );
+				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( \""+parser.statementSql+"\" ) ;\n" );
 			}
 			setColumnIndex = 0 ;
 			columnTokenIndex = 0 ;
@@ -663,16 +697,16 @@ public class SqlActionGencode {
 					}
 				}
 			}
-			saoFileBuffer.append( "\t\t" + "return prestmt.executeUpdate() ;\n" );
 		}
+		saoFileBuffer.append( "\t\t" + "int count = prestmt.executeUpdate() ;\n" );
+		saoFileBuffer.append( "\t\t" + "prestmt.close();\n" );
+		saoFileBuffer.append( "\t\t" + "return count;\n" );
 		saoFileBuffer.append( "\t" + "}\n" );
 		
 		return 0;
 	}
 	
 	public static int deleteSqlDumpGencode( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionConfTable sqlactionConfTable,
-											String sql, String statementSql, String methodName,
-											String statementInterceptorMethodName,
 											SqlActionDatabase database, SqlActionTable table,
 											SqlActionSyntaxParser parser,
 											StringBuilder saoFileBuffer, StringBuilder sauFileBuffer ) {
@@ -690,26 +724,28 @@ public class SqlActionGencode {
 		}
 		
 		saoFileBuffer.append( "\n" );
-		OutAppendSql( saoFileBuffer, sql );
-		if( statementInterceptorMethodName != null ) {
+		OutAppendSql( saoFileBuffer, parser.sqlaction );
+		if( parser.statementInterceptorMethodName != null ) {
 			saoFileBuffer.append( "\t" + "/*\n" );
-			saoFileBuffer.append( "\t" + "public static String "+statementInterceptorMethodName+"( String statementSql ) {\n" );
+			saoFileBuffer.append( "\t" + "public static String "+parser.statementInterceptorMethodName+"( String statementSql ) {\n" );
+			saoFileBuffer.append( "\t\t" + "\n" );
 			saoFileBuffer.append( "\t\t" + "return statementSql;\n" );
 			saoFileBuffer.append( "\t" + "}\n" );
 			saoFileBuffer.append( "\t" + "*/\n" );
 			
 			sauFileBuffer.append( "\t" + "\n" );
-			OutAppendSql( sauFileBuffer, sql );
-			sauFileBuffer.append( "\t" + "public static String "+statementInterceptorMethodName+"( String statementSql ) {\n" );
+			OutAppendSql( sauFileBuffer, parser.sqlaction );
+			sauFileBuffer.append( "\t" + "public static String "+parser.statementInterceptorMethodName+"( String statementSql ) {\n" );
+			sauFileBuffer.append( "\t\t" + "\n" );
 			sauFileBuffer.append( "\t\t" + "return statementSql;\n" );
 			sauFileBuffer.append( "\t" + "}\n" );
 		}
 		if( parser.whereColumnTokenList.size() > 0 ) {
-			saoFileBuffer.append( "\t" + "public static int " + methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
-			if( statementInterceptorMethodName != null ) {
-				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( "+table.javaSauClassName+"."+statementInterceptorMethodName+"(\""+statementSql+"\") ) ;\n" );
+			saoFileBuffer.append( "\t" + "public static int " + parser.methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
+			if( parser.statementInterceptorMethodName != null ) {
+				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( "+table.javaSauClassName+"."+parser.statementInterceptorMethodName+"(\""+parser.statementSql+"\") ) ;\n" );
 			} else {
-				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( \""+statementSql+"\" ) ;\n" );
+				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( \""+parser.statementSql+"\" ) ;\n" );
 			}
 			columnIndex = 0 ;
 			for( SqlActionWhereColumnToken ct : parser.whereColumnTokenList ) {
@@ -720,13 +756,12 @@ public class SqlActionGencode {
 					return nret;
 				}
 			}
-			saoFileBuffer.append( "\t\t" + "return prestmt.executeUpdate() ;\n" );
 		} else {
-			saoFileBuffer.append( "\t" + "public static int " + methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
-			if( statementInterceptorMethodName != null ) {
-				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( "+table.javaSauClassName+"."+statementInterceptorMethodName+"(\""+statementSql+"\") ) ;\n" );
+			saoFileBuffer.append( "\t" + "public static int " + parser.methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
+			if( parser.statementInterceptorMethodName != null ) {
+				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( "+table.javaSauClassName+"."+parser.statementInterceptorMethodName+"(\""+parser.statementSql+"\") ) ;\n" );
 			} else {
-				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( \""+statementSql+"\" ) ;\n" );
+				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( \""+parser.statementSql+"\" ) ;\n" );
 			}
 			columnIndex = 0 ;
 			for( SqlActionSetColumnToken ct : parser.setColumnTokenList ) {
@@ -739,8 +774,10 @@ public class SqlActionGencode {
 					}
 				}
 			}
-			saoFileBuffer.append( "\t\t" + "return prestmt.executeUpdate() ;\n" );
 		}
+		saoFileBuffer.append( "\t\t" + "int count = prestmt.executeUpdate() ;\n" );
+		saoFileBuffer.append( "\t\t" + "prestmt.close();\n" );
+		saoFileBuffer.append( "\t\t" + "return count;\n" );
 		saoFileBuffer.append( "\t" + "}\n" );
 		
 		return 0;

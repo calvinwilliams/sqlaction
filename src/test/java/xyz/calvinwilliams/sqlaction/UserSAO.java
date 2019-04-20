@@ -14,7 +14,7 @@ import java.sql.ResultSet;
 
 public class UserSAO {
 
-	int				id ; // 编号
+	int				id ; // 编号 // PRIMARY KEY
 	String			name ; // 名字
 	String			gender ; // 性别
 	short			age ; // 年龄
@@ -37,6 +37,8 @@ public class UserSAO {
 			user.level = rs.getInt( 6 ) ;
 			userListForSelectOutput.add(user) ;
 		}
+		rs.close();
+		stmt.close();
 		return userListForSelectOutput.size();
 	}
 
@@ -55,6 +57,8 @@ public class UserSAO {
 			user.level = rs.getInt( 6 ) ;
 			userListForSelectOutput.add(user) ;
 		}
+		rs.close();
+		prestmt.close();
 		return userListForSelectOutput.size();
 	}
 
@@ -70,6 +74,8 @@ public class UserSAO {
 			user.address = rs.getString( 2 ) ;
 			userListForSelectOutput.add(user) ;
 		}
+		rs.close();
+		prestmt.close();
 		return userListForSelectOutput.size();
 	}
 
@@ -87,6 +93,8 @@ public class UserSAO {
 			user.level = rs.getInt( 6 ) ;
 			userListForSelectOutput.add(user) ;
 		}
+		rs.close();
+		stmt.close();
 		return userListForSelectOutput.size();
 	}
 
@@ -100,10 +108,12 @@ public class UserSAO {
 			user._count_ = rs.getInt( 2 ) ;
 			userListForSelectOutput.add(user) ;
 		}
+		rs.close();
+		stmt.close();
 		return userListForSelectOutput.size();
 	}
 
-	// INSERT INTO user (name,gender,age,address,level) VALUES (?,?,?,?,?)
+	// INSERT INTO user @@SELECTKEY(USER_ID_SEQ)
 	public static int INSERT_INTO_user( Connection conn, UserSAO user ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement( "INSERT INTO user (name,gender,age,address,level) VALUES (?,?,?,?,?)" ) ;
 		prestmt.setString( 1, user.name );
@@ -111,20 +121,36 @@ public class UserSAO {
 		prestmt.setShort( 3, user.age );
 		prestmt.setString( 4, user.address );
 		prestmt.setInt( 5, user.level );
-		return prestmt.executeUpdate() ;
+		int count = prestmt.executeUpdate() ;
+		prestmt.close();
+		if( count == 0 )
+			return 0;
+		
+		Statement stmt = conn.createStatement() ;
+		ResultSet rs = stmt.executeQuery( "SELECT LAST_INSERT_ID()" ) ;
+		rs.next();
+		user.id = rs.getInt( 1 ) ;
+		rs.close();
+		stmt.close();
+		
+		return count;
 	}
 
 	// UPDATE user SET level=?
 	public static int UPDATE_user_SET_level_E_( Connection conn, int _1_level_ForSetInput ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement( "UPDATE user SET level=?" ) ;
 		prestmt.setInt( 1, _1_level_ForSetInput );
-		return prestmt.executeUpdate() ;
+		int count = prestmt.executeUpdate() ;
+		prestmt.close();
+		return count;
 	}
 
 	// UPDATE user SET address='calvin address',level=10 WHERE name='Calvin'
 	public static int UPDATE_user_SET_address_E_calvin_address_j_level_E_10_WHERE_name_E_Calvin_( Connection conn ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement( "UPDATE user SET address='calvin address',level=10 WHERE name='Calvin'" ) ;
-		return prestmt.executeUpdate() ;
+		int count = prestmt.executeUpdate() ;
+		prestmt.close();
+		return count;
 	}
 
 	// UPDATE user SET level=? WHERE age>? AND gender=?
@@ -133,19 +159,25 @@ public class UserSAO {
 		prestmt.setInt( 1, _1_level_ForSetInput );
 		prestmt.setShort( 2, _1_age_ForWhereInput );
 		prestmt.setString( 3, _2_gender_ForWhereInput );
-		return prestmt.executeUpdate() ;
+		int count = prestmt.executeUpdate() ;
+		prestmt.close();
+		return count;
 	}
 
 	// DELETE FROM user
 	public static int DELETE_FROM_user( Connection conn ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement( "DELETE FROM user" ) ;
-		return prestmt.executeUpdate() ;
+		int count = prestmt.executeUpdate() ;
+		prestmt.close();
+		return count;
 	}
 
 	// DELETE FROM user WHERE name='Calvin'
 	public static int DELETE_FROM_user_WHERE_name_E_Calvin_( Connection conn ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement( "DELETE FROM user WHERE name='Calvin'" ) ;
-		return prestmt.executeUpdate() ;
+		int count = prestmt.executeUpdate() ;
+		prestmt.close();
+		return count;
 	}
 
 	// DELETE FROM user WHERE age<>? AND gender<>?
@@ -153,7 +185,9 @@ public class UserSAO {
 		PreparedStatement prestmt = conn.prepareStatement( "DELETE FROM user WHERE age<>? AND gender<>?" ) ;
 		prestmt.setShort( 1, _1_age );
 		prestmt.setString( 2, _2_gender );
-		return prestmt.executeUpdate() ;
+		int count = prestmt.executeUpdate() ;
+		prestmt.close();
+		return count;
 	}
 
 }

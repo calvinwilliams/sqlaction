@@ -14,7 +14,7 @@ import java.sql.ResultSet;
 
 public class UserOrderSAO {
 
-	int				id ; // 编号
+	int				id ; // 编号 // PRIMARY KEY
 	int				userId ; // 用户编号
 	String			itemName ; // 商品名称
 	int				amount ; // 数量
@@ -22,9 +22,10 @@ public class UserOrderSAO {
 
 	int				_count_ ; // defining for 'SELECT COUNT(*)'
 
-	// SELECT /* blablabla~ */ * FROM user_order 
+	// SELECT /* blablabla~ */ * FROM user_order @@STATEMENT_INTERCEPTOR()
 	/*
 	public static String STATEMENT_INTERCEPTOR_for_SELECT_HT_blablabla_TH_ALL_FROM_user_order( String statementSql ) {
+		
 		return statementSql;
 	}
 	*/
@@ -40,6 +41,8 @@ public class UserOrderSAO {
 			userOrder.totalPrice = rs.getDouble( 5 ) ;
 			userOrderListForSelectOutput.add(userOrder) ;
 		}
+		rs.close();
+		stmt.close();
 		return userOrderListForSelectOutput.size();
 	}
 
@@ -57,12 +60,15 @@ public class UserOrderSAO {
 			userOrder.totalPrice = rs.getDouble( 5 ) ;
 			userOrderListForSelectOutput.add(userOrder) ;
 		}
+		rs.close();
+		prestmt.close();
 		return userOrderListForSelectOutput.size();
 	}
 
 	// SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price
 	// 					FROM user,user_order
 	// 					WHERE user.name=? AND user.id=user_order.user_id
+	// 					@@METHOD(queryUserAndOrderByName)
 	public static int queryUserAndOrderByName( Connection conn, List<UserSAO> userListForSelectOutput, List<UserOrderSAO> userOrderListForSelectOutput, String _1_name ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement( "SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id" ) ;
 		prestmt.setString( 1, _1_name );
@@ -78,12 +84,15 @@ public class UserOrderSAO {
 			userListForSelectOutput.add(user) ;
 			userOrderListForSelectOutput.add(userOrder) ;
 		}
+		rs.close();
+		prestmt.close();
 		return userListForSelectOutput.size();
 	}
 
-	// SELECT u.name,u.address,o.item_name,o.amount,o.total_price FROM user u,user_order o WHERE u.name=? AND u.id=o.user_id 
+	// SELECT u.name,u.address,o.item_name,o.amount,o.total_price FROM user u,user_order o WHERE u.name=? AND u.id=o.user_id @@STATEMENT_INTERCEPTOR(statementInterceptorForQueryUserAndOrderByName)
 	/*
 	public static String statementInterceptorForQueryUserAndOrderByName( String statementSql ) {
+		
 		return statementSql;
 	}
 	*/
@@ -102,17 +111,21 @@ public class UserOrderSAO {
 			userListForSelectOutput.add(user) ;
 			userOrderListForSelectOutput.add(userOrder) ;
 		}
+		rs.close();
+		prestmt.close();
 		return userListForSelectOutput.size();
 	}
 
-	// INSERT INTO user_order (user_id,item_name,amount,total_price) VALUES (?,?,?,?)
+	// INSERT INTO user_order
 	public static int INSERT_INTO_user_order( Connection conn, UserOrderSAO userOrder ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement( "INSERT INTO user_order (user_id,item_name,amount,total_price) VALUES (?,?,?,?)" ) ;
 		prestmt.setInt( 1, userOrder.userId );
 		prestmt.setString( 2, userOrder.itemName );
 		prestmt.setInt( 3, userOrder.amount );
 		prestmt.setDouble( 4, userOrder.totalPrice );
-		return prestmt.executeUpdate() ;
+		int count = prestmt.executeUpdate() ;
+		prestmt.close();
+		return count;
 	}
 
 	// UPDATE user_order SET total_price=? WHERE user_id=?
@@ -120,13 +133,17 @@ public class UserOrderSAO {
 		PreparedStatement prestmt = conn.prepareStatement( "UPDATE user_order SET total_price=? WHERE user_id=?" ) ;
 		prestmt.setDouble( 1, _1_totalPrice_ForSetInput );
 		prestmt.setInt( 2, _1_userId_ForWhereInput );
-		return prestmt.executeUpdate() ;
+		int count = prestmt.executeUpdate() ;
+		prestmt.close();
+		return count;
 	}
 
 	// DELETE FROM user_order
 	public static int DELETE_FROM_user_order( Connection conn ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement( "DELETE FROM user_order" ) ;
-		return prestmt.executeUpdate() ;
+		int count = prestmt.executeUpdate() ;
+		prestmt.close();
+		return count;
 	}
 
 }

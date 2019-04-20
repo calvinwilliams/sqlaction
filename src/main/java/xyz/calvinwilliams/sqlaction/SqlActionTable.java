@@ -14,6 +14,7 @@ import java.util.*;
 public class SqlActionTable {
 	String					tableName ;
 	List<SqlActionColumn>	columnList ;
+	SqlActionColumn			primaryKey ;
 	List<SqlActionIndex>	indexList ;
 
 	String					javaSaoClassName ;
@@ -38,7 +39,7 @@ public class SqlActionTable {
 		if( table != null )
 			return table;
 		
-		if( dbserverConf.dbms.equals(SqlActionDatabase.SQLACTION_DBMS_MYSQL) ) {
+		if( dbserverConf.dbms == SqlActionDatabase.DBMS_MYSQL ) {
 			prestmt = conn.prepareStatement("SELECT table_name,table_type FROM information_schema.TABLES WHERE table_schema=? AND table_name=?") ;
 			prestmt.setString( 1, database.databaseName );
 			prestmt.setString( 2, tableName );
@@ -88,7 +89,7 @@ public class SqlActionTable {
 			
 			for( int n = 0 ; n < depth ; n++ )
 				System.out.print( "\t" );
-			System.out.println( "tableName["+t.tableName+"]" );
+			System.out.println( "tableName["+t.tableName+"] primaryKey["+(t.primaryKey==null?null:t.primaryKey.columnName)+"] javaObjectName["+t.javaObjectName+"] primaryKey.javaPropertyName["+t.primaryKey.javaPropertyName+"]" );
 			
 			SqlActionColumn.travelAllColumnsMetadata( dbserverConf, sqlactionConf, t.columnList, depth+1 );
 			

@@ -309,7 +309,7 @@ SqlactionDemoSAO.SELECT_ALL_FROM_sqlaction_demo ok
 
 ```
                                          sqlaction
-dbserver.conf.json��sqlaction.conf.json -----------> XxxSao.java��XxxSau.java(JDBC code) --\
+dbserver.conf.json¡¢sqlaction.conf.json -----------> XxxSao.java¡¢XxxSau.java(JDBC code) --\
                                                                                             ---> Zzz.jar
                                                                                 Yyy.java --/
 ```
@@ -328,8 +328,8 @@ DDL
 ```
 CREATE TABLE `sqlaction_benchmark` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
-  `name` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT '英文各1�7',
-  `name_cn` varchar(128) COLLATE utf8mb4_bin NOT NULL COMMENT '中文各1�7',
+  `name` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT '英文各1¤7',
+  `name_cn` varchar(128) COLLATE utf8mb4_bin NOT NULL COMMENT '中文各1¤7',
   `salary` decimal(12,2) NOT NULL COMMENT '薪水',
   `birthday` date NOT NULL COMMENT '生日',
   PRIMARY KEY (`id`)
@@ -423,7 +423,7 @@ public class SqlActionBenchmarkCrud {
 			
 			sqlactionBenchmark = new SqlactionBenchmarkSAO() ;
 			sqlactionBenchmark.name = "Calvin" ;
-			sqlactionBenchmark.nameCn = "卡尔斄1�7" ;
+			sqlactionBenchmark.nameCn = "卡尔斄1¤7" ;
 			sqlactionBenchmark.salary = new BigDecimal(0) ;
 			long time = System.currentTimeMillis() ;
 			sqlactionBenchmark.birthday = new java.sql.Date(time) ;
@@ -438,7 +438,7 @@ public class SqlActionBenchmarkCrud {
 			beginMillisSecondstamp = System.currentTimeMillis() ;
 			for( i = 0 ; i < count ; i++ ) {
 				sqlactionBenchmark.name = "Calvin"+i ;
-				sqlactionBenchmark.nameCn = "卡尔斄1�7"+i ;
+				sqlactionBenchmark.nameCn = "卡尔斄1¤7"+i ;
 				rows = SqlactionBenchmarkSAO.INSERT_INTO_sqlaction_benchmark( conn, sqlactionBenchmark ) ;
 				if( rows != 1 ) {
 					System.out.println( "SqlactionBenchmarkSAO.INSERT_INTO_sqlaction_benchmark failed["+rows+"]" );
@@ -603,8 +603,8 @@ import java.math.*;
 public class SqlactionBenchmarkSAO {
 
 	int				id ; // 编号
-	String			name ; // 英文各1�7
-	String			name_cn ; // 中文各1�7
+	String			name ; // 英文各1¤7
+	String			name_cn ; // 中文各1¤7
 	BigDecimal		salary ; // 薪水
 	java.sql.Date	birthday ; // 生日
 
@@ -672,7 +672,7 @@ public class MyBatisBenchmarkCrud {
 			SqlactionBenchmarkSAO	sqlactionBenchmark = new SqlactionBenchmarkSAO() ;
 			sqlactionBenchmark.id = 1 ;
 			sqlactionBenchmark.name = "Calvin" ;
-			sqlactionBenchmark.name_cn = "卡尔斄1�7" ;
+			sqlactionBenchmark.name_cn = "卡尔斄1¤7" ;
 			sqlactionBenchmark.salary = new BigDecimal(0) ;
 			long time = System.currentTimeMillis() ;
 			sqlactionBenchmark.birthday = new java.sql.Date(time) ;
@@ -689,7 +689,7 @@ public class MyBatisBenchmarkCrud {
 			beginMillisSecondstamp = System.currentTimeMillis() ;
 			for( i = 0 ; i < count ; i++ ) {
 				sqlactionBenchmark.name = "Calvin"+i ;
-				sqlactionBenchmark.name_cn = "卡尔斄1�7"+i ;
+				sqlactionBenchmark.name_cn = "卡尔斄1¤7"+i ;
 				mapper.insertOne(sqlactionBenchmark);
 				if( i % 10 == 0 ) {
 					session.commit();
@@ -839,13 +839,13 @@ Apache Maven
 <dependency>
   <groupId>xyz.calvinwilliams</groupId>
   <artifactId>sqlaction</artifactId>
-  <version>0.2.1.0</version>
+  <version>0.2.2.0</version>
 </dependency>
 ```
 
 Gradle Kotlin DSL
 ```
-compile("xyz.calvinwilliams:sqlaction:0.2.1.0")
+compile("xyz.calvinwilliams:sqlaction:0.2.2.0")
 ```
 
 # 7. About Author

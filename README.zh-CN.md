@@ -21,12 +21,12 @@ sqlaction - 自动生成JDBC代码的数据库持久层工具
         - [3.5.3. 拦截器](#353-拦截器)
             - [3.5.3.1. SQL拦截器](#3531-sql拦截器)
 - [4. 为什么这么设计？](#4-为什么这么设计)
-- [5. 与MyBatis的开发量比较](#5-与mybatis的开发量比较)
 - [6. 与MyBatis的性能比较](#6-与mybatis的性能比较)
     - [6.1. 准备`sqlaction`](#61-准备sqlaction)
     - [6.2. 准备`MyBatis`](#62-准备mybatis)
     - [6.3. 测试案例](#63-测试案例)
     - [6.4. 测试结果](#64-测试结果)
+- [5. 与MyBatis的开发量比较](#5-与mybatis的开发量比较)
 - [7. 后续开发](#7-后续开发)
 - [8. 关于本项目](#8-关于本项目)
 - [9. 关于作者](#9-关于作者)
@@ -627,166 +627,6 @@ public class UserOrderSAU {
 
 简洁就是优秀工具的特质，而不是为了解决一种复杂性而带来另一种复杂性。
 
-# 5. 与MyBatis的开发量比较
-
-<table>
-	<tr>
-		<td>MyBatis</td>
-		<td>sqlaction</td>
-	</tr>
-	<tr>
-		<td colspan="2">每个项目手工开发量<td>
-	</tr>
-	<tr>
-		<td>
-			<textarea cols="50%" rows="21" readonly="yes" disabled="yes" wrap="virtual">
-配置数据库连接信息
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
-<configuration>
-	<settings>
-		<setting name="cacheEnabled" value="false" />
-	</settings>
-	<environments default="development">
-		<environment id="development">
-			<transactionManager type="JDBC"></transactionManager>
-			<dataSource type="POOLED">
-				<property name="driver" value="com.mysql.jdbc.Driver" />
-				<property name="url" value="jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" />
-				<property name="username" value="calvin" />
-				<property name="password" value="calvin" />
-			</dataSource>
-		</environment>
-	</environments>
-	<mappers>
-		<mapper resource="mybatis-mapper.xml" />
-	</mappers>
-</configuration>
-			</textarea>
-		</td>
-		<td>
-			<textarea cols="50%" rows="7" readonly="yes" disabled="yes" wrap="virtual">
-配置数据库连接信息
-{
-	"driver" : "com.mysql.jdbc.Driver" ,
-	"url" : "jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" ,
-	"user" : "calvin" ,
-	"pwd" : "calvin"
-}
-			</textarea>
-		</td>
-	</tr>
-	<tr>
-		<td colspan="2">每张表手工开发量<td>
-	</tr>
-	<tr>
-		<td>
-			<textarea cols="50%" rows="12" readonly="yes" disabled="yes" wrap="virtual">
-编写实体类
-package xyz.calvinwilliams.mybatis.benchmark;
-
-import java.math.*;
-
-public class SqlactionBenchmarkSAO {
-	int				id ; // 编号
-	String			name ; // 英文名
-	String			name_cn ; // 中文名
-	BigDecimal		salary ; // 薪水
-	java.sql.Date	birthday ; // 生日
-}
-			</textarea>
-		</td>
-		<td>
-			（sqlaction原生自动生成）
-		</td>
-	</tr>
-	<tr>
-		<td>
-			<textarea cols="50%" rows="23" readonly="yes" disabled="yes" wrap="virtual">
-配置表Mapper信息
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAOMapper">
-	<insert id="insertOne" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
-		INSERT INTO sqlaction_benchmark (name,name_cn,salary,birthday) VALUES( #{name}, #{name_cn}, #{salary}, #{birthday} )
-	</insert>
-	<update id="updateOneByName" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
-		UPDATE sqlaction_benchmark SET salary=#{salary} WHERE name=#{name}
-	</update>
-	<select id="selectOneByName" parameterType="java.lang.String" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO" flushCache="true" useCache="false">
-		SELECT * FROM sqlaction_benchmark WHERE name=#{name}
-	</select>
-	<select id="selectAll" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO" flushCache="true" useCache="false">
-		SELECT * FROM sqlaction_benchmark
-	</select>
-	<delete id="deleteOneByName" parameterType="java.lang.String">
-		DELETE FROM sqlaction_benchmark WHERE name=#{name}
-	</delete>
-	<delete id="deleteAll">
-		DELETE FROM sqlaction_benchmark
-	</delete>
-</mapper>
-			</textarea>
-		</td>
-		<td>
-			<textarea cols="50%" rows="18" readonly="yes" disabled="yes" wrap="virtual">
-配置表动作信息
-{
-	"database" : "calvindb" ,
-	"tables" : [
-		{
-			"table" : "sqlaction_benchmark" ,
-			"sqlactions" : [
-				"INSERT INTO sqlaction_benchmark" ,
-				"UPDATE sqlaction_benchmark SET salary=? WHERE name=?" ,
-				"SELECT * FROM sqlaction_benchmark WHERE name=?" ,
-				"SELECT * FROM sqlaction_benchmark" ,
-				"DELETE FROM sqlaction_benchmark WHERE name=?" ,
-				"DELETE FROM sqlaction_benchmark"
-			]
-		}
-	] ,
-	"javaPackage" : "xyz.calvinwilliams.sqlaction.benchmark"
-}
-			</textarea>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			<textarea cols="50%" rows="13" readonly="yes" disabled="yes" wrap="virtual">
-编写接口类
-package xyz.calvinwilliams.mybatis.benchmark;
-
-import java.util.*;
-
-public interface SqlactionBenchmarkSAOMapper {
-	public void insertOne(SqlactionBenchmarkSAO sqlactionBenchmark);
-	public void updateOneByName(SqlactionBenchmarkSAO sqlactionBenchmark);
-	public SqlactionBenchmarkSAO selectOneByName(String name);
-	public List<SqlactionBenchmarkSAO> selectAll();
-	public void deleteOneByName(String name);
-	public void deleteAll();
-}
-			</textarea>
-		</td>
-		<td>
-			No
-		</td>
-	</tr>
-	<tr>
-		<td>
-			No
-		</td>
-		<td>
-			<textarea cols="50%" rows="3" readonly="yes" disabled="yes" wrap="virtual">
-执行`sqlaction`，处理SQL动作配置
-java -Dfile.encoding=UTF-8 -classpath "D:\Work\sqlaction\sqlaction.jar;D:\Work\mysql-connector-java-8.0.15\mysql-connector-java-8.0.15.jar" xyz.calvinwilliams.sqlaction.gencode.SqlActionGencode
-pause
-			</textarea>
-		</td>
-	</tr>
-</table>
-
 # 6. 与MyBatis的性能比较
 
 由于`sqlaction`自动生成的JDBC代码，与手工代码基本无异，没有低效的反射，没有多坑的热修改字节码，所以稳定性和运行性能都非常出色，下面是`sqlaction`与`MyBatis`的性能测试。
@@ -1300,6 +1140,190 @@ All mybatis DELETE WHERE done , count[500] elapse[6.035]s
 **从以上性能测试图表中可以看出，`sqlaction`运行性能比`MyBatis`快大约20%，这意味着技术选型`sqlaction`的应用系统的交易延迟比`MyBatis`有明显优势。**
 
 **而且从测试前准备来看，无论配置文件、源代码文件数量还是大小，`sqlaction`都比`MyBatis`工作量少，能更快速的展开业务开发，减轻开发人员学习压力和心智负担，且采用的技术更简单更透明更易掌控。**
+
+# 5. 与MyBatis的开发量比较
+
+详细源文件内容见 与MyBatis的性能比较 章节
+
+| 文件 | MyBatis | sqlaction |
+|---|---|---|
+| 数据库连接信息配置文件 | mybatis-config.xml（共21行） | dbserver.conf.json（共6行） |
+| 表映射信息配置文件 | mybatis-mapper.xml（共22行） | sqlaction.conf.json（共17行） |
+
+
+<table>
+	<tr>
+		<td>MyBatis</td>
+		<td>sqlaction</td>
+	</tr>
+	<tr>
+		<td colspan="2">每个项目手工开发量<td>
+	</tr>
+	<tr>
+		<td><image src="mybatis-config.xml.png" /></td>
+		<td><image src="dbserver.conf.json.png" /></td>
+	</tr>
+</table>
+
+
+
+<table>
+	<tr>
+		<td>MyBatis</td>
+		<td>sqlaction</td>
+	</tr>
+	<tr>
+		<td colspan="2">每个项目手工开发量<td>
+	</tr>
+	<tr>
+		<td>
+			<textarea cols="50%" rows="21" readonly="yes" disabled="yes" wrap="virtual">
+配置数据库连接信息
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<setting name="cacheEnabled" value="false" />
+	</settings>
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC"></transactionManager>
+			<dataSource type="POOLED">
+				<property name="driver" value="com.mysql.jdbc.Driver" />
+				<property name="url" value="jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" />
+				<property name="username" value="calvin" />
+				<property name="password" value="calvin" />
+			</dataSource>
+		</environment>
+	</environments>
+	<mappers>
+		<mapper resource="mybatis-mapper.xml" />
+	</mappers>
+</configuration>
+			</textarea>
+		</td>
+		<td>
+			<textarea cols="50%" rows="7" readonly="yes" disabled="yes" wrap="virtual">
+配置数据库连接信息
+{
+	"driver" : "com.mysql.jdbc.Driver" ,
+	"url" : "jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" ,
+	"user" : "calvin" ,
+	"pwd" : "calvin"
+}
+			</textarea>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">每张表手工开发量<td>
+	</tr>
+	<tr>
+		<td>
+			<textarea cols="50%" rows="12" readonly="yes" disabled="yes" wrap="virtual">
+编写实体类
+package xyz.calvinwilliams.mybatis.benchmark;
+
+import java.math.*;
+
+public class SqlactionBenchmarkSAO {
+	int				id ; // 编号
+	String			name ; // 英文名
+	String			name_cn ; // 中文名
+	BigDecimal		salary ; // 薪水
+	java.sql.Date	birthday ; // 生日
+}
+			</textarea>
+		</td>
+		<td>
+			（sqlaction原生自动生成）
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<textarea cols="50%" rows="23" readonly="yes" disabled="yes" wrap="virtual">
+配置表Mapper信息
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAOMapper">
+	<insert id="insertOne" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
+		INSERT INTO sqlaction_benchmark (name,name_cn,salary,birthday) VALUES( #{name}, #{name_cn}, #{salary}, #{birthday} )
+	</insert>
+	<update id="updateOneByName" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
+		UPDATE sqlaction_benchmark SET salary=#{salary} WHERE name=#{name}
+	</update>
+	<select id="selectOneByName" parameterType="java.lang.String" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO" flushCache="true" useCache="false">
+		SELECT * FROM sqlaction_benchmark WHERE name=#{name}
+	</select>
+	<select id="selectAll" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO" flushCache="true" useCache="false">
+		SELECT * FROM sqlaction_benchmark
+	</select>
+	<delete id="deleteOneByName" parameterType="java.lang.String">
+		DELETE FROM sqlaction_benchmark WHERE name=#{name}
+	</delete>
+	<delete id="deleteAll">
+		DELETE FROM sqlaction_benchmark
+	</delete>
+</mapper>
+			</textarea>
+		</td>
+		<td>
+			<textarea cols="50%" rows="18" readonly="yes" disabled="yes" wrap="virtual">
+配置表动作信息
+{
+	"database" : "calvindb" ,
+	"tables" : [
+		{
+			"table" : "sqlaction_benchmark" ,
+			"sqlactions" : [
+				"INSERT INTO sqlaction_benchmark" ,
+				"UPDATE sqlaction_benchmark SET salary=? WHERE name=?" ,
+				"SELECT * FROM sqlaction_benchmark WHERE name=?" ,
+				"SELECT * FROM sqlaction_benchmark" ,
+				"DELETE FROM sqlaction_benchmark WHERE name=?" ,
+				"DELETE FROM sqlaction_benchmark"
+			]
+		}
+	] ,
+	"javaPackage" : "xyz.calvinwilliams.sqlaction.benchmark"
+}
+			</textarea>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<textarea cols="50%" rows="13" readonly="yes" disabled="yes" wrap="virtual">
+编写接口类
+package xyz.calvinwilliams.mybatis.benchmark;
+
+import java.util.*;
+
+public interface SqlactionBenchmarkSAOMapper {
+	public void insertOne(SqlactionBenchmarkSAO sqlactionBenchmark);
+	public void updateOneByName(SqlactionBenchmarkSAO sqlactionBenchmark);
+	public SqlactionBenchmarkSAO selectOneByName(String name);
+	public List<SqlactionBenchmarkSAO> selectAll();
+	public void deleteOneByName(String name);
+	public void deleteAll();
+}
+			</textarea>
+		</td>
+		<td>
+			No
+		</td>
+	</tr>
+	<tr>
+		<td>
+			No
+		</td>
+		<td>
+			<textarea cols="50%" rows="3" readonly="yes" disabled="yes" wrap="virtual">
+执行`sqlaction`，处理SQL动作配置
+java -Dfile.encoding=UTF-8 -classpath "D:\Work\sqlaction\sqlaction.jar;D:\Work\mysql-connector-java-8.0.15\mysql-connector-java-8.0.15.jar" xyz.calvinwilliams.sqlaction.gencode.SqlActionGencode
+pause
+			</textarea>
+		</td>
+	</tr>
+</table>
 
 # 7. 后续开发
 

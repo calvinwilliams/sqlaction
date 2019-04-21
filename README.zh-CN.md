@@ -639,7 +639,6 @@ public class UserOrderSAU {
 	</tr>
 	<tr>
 		<td>
-			<pre>
 				<xmp>
 配置数据库连接信息
 <?xml version="1.0" encoding="UTF-8"?>
@@ -667,7 +666,6 @@ public class UserOrderSAU {
 	</mappers>
 </configuration>
 				</xmp>
-			</pre>
 		</td>
 		<td>
 			<pre>

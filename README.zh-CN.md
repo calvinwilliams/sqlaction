@@ -639,7 +639,7 @@ public class UserOrderSAU {
 	</tr>
 	<tr>
 		<td>
-			<textarea cols="50%" rows="21" readonly disabled>
+			<textarea cols="50%" rows="21" readonly="yes" disabled="yes" wrap="virtual">
 配置数据库连接信息
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
@@ -665,7 +665,7 @@ public class UserOrderSAU {
 			</textarea>
 		</td>
 		<td>
-			<textarea cols="50%" rows="7" readonly disabled>
+			<textarea cols="50%" rows="7" readonly="yes" disabled="yes" wrap="virtual">
 配置数据库连接信息
 {
 	"driver" : "com.mysql.jdbc.Driver" ,
@@ -681,7 +681,7 @@ public class UserOrderSAU {
 	</tr>
 	<tr>
 		<td>
-			<textarea cols="50%" rows="12" readonly disabled>
+			<textarea cols="50%" rows="12" readonly="yes" disabled="yes" wrap="virtual">
 编写实体类
 package xyz.calvinwilliams.mybatis.benchmark;
 
@@ -702,7 +702,7 @@ public class SqlactionBenchmarkSAO {
 	</tr>
 	<tr>
 		<td>
-			<textarea cols="50%" rows="23" readonly disabled>
+			<textarea cols="50%" rows="23" readonly="yes" disabled="yes" wrap="virtual">
 配置表Mapper信息
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
@@ -729,7 +729,7 @@ public class SqlactionBenchmarkSAO {
 			</textarea>
 		</td>
 		<td>
-			<textarea cols="50%" rows="18" readonly disabled>
+			<textarea cols="50%" rows="18" readonly="yes" disabled="yes" wrap="virtual">
 配置表动作信息
 {
 	"database" : "calvindb" ,
@@ -753,7 +753,7 @@ public class SqlactionBenchmarkSAO {
 	</tr>
 	<tr>
 		<td>
-			<textarea cols="50%" rows="13" readonly disabled>
+			<textarea cols="50%" rows="13" readonly="yes" disabled="yes" wrap="virtual">
 编写接口类
 package xyz.calvinwilliams.mybatis.benchmark;
 
@@ -778,7 +778,7 @@ public interface SqlactionBenchmarkSAOMapper {
 			No
 		</td>
 		<td>
-			<textarea cols="50%" rows="3" readonly disabled>
+			<textarea cols="50%" rows="3" readonly="yes" disabled="yes" wrap="virtual">
 执行`sqlaction`，处理SQL动作配置
 java -Dfile.encoding=UTF-8 -classpath "D:\Work\sqlaction\sqlaction.jar;D:\Work\mysql-connector-java-8.0.15\mysql-connector-java-8.0.15.jar" xyz.calvinwilliams.sqlaction.gencode.SqlActionGencode
 pause

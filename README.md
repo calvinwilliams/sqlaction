@@ -327,7 +327,7 @@ dbserver.conf.json,sqlaction.conf.json -----------> XxxSao.java,XxxSau.java(JDBC
 	</tr>
 	<tr>
 		<td>
-			<textarea cols="50%" rows="21" readonly="yes" disabled="yes">
+			<textarea cols="50%" rows="21" readonly="yes" disabled="yes" wrap="virtual">
 Configure database connection
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
@@ -353,7 +353,7 @@ Configure database connection
 			</textarea>
 		</td>
 		<td>
-			<textarea cols="50%" rows="7" readonly="yes" disabled="yes">
+			<textarea cols="50%" rows="7" readonly="yes" disabled="yes" wrap="virtual">
 Configure database connection
 {
 	"driver" : "com.mysql.jdbc.Driver" ,
@@ -369,7 +369,7 @@ Configure database connection
 	</tr>
 	<tr>
 		<td>
-			<textarea cols="50%" rows="12" readonly="yes" disabled="yes">
+			<textarea cols="50%" rows="12" readonly="yes" disabled="yes" wrap="virtual">
 Write entity class
 package xyz.calvinwilliams.mybatis.benchmark;
 
@@ -391,7 +391,7 @@ public class SqlactionBenchmarkSAO {
 	</tr>
 	<tr>
 		<td>
-			<textarea cols="50%" rows="23" readonly="yes" disabled="yes">
+			<textarea cols="50%" rows="23" readonly="yes" disabled="yes" wrap="virtual">
 Write entity class
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
@@ -418,7 +418,7 @@ Write entity class
 			</textarea>
 		</td>
 		<td>
-			<textarea cols="50%" rows="18" readonly="yes" disabled="yes">
+			<textarea cols="50%" rows="18" readonly="yes" disabled="yes" wrap="virtual">
 Configure table actions
 {
 	"database" : "calvindb" ,
@@ -442,7 +442,7 @@ Configure table actions
 	</tr>
 	<tr>
 		<td>
-			<textarea cols="50%" rows="13" readonly="yes" disabled="yes">
+			<textarea cols="50%" rows="13" readonly="yes" disabled="yes" wrap="virtual">
 Write interface class
 package xyz.calvinwilliams.mybatis.benchmark;
 
@@ -467,7 +467,7 @@ public interface SqlactionBenchmarkSAOMapper {
 			No
 		</td>
 		<td>
-			<textarea cols="50%" rows="3" readonly="yes" disabled="yes">
+			<textarea cols="50%" rows="3" readonly="yes" disabled="yes" wrap="virtual">
 Execute `sqlaction`
 java -Dfile.encoding=UTF-8 -classpath "D:\Work\sqlaction\sqlaction.jar;D:\Work\mysql-connector-java-8.0.15\mysql-connector-java-8.0.15.jar" xyz.calvinwilliams.sqlaction.gencode.SqlActionGencode
 pause

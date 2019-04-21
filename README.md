@@ -886,5 +886,5 @@ compile("xyz.calvinwilliams:sqlaction:0.2.2.0")
 
 # 8. About Author
 
-Mailto : [netease](mailto:calvinwilliams@163.com)��[Gmail](mailto:calvinwilliams.c@gmail.com)
+Mailto : [netease](mailto:calvinwilliams@163.com) or [Gmail](mailto:calvinwilliams.c@gmail.com)
 

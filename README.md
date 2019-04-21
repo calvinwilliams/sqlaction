@@ -327,7 +327,7 @@ dbserver.conf.jsonÂ¡Â¢sqlaction.conf.json -----------> XxxSao.javaÂ¡Â¢XxxSau.jav
 	</tr>
 	<tr>
 		<td>
-			<xmp>
+			<textarea cols="50%" rows="21" readonly disabled>
 Configure database connection
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
@@ -350,10 +350,10 @@ Configure database connection
 		<mapper resource="mybatis-mapper.xml" />
 	</mappers>
 </configuration>
-			</xmp>
+			</textarea>
 		</td>
 		<td>
-			<xmp>
+			<textarea cols="50%" rows="7" readonly disabled>
 Configure database connection
 {
 	"driver" : "com.mysql.jdbc.Driver" ,
@@ -361,7 +361,7 @@ Configure database connection
 	"user" : "calvin" ,
 	"pwd" : "calvin"
 }
-			</xmp>
+			</textarea>
 		</td>
 	</tr>
 	<tr>
@@ -369,7 +369,7 @@ Configure database connection
 	</tr>
 	<tr>
 		<td>
-			<xmp>
+			<textarea cols="50%" rows="12" readonly disabled>
 Write entity class
 package xyz.calvinwilliams.mybatis.benchmark;
 
@@ -383,15 +383,15 @@ public class SqlactionBenchmarkSAO {
 	BigDecimal		salary ;
 	java.sql.Date	birthday ;
 }
-			</xmp>
+			</textarea>
 		</td>
 		<td>
-			£¨sqlaction auto-gen code£©
+			(sqlaction auto-gen code)
 		</td>
 	</tr>
 	<tr>
 		<td>
-			<xmp>
+			<textarea cols="50%" rows="23" readonly disabled>
 Write entity class
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
@@ -415,10 +415,10 @@ Write entity class
 		DELETE FROM sqlaction_benchmark
 	</delete>
 </mapper>
-			</xmp>
+			</textarea>
 		</td>
 		<td>
-			<xmp>
+			<textarea cols="50%" rows="18" readonly disabled>
 Configure table actions
 {
 	"database" : "calvindb" ,
@@ -437,12 +437,12 @@ Configure table actions
 	] ,
 	"javaPackage" : "xyz.calvinwilliams.sqlaction.benchmark"
 }
-			</xmp>
+			</textarea>
 		</td>
 	</tr>
 	<tr>
 		<td>
-			<xmp>
+			<textarea cols="50%" rows="13" readonly disabled>
 Write interface class
 package xyz.calvinwilliams.mybatis.benchmark;
 
@@ -456,22 +456,22 @@ public interface SqlactionBenchmarkSAOMapper {
 	public void deleteOneByName(String name);
 	public void deleteAll();
 }
-			</xmp>
+			</textarea>
 		</td>
 		<td>
-			£¨no work£©
+			No
 		</td>
 	</tr>
 	<tr>
 		<td>
-			£¨no work£©
+			No
 		</td>
 		<td>
-			<xmp>
+			<textarea cols="50%" rows="3" readonly disabled>
 Execute `sqlaction`
 java -Dfile.encoding=UTF-8 -classpath "D:\Work\sqlaction\sqlaction.jar;D:\Work\mysql-connector-java-8.0.15\mysql-connector-java-8.0.15.jar" xyz.calvinwilliams.sqlaction.gencode.SqlActionGencode
 pause
-			</xmp>
+			</textarea>
 		</td>
 	</tr>
 </table>

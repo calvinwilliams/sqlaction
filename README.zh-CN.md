@@ -639,8 +639,7 @@ public class UserOrderSAU {
 	</tr>
 	<tr>
 		<td>
-			<pre>
-				<xmp>
+			<textarea cols="50%" rows="21" readonly disabled>
 配置数据库连接信息
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
@@ -663,12 +662,10 @@ public class UserOrderSAU {
 		<mapper resource="mybatis-mapper.xml" />
 	</mappers>
 </configuration>
-				</xmp>
-			</pre>
+			</textarea>
 		</td>
 		<td>
-			<pre>
-				<xmp>
+			<textarea cols="50%" rows="7" readonly disabled>
 配置数据库连接信息
 {
 	"driver" : "com.mysql.jdbc.Driver" ,
@@ -676,8 +673,7 @@ public class UserOrderSAU {
 	"user" : "calvin" ,
 	"pwd" : "calvin"
 }
-				</xmp>
-			</pre>
+			</textarea>
 		</td>
 	</tr>
 	<tr>
@@ -685,32 +681,28 @@ public class UserOrderSAU {
 	</tr>
 	<tr>
 		<td>
-			<pre>
-				<xmp>
+			<textarea cols="50%" rows="12" readonly disabled>
 编写实体类
 package xyz.calvinwilliams.mybatis.benchmark;
 
 import java.math.*;
 
 public class SqlactionBenchmarkSAO {
-
 	int				id ; // 编号
 	String			name ; // 英文名
 	String			name_cn ; // 中文名
 	BigDecimal		salary ; // 薪水
 	java.sql.Date	birthday ; // 生日
 }
-				</xmp>
-			</pre>
+			</textarea>
 		</td>
 		<td>
-			（sqlaction自动生成）
+			（sqlaction原生自动生成）
 		</td>
 	</tr>
 	<tr>
 		<td>
-			<pre>
-				<xmp>
+			<textarea cols="50%" rows="23" readonly disabled>
 配置表Mapper信息
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
@@ -734,12 +726,10 @@ public class SqlactionBenchmarkSAO {
 		DELETE FROM sqlaction_benchmark
 	</delete>
 </mapper>
-				</xmp>
-			</pre>
+			</textarea>
 		</td>
 		<td>
-			<pre>
-				<xmp>
+			<textarea cols="50%" rows="18" readonly disabled>
 配置表动作信息
 {
 	"database" : "calvindb" ,
@@ -758,14 +748,12 @@ public class SqlactionBenchmarkSAO {
 	] ,
 	"javaPackage" : "xyz.calvinwilliams.sqlaction.benchmark"
 }
-				</xmp>
-			</pre>
+			</textarea>
 		</td>
 	</tr>
 	<tr>
 		<td>
-			<pre>
-				<xmp>
+			<textarea cols="50%" rows="13" readonly disabled>
 编写接口类
 package xyz.calvinwilliams.mybatis.benchmark;
 
@@ -779,25 +767,22 @@ public interface SqlactionBenchmarkSAOMapper {
 	public void deleteOneByName(String name);
 	public void deleteAll();
 }
-				</xmp>
-			</pre>
+			</textarea>
 		</td>
 		<td>
-			（无）
+			No
 		</td>
 	</tr>
 	<tr>
 		<td>
-			（无）
+			No
 		</td>
 		<td>
-			<pre>
-				<xmp>
+			<textarea cols="50%" rows="3" readonly disabled>
 执行`sqlaction`，处理SQL动作配置
 java -Dfile.encoding=UTF-8 -classpath "D:\Work\sqlaction\sqlaction.jar;D:\Work\mysql-connector-java-8.0.15\mysql-connector-java-8.0.15.jar" xyz.calvinwilliams.sqlaction.gencode.SqlActionGencode
 pause
-				</xmp>
-			</pre>
+			</textarea>
 		</td>
 	</tr>
 </table>

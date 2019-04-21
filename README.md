@@ -15,8 +15,8 @@ sqlaction - Database persistence layer tool based auto-gen JDBC code
 	- [3.1. Process flow](#31-process-flow)
 - [4. Workload compare to MyBatis](#4-workload-compare-to-mybatis)
 - [5. Benchmark compare to MyBatis](#5-benchmark-compare-to-mybatis)
-	- [5.1. Prepare `sqlaction`](#51-prepare-sqlaction)
-	- [5.2. Prepare `MyBatis`](#52-prepare-mybatis)
+	- [5.1. Prepare sqlaction](#51-prepare-sqlaction)
+	- [5.2. Prepare MyBatis](#52-prepare-mybatis)
 	- [5.3. Case](#53-case)
 	- [5.4. Result](#54-result)
 - [6. TODO](#6-todo)
@@ -372,7 +372,7 @@ CREATE TABLE `sqlaction_benchmark` (
 ) ENGINE=InnoDB AUTO_INCREMENT=42332 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
 ```
 
-## 5.1. Prepare `sqlaction`
+## 5.1. Prepare sqlaction
 
 Create `dbserver.conf.json`
 
@@ -574,7 +574,7 @@ public class SqlActionBenchmarkCrud {
 }
 ```
 
-## 5.2. Prepare `MyBatis`
+## 5.2. Prepare MyBatis
 
 Create `mybatis-config.xml`
 

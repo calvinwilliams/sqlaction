@@ -7,13 +7,13 @@ sqlaction - 自动生成JDBC代码的数据库持久层工具
 - [2. 一个DEMO](#2-一个demo)
     - [2.1. 建表DDL](#21-建表ddl)
     - [2.2. 新建JAVA项目](#22-新建java项目)
-    - [2.3. 在包目录中执行`sqlaction`工具](#23-在包目录中执行sqlaction工具)
+    - [2.3. 在包目录中执行sqlaction工具](#23-在包目录中执行sqlaction工具)
     - [2.4. 到目前为止，一行JAVA代码都没写，现在开始写应用代码](#24-到目前为止一行java代码都没写现在开始写应用代码)
     - [2.5. 执行](#25-执行)
 - [3. 使用参考](#3-使用参考)
     - [3.1. 开发流程](#31-开发流程)
-    - [3.2. 配置文件`dbserver.conf.json`](#32-配置文件dbserverconfjson)
-    - [3.3. 配置文件`sqlaction.conf.json`](#33-配置文件sqlactionconfjson)
+    - [3.2. 配置文件dbserver.conf.json](#32-配置文件dbserverconfjson)
+    - [3.3. 配置文件sqlaction.conf.json](#33-配置文件sqlactionconfjson)
     - [3.4. 自动生成规则](#34-自动生成规则)
     - [3.5. 元配置](#35-元配置)
         - [3.5.1. 自定义SQL动作方法名](#351-自定义sql动作方法名)
@@ -23,8 +23,8 @@ sqlaction - 自动生成JDBC代码的数据库持久层工具
 - [4. 为什么这么设计？](#4-为什么这么设计)
 - [5. 与MyBatis的开发量比较](#5-与mybatis的开发量比较)
 - [6. 与MyBatis的性能比较](#6-与mybatis的性能比较)
-    - [6.1. 准备`sqlaction`](#61-准备sqlaction)
-    - [6.2. 准备`MyBatis`](#62-准备mybatis)
+    - [6.1. 准备sqlaction](#61-准备sqlaction)
+    - [6.2. 准备MyBatis](#62-准备mybatis)
     - [6.3. 测试案例](#63-测试案例)
     - [6.4. 测试结果](#64-测试结果)
 - [7. 后续开发](#7-后续开发)
@@ -103,7 +103,7 @@ CREATE TABLE `sqlaction_demo` (
 }
 ```
 
-## 2.3. 在包目录中执行`sqlaction`工具
+## 2.3. 在包目录中执行sqlaction工具
 
 我把执行命令行包成批处理文件后执行，欢迎懂`Eclipse`插件开发的同学帮我写个插件 :)
 
@@ -373,7 +373,7 @@ dbserver.conf.json、sqlaction.conf.json ---------> XxxSao.java(Auto-gen JDBC co
                                                                                                     Yyy.java --/
 ```
 
-## 3.2. 配置文件`dbserver.conf.json`
+## 3.2. 配置文件dbserver.conf.json
 
 ```
 {
@@ -433,7 +433,7 @@ dbserver.conf.json、sqlaction.conf.json ---------> XxxSao.java(Auto-gen JDBC co
 
 注意：读取JSON配置文件使用到了我的另一个开源项目：okjson，一个简洁易用的JSON解析器/生成器，只有一个类文件，可以很方便的融合到其它项目中。
 
-## 3.3. 配置文件`sqlaction.conf.json`
+## 3.3. 配置文件sqlaction.conf.json
 
 ```
 {
@@ -690,7 +690,7 @@ CREATE TABLE `sqlaction_benchmark` (
 ) ENGINE=InnoDB AUTO_INCREMENT=42332 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
 ```
 
-## 6.1. 准备`sqlaction`
+## 6.1. 准备sqlaction
 
 手工编写数据库连接配置文件`dbserver.conf.json`
 
@@ -892,7 +892,7 @@ public class SqlActionBenchmarkCrud {
 }
 ```
 
-## 6.2. 准备`MyBatis`
+## 6.2. 准备MyBatis
 
 手工编写数据库连接配置文件`mybatis-config.xml`
 

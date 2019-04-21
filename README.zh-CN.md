@@ -639,7 +639,8 @@ public class UserOrderSAU {
 	</tr>
 	<tr>
 		<td>
-			<xmp>
+			<pre>
+				<xmp>
 配置数据库连接信息
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
@@ -662,10 +663,12 @@ public class UserOrderSAU {
 		<mapper resource="mybatis-mapper.xml" />
 	</mappers>
 </configuration>
-			</xmp>
+				</xmp>
+			</pre>
 		</td>
 		<td>
-			<xmp>
+			<pre>
+				<xmp>
 配置数据库连接信息
 {
 	"driver" : "com.mysql.jdbc.Driver" ,
@@ -673,7 +676,8 @@ public class UserOrderSAU {
 	"user" : "calvin" ,
 	"pwd" : "calvin"
 }
-			</xmp>
+				</xmp>
+			</pre>
 		</td>
 	</tr>
 	<tr>
@@ -681,7 +685,8 @@ public class UserOrderSAU {
 	</tr>
 	<tr>
 		<td>
-			<xmp>
+			<pre>
+				<xmp>
 编写实体类
 package xyz.calvinwilliams.mybatis.benchmark;
 
@@ -695,7 +700,8 @@ public class SqlactionBenchmarkSAO {
 	BigDecimal		salary ; // 薪水
 	java.sql.Date	birthday ; // 生日
 }
-			</xmp>
+				</xmp>
+			</pre>
 		</td>
 		<td>
 			（sqlaction自动生成）
@@ -703,7 +709,8 @@ public class SqlactionBenchmarkSAO {
 	</tr>
 	<tr>
 		<td>
-			<xmp>
+			<pre>
+				<xmp>
 配置表Mapper信息
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
@@ -727,10 +734,12 @@ public class SqlactionBenchmarkSAO {
 		DELETE FROM sqlaction_benchmark
 	</delete>
 </mapper>
-			</xmp>
+				</xmp>
+			</pre>
 		</td>
 		<td>
-			<xmp>
+			<pre>
+				<xmp>
 配置表动作信息
 {
 	"database" : "calvindb" ,
@@ -749,12 +758,14 @@ public class SqlactionBenchmarkSAO {
 	] ,
 	"javaPackage" : "xyz.calvinwilliams.sqlaction.benchmark"
 }
-			</xmp>
+				</xmp>
+			</pre>
 		</td>
 	</tr>
 	<tr>
 		<td>
-			<xmp>
+			<pre>
+				<xmp>
 编写接口类
 package xyz.calvinwilliams.mybatis.benchmark;
 
@@ -768,7 +779,8 @@ public interface SqlactionBenchmarkSAOMapper {
 	public void deleteOneByName(String name);
 	public void deleteAll();
 }
-			</xmp>
+				</xmp>
+			</pre>
 		</td>
 		<td>
 			（无）
@@ -779,11 +791,13 @@ public interface SqlactionBenchmarkSAOMapper {
 			（无）
 		</td>
 		<td>
-			<xmp>
+			<pre>
+				<xmp>
 执行`sqlaction`，处理SQL动作配置
 java -Dfile.encoding=UTF-8 -classpath "D:\Work\sqlaction\sqlaction.jar;D:\Work\mysql-connector-java-8.0.15\mysql-connector-java-8.0.15.jar" xyz.calvinwilliams.sqlaction.gencode.SqlActionGencode
 pause
-			</xmp>
+				</xmp>
+			</pre>
 		</td>
 	</tr>
 </table>

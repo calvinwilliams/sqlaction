@@ -858,7 +858,7 @@ All mybatis DELETE WHERE done , count[500] elapse[6.035]s
 
 ![benchmark_DELETE_WHERE.png](benchmark_DELETE_WHERE.png)
 
-**`sqlaction`'s performance fast 20% than `MyBatis`**
+**`sqlaction`'s performance faster 20% than `MyBatis`**
 
 # 6. TODO
 

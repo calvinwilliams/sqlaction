@@ -629,6 +629,12 @@ public class UserOrderSAU {
 
 ## 4.1. 与MyBatis的开发量比较
 
+| MyBatis | sqlaction |
+|---|---|
+| 配置数据库连接信息<br /><?xml version="1.0" encoding="UTF-8"?><br /><!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd"><br />
+<configuration><br /><settings><br /><setting name="cacheEnabled" value="false" /><br /></settings><br /><environments default="development"><br /><environment id="development"><br /><transactionManager type="JDBC"></transactionManager><br /><dataSource type=="POOLED"><br /><property name="driver" value="com.mysql.jdbc.Driver" /><br /><property name="url" value="jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" /><br /><property name="username" value="calvin" /><br /><property name="password" value="calvin" /><br /></dataSource><br /></environment><br /></environments><br /><mappers><br /><mapper resource="mybatis-mapper.xml" /><br /></mappers><br />
+</configuration> | 配置数据库连接信息<br />{<br />"driver" : "com.mysql.jdbc.Driver" ,<br />"url" : "jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" ,<br />"user" : "calvin" ,<br />"pwd" : "calvin"<br />} |
+
 <table>
 	<tr>
 		<td>MyBatis</td>
@@ -639,33 +645,11 @@ public class UserOrderSAU {
 	</tr>
 	<tr>
 		<td>
-			<xmp>
-			配置数据库连接信息
-			<?xml version="1.0" encoding="UTF-8"?>
-			<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
-			<configuration>
-				<settings>
-					<setting name="cacheEnabled" value="false" />
-				</settings>
-				<environments default="development">
-					<environment id="development">
-						<transactionManager type="JDBC"></transactionManager>
-						<dataSource type="POOLED">
-							<property name="driver" value="com.mysql.jdbc.Driver" />
-							<property name="url" value="jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" />
-							<property name="username" value="calvin" />
-							<property name="password" value="calvin" />
-						</dataSource>
-					</environment>
-				</environments>
-				<mappers>
-					<mapper resource="mybatis-mapper.xml" />
-				</mappers>
-			</configuration>
-			</xmp>
+			<pre>
+			</pre>
 		</td>
 		<td>
-			<xmp>
+			<pre>
 			配置数据库连接信息
 			{
 				"driver" : "com.mysql.jdbc.Driver" ,
@@ -673,7 +657,7 @@ public class UserOrderSAU {
 				"user" : "calvin" ,
 				"pwd" : "calvin"
 			}
-			</xmp>
+			</pre>
 		</td>
 	</tr>
 	<tr>
@@ -689,7 +673,7 @@ public class UserOrderSAU {
 	</tr>
 	<tr>
 		<td>
-			<xmp>
+			<pre>
 			编写实体类
 			package xyz.calvinwilliams.mybatis.benchmark;
 
@@ -703,7 +687,7 @@ public class UserOrderSAU {
 				BigDecimal		salary ; // 薪水
 				java.sql.Date	birthday ; // 生日
 			}
-			</xmp>
+			</pre>
 		</td>
 		<td>
 			（sqlaction自动生成）
@@ -711,7 +695,7 @@ public class UserOrderSAU {
 	</tr>
 	<tr>
 		<td>
-			<xmp>
+			<pre>
 				配置表Mapper信息
 				<?xml version="1.0" encoding="UTF-8"?>
 				<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
@@ -735,10 +719,10 @@ public class UserOrderSAU {
 						DELETE FROM sqlaction_benchmark
 					</delete>
 				</mapper>
-			</xmp>
+			</pre>
 		</td>
 		<td>
-			<xmp>
+			<pre>
 			配置表动作信息
 			{
 				"database" : "calvindb" ,
@@ -757,7 +741,7 @@ public class UserOrderSAU {
 				] ,
 				"javaPackage" : "xyz.calvinwilliams.sqlaction.benchmark"
 			}
-			</xmp>
+			</pre>
 		</td>
 	</tr>
 	<tr>

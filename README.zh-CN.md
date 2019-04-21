@@ -1160,8 +1160,8 @@ All mybatis DELETE WHERE done , count[500] elapse[6.035]s
 		<td colspan="2">每个项目手工开发量<td>
 	</tr>
 	<tr>
-		<td><image src="mybatis-config.xml.png" /></td>
-		<td><image src="dbserver.conf.json.png" /></td>
+		<td><img src="mybatis-config.xml.png" /></td>
+		<td><img src="dbserver.conf.json.png" /></td>
 	</tr>
 </table>
 

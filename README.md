@@ -317,6 +317,25 @@ dbserver.conf.json,sqlaction.conf.json -----------> XxxSao.java,XxxSau.java(JDBC
 
 # 4. Workload with MyBatis
 
+
+<table>
+	<tr>
+		<td>MyBatis</td>
+		<td>sqlaction</td>
+	</tr>
+	<tr>
+		<td colspan="2">?????????<td>
+	</tr>
+	<tr>
+		<td><img src="mybatis-config.xml.png" /></td>
+		<td><img src="dbserver.conf.json.png" /></td>
+	</tr>
+</table>
+
+
+
+
+
 <table>
 	<tr>
 		<td>MyBatis</td>

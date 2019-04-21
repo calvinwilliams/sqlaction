@@ -327,7 +327,6 @@ dbserver.conf.json,sqlaction.conf.json -----------> XxxSao.java,XxxSau.java(JDBC
 	</tr>
 	<tr>
 		<td>
-			<textarea cols="50%" rows="21" readonly="yes" disabled="yes" wrap="virtual">
 Configure database connection
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
@@ -350,10 +349,8 @@ Configure database connection
 		<mapper resource="mybatis-mapper.xml" />
 	</mappers>
 </configuration>
-			</textarea>
 		</td>
 		<td>
-			<textarea cols="50%" rows="7" readonly="yes" disabled="yes" wrap="virtual">
 Configure database connection
 {
 	"driver" : "com.mysql.jdbc.Driver" ,
@@ -361,7 +358,6 @@ Configure database connection
 	"user" : "calvin" ,
 	"pwd" : "calvin"
 }
-			</textarea>
 		</td>
 	</tr>
 	<tr>

@@ -13,7 +13,8 @@ sqlaction - Database persistence layer tool based auto-gen JDBC code
 	- [2.5. Executing your application](#25-executing-your-application)
 - [3. Reference](#3-reference)
 	- [3.1. Process flow](#31-process-flow)
-- [4. Benchmark](#4-benchmark)
+- [Workload with MyBatis](#workload-with-mybatis)
+- [4. Benchmark with MyBatis](#4-benchmark-with-mybatis)
 	- [4.1. Prepare `sqlaction`](#41-prepare-sqlaction)
 	- [4.2. Prepare `MyBatis`](#42-prepare-mybatis)
 	- [4.3. Case](#43-case)
@@ -314,7 +315,184 @@ dbserver.conf.json¡¢sqlaction.conf.json -----------> XxxSao.java¡¢XxxSau.jav
                                                                                 Yyy.java --/
 ```
 
-# 4. Benchmark
+# Workload with MyBatis
+
+<table>
+	<tr>
+		<td>MyBatis</td>
+		<td>sqlaction</td>
+	</tr>
+	<tr>
+		<td colspan="2">ÿ����Ŀ�ֹ�������<td>
+	</tr>
+	<tr>
+		<td>
+			<xmp>
+			Configure database connection
+			<?xml version="1.0" encoding="UTF-8"?>
+			<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+			<configuration>
+				<settings>
+					<setting name="cacheEnabled" value="false" />
+				</settings>
+				<environments default="development">
+					<environment id="development">
+						<transactionManager type="JDBC"></transactionManager>
+						<dataSource type="POOLED">
+							<property name="driver" value="com.mysql.jdbc.Driver" />
+							<property name="url" value="jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" />
+							<property name="username" value="calvin" />
+							<property name="password" value="calvin" />
+						</dataSource>
+					</environment>
+				</environments>
+				<mappers>
+					<mapper resource="mybatis-mapper.xml" />
+				</mappers>
+			</configuration>
+			</xmp>
+		</td>
+		<td>
+			<xmp>
+			Configure database connection
+			{
+				"driver" : "com.mysql.jdbc.Driver" ,
+				"url" : "jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" ,
+				"user" : "calvin" ,
+				"pwd" : "calvin"
+			}
+			</xmp>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			Total 21 line need to write
+		</td>
+		<td>
+			Total 6 line need to write
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">ÿ�ű��ֹ�������<td>
+	</tr>
+	<tr>
+		<td>
+			<xmp>
+			Write entity class
+			package xyz.calvinwilliams.mybatis.benchmark;
+
+			import java.math.*;
+
+			public class SqlactionBenchmarkSAO {
+
+				int				id ;
+				String			name ;
+				String			name_cn ;
+				BigDecimal		salary ;
+				java.sql.Date	birthday ;
+			}
+			</xmp>
+		</td>
+		<td>
+			��sqlaction auto-gen code��
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<xmp>
+				Write entity class
+				<?xml version="1.0" encoding="UTF-8"?>
+				<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+				<mapper namespace="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAOMapper">
+					<insert id="insertOne" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
+						INSERT INTO sqlaction_benchmark (name,name_cn,salary,birthday) VALUES( #{name}, #{name_cn}, #{salary}, #{birthday} )
+					</insert>
+					<update id="updateOneByName" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
+						UPDATE sqlaction_benchmark SET salary=#{salary} WHERE name=#{name}
+					</update>
+					<select id="selectOneByName" parameterType="java.lang.String" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO" flushCache="true" useCache="false">
+						SELECT * FROM sqlaction_benchmark WHERE name=#{name}
+					</select>
+					<select id="selectAll" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO" flushCache="true" useCache="false">
+						SELECT * FROM sqlaction_benchmark
+					</select>
+					<delete id="deleteOneByName" parameterType="java.lang.String">
+						DELETE FROM sqlaction_benchmark WHERE name=#{name}
+					</delete>
+					<delete id="deleteAll">
+						DELETE FROM sqlaction_benchmark
+					</delete>
+				</mapper>
+			</xmp>
+		</td>
+		<td>
+			<xmp>
+			Configure table actions
+			{
+				"database" : "calvindb" ,
+				"tables" : [
+					{
+						"table" : "sqlaction_benchmark" ,
+						"sqlactions" : [
+							"INSERT INTO sqlaction_benchmark" ,
+							"UPDATE sqlaction_benchmark SET salary=? WHERE name=?" ,
+							"SELECT * FROM sqlaction_benchmark WHERE name=?" ,
+							"SELECT * FROM sqlaction_benchmark" ,
+							"DELETE FROM sqlaction_benchmark WHERE name=?" ,
+							"DELETE FROM sqlaction_benchmark"
+						]
+					}
+				] ,
+				"javaPackage" : "xyz.calvinwilliams.sqlaction.benchmark"
+			}
+			</xmp>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<xmp>
+				Write interface class
+				package xyz.calvinwilliams.mybatis.benchmark;
+
+				import java.util.*;
+
+				public interface SqlactionBenchmarkSAOMapper {
+					public void insertOne(SqlactionBenchmarkSAO sqlactionBenchmark);
+					public void updateOneByName(SqlactionBenchmarkSAO sqlactionBenchmark);
+					public SqlactionBenchmarkSAO selectOneByName(String name);
+					public List<SqlactionBenchmarkSAO> selectAll();
+					public void deleteOneByName(String name);
+					public void deleteAll();
+				}
+			</xmp>
+		</td>
+		<td>
+			��no work��
+		</td>
+	</tr>
+	<tr>
+		<td>
+			��no work��
+		</td>
+		<td>
+			<xmp>
+			Execute `sqlaction`
+			java -Dfile.encoding=UTF-8 -classpath "D:\Work\sqlaction\sqlaction.jar;D:\Work\mysql-connector-java-8.0.15\mysql-connector-java-8.0.15.jar" xyz.calvinwilliams.sqlaction.gencode.SqlActionGencode
+			pause
+			</xmp>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			Total 46 line need to write
+		</td>
+		<td>
+			Total 19 line need to write
+		</td>
+	</tr>
+</table>
+
+# 4. Benchmark with MyBatis
 
 CPU : Intel Core i5-7500 3.4GHz 3.4GHz
 Momey : 16GB
@@ -328,8 +506,8 @@ DDL
 ```
 CREATE TABLE `sqlaction_benchmark` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
-  `name` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT '英文各1¤7',
-  `name_cn` varchar(128) COLLATE utf8mb4_bin NOT NULL COMMENT '中文各1¤7',
+  `name` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT '英文各1�71¤7',
+  `name_cn` varchar(128) COLLATE utf8mb4_bin NOT NULL COMMENT '中文各1�71¤7',
   `salary` decimal(12,2) NOT NULL COMMENT '薪水',
   `birthday` date NOT NULL COMMENT '生日',
   PRIMARY KEY (`id`)
@@ -423,7 +601,7 @@ public class SqlActionBenchmarkCrud {
 			
 			sqlactionBenchmark = new SqlactionBenchmarkSAO() ;
 			sqlactionBenchmark.name = "Calvin" ;
-			sqlactionBenchmark.nameCn = "卡尔斄1¤7" ;
+			sqlactionBenchmark.nameCn = "卡尔斄1�71¤7" ;
 			sqlactionBenchmark.salary = new BigDecimal(0) ;
 			long time = System.currentTimeMillis() ;
 			sqlactionBenchmark.birthday = new java.sql.Date(time) ;
@@ -438,7 +616,7 @@ public class SqlActionBenchmarkCrud {
 			beginMillisSecondstamp = System.currentTimeMillis() ;
 			for( i = 0 ; i < count ; i++ ) {
 				sqlactionBenchmark.name = "Calvin"+i ;
-				sqlactionBenchmark.nameCn = "卡尔斄1¤7"+i ;
+				sqlactionBenchmark.nameCn = "卡尔斄1�71¤7"+i ;
 				rows = SqlactionBenchmarkSAO.INSERT_INTO_sqlaction_benchmark( conn, sqlactionBenchmark ) ;
 				if( rows != 1 ) {
 					System.out.println( "SqlactionBenchmarkSAO.INSERT_INTO_sqlaction_benchmark failed["+rows+"]" );
@@ -603,8 +781,8 @@ import java.math.*;
 public class SqlactionBenchmarkSAO {
 
 	int				id ; // 编号
-	String			name ; // 英文各1¤7
-	String			name_cn ; // 中文各1¤7
+	String			name ; // 英文各1�71¤7
+	String			name_cn ; // 中文各1�71¤7
 	BigDecimal		salary ; // 薪水
 	java.sql.Date	birthday ; // 生日
 
@@ -672,7 +850,7 @@ public class MyBatisBenchmarkCrud {
 			SqlactionBenchmarkSAO	sqlactionBenchmark = new SqlactionBenchmarkSAO() ;
 			sqlactionBenchmark.id = 1 ;
 			sqlactionBenchmark.name = "Calvin" ;
-			sqlactionBenchmark.name_cn = "卡尔斄1¤7" ;
+			sqlactionBenchmark.name_cn = "卡尔斄1�71¤7" ;
 			sqlactionBenchmark.salary = new BigDecimal(0) ;
 			long time = System.currentTimeMillis() ;
 			sqlactionBenchmark.birthday = new java.sql.Date(time) ;
@@ -689,7 +867,7 @@ public class MyBatisBenchmarkCrud {
 			beginMillisSecondstamp = System.currentTimeMillis() ;
 			for( i = 0 ; i < count ; i++ ) {
 				sqlactionBenchmark.name = "Calvin"+i ;
-				sqlactionBenchmark.name_cn = "卡尔斄1¤7"+i ;
+				sqlactionBenchmark.name_cn = "卡尔斄1�71¤7"+i ;
 				mapper.insertOne(sqlactionBenchmark);
 				if( i % 10 == 0 ) {
 					session.commit();

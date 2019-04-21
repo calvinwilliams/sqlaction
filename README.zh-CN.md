@@ -15,19 +15,21 @@ sqlaction - 自动生成JDBC代码的数据库持久层工具
     - [3.2. 配置文件`dbserver.conf.json`](#32-配置文件dbserverconfjson)
     - [3.3. 配置文件`sqlaction.conf.json`](#33-配置文件sqlactionconfjson)
     - [3.4. 自动生成规则](#34-自动生成规则)
-    - [3.5. 配置元](#35-配置元)
+    - [3.5. 元配置](#35-元配置)
         - [3.5.1. 自定义SQL动作方法名](#351-自定义sql动作方法名)
-        - [3.5.2. 拦截器](#352-拦截器)
-            - [3.5.2.1. SQL拦截器](#3521-sql拦截器)
-    - [3.6. 为什么这么设计](#36-为什么这么设计)
-- [4. 性能压测](#4-性能压测)
-    - [4.1. 准备`sqlaction`](#41-准备sqlaction)
-    - [4.2. 准备`MyBatis`](#42-准备mybatis)
-    - [4.3. 测试案例](#43-测试案例)
-    - [4.4. 测试结果](#44-测试结果)
-- [5. 后续开发](#5-后续开发)
-- [6. 关于本项目](#6-关于本项目)
-- [7. 关于作者](#7-关于作者)
+        - [3.5.2. 自动返回自增主键值](#352-自动返回自增主键值)
+        - [3.5.3. 拦截器](#353-拦截器)
+            - [3.5.3.1. SQL拦截器](#3531-sql拦截器)
+- [4. 为什么这么设计？](#4-为什么这么设计)
+    - [4.1. 与MyBatis的开发量比较](#41-与mybatis的开发量比较)
+- [5. 与MyBatis的性能比较](#5-与mybatis的性能比较)
+    - [5.1. 准备`sqlaction`](#51-准备sqlaction)
+    - [5.2. 准备`MyBatis`](#52-准备mybatis)
+    - [5.3. 测试案例](#53-测试案例)
+    - [5.4. 测试结果](#54-测试结果)
+- [6. 后续开发](#6-后续开发)
+- [7. 关于本项目](#7-关于本项目)
+- [8. 关于作者](#8-关于作者)
 
 <!-- /TOC -->
 
@@ -363,10 +365,10 @@ SqlactionDemoSAO.SELECT_ALL_FROM_sqlaction_demo ok
 ## 3.1. 开发流程
 
 ```
-                                         sqlaction
-dbserver.conf.json、sqlaction.conf.json -----------> XxxSao.java、XxxSau.java(JDBC code) --\
-                                                                                            ---> Zzz.jar
-                                                                                Yyy.java --/
+                                        sqlaction
+dbserver.conf.json、sqlaction.conf.json ---------> XxxSao.java(Auto-gen JDBC code)、XxxSau.java(Custom code) --\
+                                                                                                                ---> Zzz.jar
+                                                                                                    Yyy.java --/
 ```
 
 ## 3.2. 配置文件`dbserver.conf.json`
@@ -542,9 +544,9 @@ SQL动作对应缺省方法名为SQL转换而来，具体算法为所有非字�
 
 就这么简单！
 
-## 3.5. 配置元
+## 3.5. 元配置
 
-SQL中可追加一些以"@@"开头的配置元以实现一些额外的功能。
+SQL中可追加一些以"@@"开头的元配置以实现一些额外的功能。
 
 ### 3.5.1. 自定义SQL动作方法名
 
@@ -553,9 +555,33 @@ SQL中可追加一些以"@@"开头的配置元以实现一些额外的功能。
 SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price FROM user,user_order WHERE user.name=? AND user.id=user_order.user_id @@METHOD(queryUserAndOrderByName)
 ```
 
-### 3.5.2. 拦截器
+### 3.5.2. 自动返回自增主键值
 
-#### 3.5.2.1. SQL拦截器
+MySQL的自增主键值在INSERT时自动取得，其DDL如下：
+```
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  ...
+```
+
+有些数据库没有自增功能，自增主键值从序列中取得，`sqlaction`为了统一其访问抽象，提供元配置"@@SELECTKEY"，在`sqlaction.conf.json`配置如下：
+```
+{
+	"database" : "calvindb" ,
+	"tables" : [
+		{
+			"table" : "user" ,
+			"sqlactions" : [
+				...
+				"INSERT INTO user @@SELECTKEY(user_id_seq)" ,
+```
+
+* 当在MySQL等有自增功能的DBMS中，`sqlaction`处理`sqlaction.conf.json`自动生成的JDBC代码中，在INSERT操作完后，追加生成调用"SELECT LAST_INSERT_ID()"的代码，取得自增主键值，赋值到主键字段中；
+* 当在Oracle环境等没有自增功能但有序列的DBMS中，`sqlaction`处理`sqlaction.conf.json`自动生成的JDBC代码中，在INSERT操作前，调用"select user_id_seq.nextval from dual;"取得序列值，赋值到主键字段中，然后再INSERT；
+
+### 3.5.3. 拦截器
+
+#### 3.5.3.1. SQL拦截器
 
 如果需要SQL真正执行前微调一下SQL（如分库分表修改hint），可加入拦截器"@@STATEMENT_INTERCEPTOR(拦截器方法名，填空则自动生成一个)"，配置示例：
 ```
@@ -587,13 +613,13 @@ public class UserOrderSAU {
 
 由于`XxxSau.java`只有在首次执行`sqlaction`才会自动生成，后面增加的拦截器方法框架源代码虽然不会自动添加到`XxxSau.java`中，但会作为注释出现在`XxxSao.java`中，方便开发者复制粘贴过去。
 
-## 3.6. 为什么这么设计
+# 4. 为什么这么设计？
 
 数据库应用接口层框架/工具对于表结构的配置源的有两派思路，一派是定义在配置文件中，好处是可以做不同DBMS的统一规范，如同一种数据类型的统一表达，坏处是与数据库之间同步较麻烦，另一派是定义在数据库中，需要用时读数据库中的元信息，好处是可以利用数据库设计工具，图形化界面管理表结构，还能自动生成E-R图，坏处是不同DBMS存在标准差异。`sqlaction`采用后一派思路，在数据类型与JAVA属性类型之间建立多DBMS映射表来解决标准差异。
 
 很多数据库持久化框架对于SQL动作都定义了一套自己的动作语法标准，`sqlaction`坚持采用原SQL来配置，减少开发人员学习负担。在分页查询等差异问题上，`sqlaction`定义一套兼容标准来统一SQL表达。
 
-`sqlaction`的SQL集合都放在一个文件中，便于审计表操作，如很容易查出是否有操作游离于索引之外，但生产部署又不需要其SQL配置文件，防止被人篡改。
+`sqlaction`的SQL集合都放在一个文件中，便于审计表操作，如很容易查出是否有操作游离于索引之外，但生产部署又不需要其SQL动作配置文件，防止被人篡改。
 
 `sqlaction`坚持采用最小化配置原则，规避一切冗余配置，尽力减少开发人员工作量，推荐用缺省值工作，如果需要自定义再提供额外的配置，如SQL动作方法名默认情况下无需配置，按照缺省规则就能自动根据SQL生成一个含义清晰的名字，开发人员无须为每个SQL动作必须配置方法名，甚至无需繁复的XML替代JAVA语言定义方法的输入输出参数（MyBatis），而且配置错误时只有在运行期才告知。
 
@@ -601,7 +627,184 @@ public class UserOrderSAU {
 
 简洁就是优秀工具的特质，而不是为了解决一种复杂性而带来另一种复杂性。
 
-# 4. 性能压测
+## 4.1. 与MyBatis的开发量比较
+
+<table>
+	<tr>
+		<td>MyBatis</td>
+		<td>sqlaction</td>
+	</tr>
+	<tr>
+		<td colspan="2">每个项目手工开发量<td>
+	</tr>
+	<tr>
+		<td>
+			<xmp>
+			配置数据库连接信息
+			<?xml version="1.0" encoding="UTF-8"?>
+			<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+			<configuration>
+				<settings>
+					<setting name="cacheEnabled" value="false" />
+				</settings>
+				<environments default="development">
+					<environment id="development">
+						<transactionManager type="JDBC"></transactionManager>
+						<dataSource type="POOLED">
+							<property name="driver" value="com.mysql.jdbc.Driver" />
+							<property name="url" value="jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" />
+							<property name="username" value="calvin" />
+							<property name="password" value="calvin" />
+						</dataSource>
+					</environment>
+				</environments>
+				<mappers>
+					<mapper resource="mybatis-mapper.xml" />
+				</mappers>
+			</configuration>
+			</xmp>
+		</td>
+		<td>
+			<xmp>
+			配置数据库连接信息
+			{
+				"driver" : "com.mysql.jdbc.Driver" ,
+				"url" : "jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" ,
+				"user" : "calvin" ,
+				"pwd" : "calvin"
+			}
+			</xmp>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			共21行手工工作量
+		</td>
+		<td>
+			共6行手工工作量
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">每张表手工开发量<td>
+	</tr>
+	<tr>
+		<td>
+			<xmp>
+			编写实体类
+			package xyz.calvinwilliams.mybatis.benchmark;
+
+			import java.math.*;
+
+			public class SqlactionBenchmarkSAO {
+
+				int				id ; // 编号
+				String			name ; // 英文名
+				String			name_cn ; // 中文名
+				BigDecimal		salary ; // 薪水
+				java.sql.Date	birthday ; // 生日
+			}
+			</xmp>
+		</td>
+		<td>
+			（sqlaction自动生成）
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<xmp>
+				配置表Mapper信息
+				<?xml version="1.0" encoding="UTF-8"?>
+				<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+				<mapper namespace="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAOMapper">
+					<insert id="insertOne" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
+						INSERT INTO sqlaction_benchmark (name,name_cn,salary,birthday) VALUES( #{name}, #{name_cn}, #{salary}, #{birthday} )
+					</insert>
+					<update id="updateOneByName" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
+						UPDATE sqlaction_benchmark SET salary=#{salary} WHERE name=#{name}
+					</update>
+					<select id="selectOneByName" parameterType="java.lang.String" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO" flushCache="true" useCache="false">
+						SELECT * FROM sqlaction_benchmark WHERE name=#{name}
+					</select>
+					<select id="selectAll" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO" flushCache="true" useCache="false">
+						SELECT * FROM sqlaction_benchmark
+					</select>
+					<delete id="deleteOneByName" parameterType="java.lang.String">
+						DELETE FROM sqlaction_benchmark WHERE name=#{name}
+					</delete>
+					<delete id="deleteAll">
+						DELETE FROM sqlaction_benchmark
+					</delete>
+				</mapper>
+			</xmp>
+		</td>
+		<td>
+			<xmp>
+			配置表动作信息
+			{
+				"database" : "calvindb" ,
+				"tables" : [
+					{
+						"table" : "sqlaction_benchmark" ,
+						"sqlactions" : [
+							"INSERT INTO sqlaction_benchmark" ,
+							"UPDATE sqlaction_benchmark SET salary=? WHERE name=?" ,
+							"SELECT * FROM sqlaction_benchmark WHERE name=?" ,
+							"SELECT * FROM sqlaction_benchmark" ,
+							"DELETE FROM sqlaction_benchmark WHERE name=?" ,
+							"DELETE FROM sqlaction_benchmark"
+						]
+					}
+				] ,
+				"javaPackage" : "xyz.calvinwilliams.sqlaction.benchmark"
+			}
+			</xmp>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<xmp>
+				编写接口类
+				package xyz.calvinwilliams.mybatis.benchmark;
+
+				import java.util.*;
+
+				public interface SqlactionBenchmarkSAOMapper {
+					public void insertOne(SqlactionBenchmarkSAO sqlactionBenchmark);
+					public void updateOneByName(SqlactionBenchmarkSAO sqlactionBenchmark);
+					public SqlactionBenchmarkSAO selectOneByName(String name);
+					public List<SqlactionBenchmarkSAO> selectAll();
+					public void deleteOneByName(String name);
+					public void deleteAll();
+				}
+			</xmp>
+		</td>
+		<td>
+			（无）
+		</td>
+	</tr>
+	<tr>
+		<td>
+			（无）
+		</td>
+		<td>
+			<xmp>
+			执行`sqlaction`，处理SQL动作配置
+			java -Dfile.encoding=UTF-8 -classpath "D:\Work\sqlaction\sqlaction.jar;D:\Work\mysql-connector-java-8.0.15\mysql-connector-java-8.0.15.jar" xyz.calvinwilliams.sqlaction.gencode.SqlActionGencode
+			pause
+			</xmp>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			共46行手工工作量
+		</td>
+		<td>
+			共19行手工工作量
+		</td>
+	</tr>
+</table>
+
+# 5. 与MyBatis的性能比较
 
 由于`sqlaction`自动生成的JDBC代码，与手工代码基本无异，没有低效的反射，没有多坑的热修改字节码，所以稳定性和运行性能都非常出色，下面是`sqlaction`与`MyBatis`的性能测试。
 
@@ -625,7 +828,7 @@ CREATE TABLE `sqlaction_benchmark` (
 ) ENGINE=InnoDB AUTO_INCREMENT=42332 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
 ```
 
-## 4.1. 准备`sqlaction`
+## 5.1. 准备`sqlaction`
 
 手工编写数据库连接配置文件`dbserver.conf.json`
 
@@ -827,7 +1030,7 @@ public class SqlActionBenchmarkCrud {
 }
 ```
 
-## 4.2. 准备`MyBatis`
+## 5.2. 准备`MyBatis`
 
 手工编写数据库连接配置文件`mybatis-config.xml`
 
@@ -1053,7 +1256,7 @@ public class MyBatisBenchmarkCrud {
 }
 ```
 
-## 4.3. 测试案例
+## 5.3. 测试案例
 
 INSERT表500条记录（每10条提交一次）
 UPDATE表500条记录（每10条提交一次）
@@ -1061,7 +1264,7 @@ SELECT表单条记录500*5次
 SELECT表所有记录1000次
 DELETE表500条记录（每10条提交一次）
 
-## 4.4. 测试结果
+## 5.4. 测试结果
 
 ```
 All sqlaction INSERT done , count[500] elapse[4.742]s
@@ -1115,13 +1318,13 @@ All mybatis DELETE WHERE done , count[500] elapse[6.035]s
 
 **而且从测试前准备来看，无论配置文件、源代码文件数量还是大小，`sqlaction`都比`MyBatis`工作量少，能更快速的展开业务开发，减轻开发人员学习压力和心智负担，且采用的技术更简单更透明更易掌控。**
 
-# 5. 后续开发
+# 6. 后续开发
 
 1. 目前`sqlaction`支持的SQL标准对于联机交易没问题，对于分析型复杂SQL（如函数、子查询）还需后续研发新增支持。
 2. 目前只支持MySQL数据库，后续将新增支持PostgreSQL和Oracle。
-3. 待设计各DBMS的分页查询语法的兼容统一表达。
+3. 待设计各DBMS的分页查询语法的统一抽象表达。
 
-# 6. 关于本项目
+# 7. 关于本项目
 
 欢迎使用`sqlaction`，如果你在使用中碰到了问题请告诉我，谢谢 ^_^
 
@@ -1141,7 +1344,7 @@ Gradle Kotlin DSL
 compile("xyz.calvinwilliams:sqlaction:0.2.2.0")
 ```
 
-# 7. 关于作者
+# 8. 关于作者
 
 厉华，右手C，左手JAVA，写过小到性能卓越方便快捷的日志库、HTTP解析器、日志采集器等，大到交易平台/中间件等，分布式系统实践者，容器技术专研者，目前在某城商行负责基础架构。
 

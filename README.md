@@ -310,9 +310,9 @@ SqlactionDemoSAO.SELECT_ALL_FROM_sqlaction_demo ok
 
 ```
                                          sqlaction
-dbserver.conf.json隆垄sqlaction.conf.json -----------> XxxSao.java隆垄XxxSau.java(JDBC code) --\
-                                                                                            ---> Zzz.jar
-                                                                                Yyy.java --/
+dbserver.conf.json,sqlaction.conf.json -----------> XxxSao.java,XxxSau.java(JDBC code) --\
+                                                                                          ---> Zzz.jar
+                                                                              Yyy.java --/
 ```
 
 # 4. Workload with MyBatis
@@ -323,11 +323,11 @@ dbserver.conf.json隆垄sqlaction.conf.json -----------> XxxSao.java隆垄XxxSau.jav
 		<td>sqlaction</td>
 	</tr>
 	<tr>
-		<td colspan="2">每个项目手工开发量<td>
+		<td colspan="2">Database configure<td>
 	</tr>
 	<tr>
 		<td>
-			<textarea cols="50%" rows="21" readonly disabled>
+			<textarea cols="50%" rows="21" readonly="yes" disabled="yes">
 Configure database connection
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
@@ -353,7 +353,7 @@ Configure database connection
 			</textarea>
 		</td>
 		<td>
-			<textarea cols="50%" rows="7" readonly disabled>
+			<textarea cols="50%" rows="7" readonly="yes" disabled="yes">
 Configure database connection
 {
 	"driver" : "com.mysql.jdbc.Driver" ,
@@ -365,11 +365,11 @@ Configure database connection
 		</td>
 	</tr>
 	<tr>
-		<td colspan="2">每张表手工开发量<td>
+		<td colspan="2">Table configure<td>
 	</tr>
 	<tr>
 		<td>
-			<textarea cols="50%" rows="12" readonly disabled>
+			<textarea cols="50%" rows="12" readonly="yes" disabled="yes">
 Write entity class
 package xyz.calvinwilliams.mybatis.benchmark;
 
@@ -391,7 +391,7 @@ public class SqlactionBenchmarkSAO {
 	</tr>
 	<tr>
 		<td>
-			<textarea cols="50%" rows="23" readonly disabled>
+			<textarea cols="50%" rows="23" readonly="yes" disabled="yes">
 Write entity class
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
@@ -418,7 +418,7 @@ Write entity class
 			</textarea>
 		</td>
 		<td>
-			<textarea cols="50%" rows="18" readonly disabled>
+			<textarea cols="50%" rows="18" readonly="yes" disabled="yes">
 Configure table actions
 {
 	"database" : "calvindb" ,
@@ -442,7 +442,7 @@ Configure table actions
 	</tr>
 	<tr>
 		<td>
-			<textarea cols="50%" rows="13" readonly disabled>
+			<textarea cols="50%" rows="13" readonly="yes" disabled="yes">
 Write interface class
 package xyz.calvinwilliams.mybatis.benchmark;
 
@@ -467,7 +467,7 @@ public interface SqlactionBenchmarkSAOMapper {
 			No
 		</td>
 		<td>
-			<textarea cols="50%" rows="3" readonly disabled>
+			<textarea cols="50%" rows="3" readonly="yes" disabled="yes">
 Execute `sqlaction`
 java -Dfile.encoding=UTF-8 -classpath "D:\Work\sqlaction\sqlaction.jar;D:\Work\mysql-connector-java-8.0.15\mysql-connector-java-8.0.15.jar" xyz.calvinwilliams.sqlaction.gencode.SqlActionGencode
 pause

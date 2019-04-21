@@ -21,15 +21,15 @@ sqlaction - 自动生成JDBC代码的数据库持久层工具
         - [3.5.3. 拦截器](#353-拦截器)
             - [3.5.3.1. SQL拦截器](#3531-sql拦截器)
 - [4. 为什么这么设计？](#4-为什么这么设计)
-    - [4.1. 与MyBatis的开发量比较](#41-与mybatis的开发量比较)
-- [5. 与MyBatis的性能比较](#5-与mybatis的性能比较)
-    - [5.1. 准备`sqlaction`](#51-准备sqlaction)
-    - [5.2. 准备`MyBatis`](#52-准备mybatis)
-    - [5.3. 测试案例](#53-测试案例)
-    - [5.4. 测试结果](#54-测试结果)
-- [6. 后续开发](#6-后续开发)
-- [7. 关于本项目](#7-关于本项目)
-- [8. 关于作者](#8-关于作者)
+- [5. 与MyBatis的开发量比较](#5-与mybatis的开发量比较)
+- [6. 与MyBatis的性能比较](#6-与mybatis的性能比较)
+    - [6.1. 准备`sqlaction`](#61-准备sqlaction)
+    - [6.2. 准备`MyBatis`](#62-准备mybatis)
+    - [6.3. 测试案例](#63-测试案例)
+    - [6.4. 测试结果](#64-测试结果)
+- [7. 后续开发](#7-后续开发)
+- [8. 关于本项目](#8-关于本项目)
+- [9. 关于作者](#9-关于作者)
 
 <!-- /TOC -->
 
@@ -627,7 +627,7 @@ public class UserOrderSAU {
 
 简洁就是优秀工具的特质，而不是为了解决一种复杂性而带来另一种复杂性。
 
-## 4.1. 与MyBatis的开发量比较
+# 5. 与MyBatis的开发量比较
 
 <table>
 	<tr>
@@ -791,7 +791,7 @@ pause
 	</tr>
 </table>
 
-# 5. 与MyBatis的性能比较
+# 6. 与MyBatis的性能比较
 
 由于`sqlaction`自动生成的JDBC代码，与手工代码基本无异，没有低效的反射，没有多坑的热修改字节码，所以稳定性和运行性能都非常出色，下面是`sqlaction`与`MyBatis`的性能测试。
 
@@ -815,7 +815,7 @@ CREATE TABLE `sqlaction_benchmark` (
 ) ENGINE=InnoDB AUTO_INCREMENT=42332 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
 ```
 
-## 5.1. 准备`sqlaction`
+## 6.1. 准备`sqlaction`
 
 手工编写数据库连接配置文件`dbserver.conf.json`
 
@@ -1017,7 +1017,7 @@ public class SqlActionBenchmarkCrud {
 }
 ```
 
-## 5.2. 准备`MyBatis`
+## 6.2. 准备`MyBatis`
 
 手工编写数据库连接配置文件`mybatis-config.xml`
 
@@ -1243,7 +1243,7 @@ public class MyBatisBenchmarkCrud {
 }
 ```
 
-## 5.3. 测试案例
+## 6.3. 测试案例
 
 INSERT表500条记录（每10条提交一次）
 UPDATE表500条记录（每10条提交一次）
@@ -1251,7 +1251,7 @@ SELECT表单条记录500*5次
 SELECT表所有记录1000次
 DELETE表500条记录（每10条提交一次）
 
-## 5.4. 测试结果
+## 6.4. 测试结果
 
 ```
 All sqlaction INSERT done , count[500] elapse[4.742]s
@@ -1305,13 +1305,13 @@ All mybatis DELETE WHERE done , count[500] elapse[6.035]s
 
 **而且从测试前准备来看，无论配置文件、源代码文件数量还是大小，`sqlaction`都比`MyBatis`工作量少，能更快速的展开业务开发，减轻开发人员学习压力和心智负担，且采用的技术更简单更透明更易掌控。**
 
-# 6. 后续开发
+# 7. 后续开发
 
 1. 目前`sqlaction`支持的SQL标准对于联机交易没问题，对于分析型复杂SQL（如函数、子查询）还需后续研发新增支持。
 2. 目前只支持MySQL数据库，后续将新增支持PostgreSQL和Oracle。
 3. 待设计各DBMS的分页查询语法的统一抽象表达。
 
-# 7. 关于本项目
+# 8. 关于本项目
 
 欢迎使用`sqlaction`，如果你在使用中碰到了问题请告诉我，谢谢 ^_^
 
@@ -1331,7 +1331,7 @@ Gradle Kotlin DSL
 compile("xyz.calvinwilliams:sqlaction:0.2.2.0")
 ```
 
-# 8. 关于作者
+# 9. 关于作者
 
 厉华，右手C，左手JAVA，写过小到性能卓越方便快捷的日志库、HTTP解析器、日志采集器等，大到交易平台/中间件等，分布式系统实践者，容器技术专研者，目前在某城商行负责基础架构。
 

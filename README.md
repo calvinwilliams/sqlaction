@@ -13,15 +13,15 @@ sqlaction - Database persistence layer tool based auto-gen JDBC code
 	- [2.5. Executing your application](#25-executing-your-application)
 - [3. Reference](#3-reference)
 	- [3.1. Process flow](#31-process-flow)
-- [Workload with MyBatis](#workload-with-mybatis)
-- [4. Benchmark with MyBatis](#4-benchmark-with-mybatis)
-	- [4.1. Prepare `sqlaction`](#41-prepare-sqlaction)
-	- [4.2. Prepare `MyBatis`](#42-prepare-mybatis)
-	- [4.3. Case](#43-case)
-	- [4.4. Result](#44-result)
-- [5. TODO](#5-todo)
-- [6. About The Project](#6-about-the-project)
-- [7. About Author](#7-about-author)
+- [4. Workload with MyBatis](#4-workload-with-mybatis)
+- [5. Benchmark with MyBatis](#5-benchmark-with-mybatis)
+	- [5.1. Prepare `sqlaction`](#51-prepare-sqlaction)
+	- [5.2. Prepare `MyBatis`](#52-prepare-mybatis)
+	- [5.3. Case](#53-case)
+	- [5.4. Result](#54-result)
+- [6. TODO](#6-todo)
+- [7. About The Project](#7-about-the-project)
+- [8. About Author](#8-about-author)
 
 <!-- /TOC -->
 
@@ -315,7 +315,7 @@ dbserver.conf.json¡¢sqlaction.conf.json -----------> XxxSao.java¡¢XxxSau.jav
                                                                                 Yyy.java --/
 ```
 
-# Workload with MyBatis
+# 4. Workload with MyBatis
 
 <table>
 	<tr>
@@ -476,7 +476,7 @@ pause
 	</tr>
 </table>
 
-# 4. Benchmark with MyBatis
+# 5. Benchmark with MyBatis
 
 CPU : Intel Core i5-7500 3.4GHz 3.4GHz
 Momey : 16GB
@@ -498,7 +498,7 @@ CREATE TABLE `sqlaction_benchmark` (
 ) ENGINE=InnoDB AUTO_INCREMENT=42332 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
 ```
 
-## 4.1. Prepare `sqlaction`
+## 5.1. Prepare `sqlaction`
 
 Create `dbserver.conf.json`
 
@@ -700,7 +700,7 @@ public class SqlActionBenchmarkCrud {
 }
 ```
 
-## 4.2. Prepare `MyBatis`
+## 5.2. Prepare `MyBatis`
 
 Create `mybatis-config.xml`
 
@@ -926,7 +926,7 @@ public class MyBatisBenchmarkCrud {
 }
 ```
 
-## 4.3. Case
+## 5.3. Case
 
 INSERT table for 500 records
 UPDATE table for 500 records
@@ -934,7 +934,7 @@ SELECT table for 500*5 records
 SELECT table to List for 1000 records
 DELETE table for 500 records
 
-## 4.4. Result
+## 5.4. Result
 
 ```
 All sqlaction INSERT done , count[500] elapse[4.742]s
@@ -986,13 +986,13 @@ All mybatis DELETE WHERE done , count[500] elapse[6.035]s
 
 **`sqlaction`'s performance fast 20% than `MyBatis`**
 
-# 5. TODO
+# 6. TODO
 
 1. Support Complex SQL.
 2. Support PostgreSQL and Oracle.
 3. Support page-query SQL
 
-# 6. About The Project
+# 7. About The Project
 
 Download source at : [gitee](https://gitee.com/calvinwilliams/sqlaction),[github](https://github.com/calvinwilliams/sqlaction)
 
@@ -1010,7 +1010,7 @@ Gradle Kotlin DSL
 compile("xyz.calvinwilliams:sqlaction:0.2.2.0")
 ```
 
-# 7. About Author
+# 8. About Author
 
 Mailto : [netease](mailto:calvinwilliams@163.com)��[Gmail](mailto:calvinwilliams.c@gmail.com)
 

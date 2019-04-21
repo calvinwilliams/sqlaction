@@ -13,8 +13,8 @@ sqlaction - Database persistence layer tool based auto-gen JDBC code
 	- [2.5. Executing your application](#25-executing-your-application)
 - [3. Reference](#3-reference)
 	- [3.1. Process flow](#31-process-flow)
-- [4. Workload with MyBatis](#4-workload-with-mybatis)
-- [5. Benchmark with MyBatis](#5-benchmark-with-mybatis)
+- [4. Workload compare to MyBatis](#4-workload-compare-to-mybatis)
+- [5. Benchmark compare to MyBatis](#5-benchmark-compare-to-mybatis)
 	- [5.1. Prepare `sqlaction`](#51-prepare-sqlaction)
 	- [5.2. Prepare `MyBatis`](#52-prepare-mybatis)
 	- [5.3. Case](#53-case)
@@ -309,193 +309,48 @@ SqlactionDemoSAO.SELECT_ALL_FROM_sqlaction_demo ok
 ## 3.1. Process flow
 
 ```
-                                         sqlaction
+                                        sqlaction
 dbserver.conf.json,sqlaction.conf.json -----------> XxxSao.java,XxxSau.java(JDBC code) --\
                                                                                           ---> Zzz.jar
                                                                               Yyy.java --/
 ```
 
-# 4. Workload with MyBatis
-
-
-<table>
-	<tr>
-		<td>MyBatis</td>
-		<td>sqlaction</td>
-	</tr>
-	<tr>
-		<td colspan="2">?????????<td>
-	</tr>
-	<tr>
-		<td><img src="mybatis-config.xml.png" /></td>
-		<td><img src="dbserver.conf.json.png" /></td>
-	</tr>
-</table>
-
-
-
-
+# 4. Workload compare to MyBatis
 
 <table>
 	<tr>
-		<td>MyBatis</td>
-		<td>sqlaction</td>
+		<td align="center">MyBatis</td>
+		<td align="center">sqlaction</td>
 	</tr>
 	<tr>
-		<td colspan="2">Database configure<td>
+		<td colspan="2" align="center">Configure project once<td>
 	</tr>
 	<tr>
-		<td>
-			<textarea cols="50%" rows="21" readonly="yes" disabled="yes" wrap="virtual">
-Configure database connection
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
-<configuration>
-	<settings>
-		<setting name="cacheEnabled" value="false" />
-	</settings>
-	<environments default="development">
-		<environment id="development">
-			<transactionManager type="JDBC"></transactionManager>
-			<dataSource type="POOLED">
-				<property name="driver" value="com.mysql.jdbc.Driver" />
-				<property name="url" value="jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" />
-				<property name="username" value="calvin" />
-				<property name="password" value="calvin" />
-			</dataSource>
-		</environment>
-	</environments>
-	<mappers>
-		<mapper resource="mybatis-mapper.xml" />
-	</mappers>
-</configuration>
-			</textarea>
-		</td>
-		<td>
-			<textarea cols="50%" rows="7" readonly="yes" disabled="yes" wrap="virtual">
-Configure database connection
-{
-	"driver" : "com.mysql.jdbc.Driver" ,
-	"url" : "jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" ,
-	"user" : "calvin" ,
-	"pwd" : "calvin"
-}
-			</textarea>
-		</td>
+		<td>Databaes conntion config<img src="mybatis-config.xml.png" /></td>
+		<td>Databaes conntion config<img src="dbserver.conf.json.png" /></td>
 	</tr>
 	<tr>
-		<td colspan="2">Table configure<td>
+		<td colspan="2" align="center">Configure every table<td>
 	</tr>
 	<tr>
-		<td>
-			<textarea cols="50%" rows="12" readonly="yes" disabled="yes" wrap="virtual">
-Write entity class
-package xyz.calvinwilliams.mybatis.benchmark;
-
-import java.math.*;
-
-public class SqlactionBenchmarkSAO {
-
-	int				id ;
-	String			name ;
-	String			name_cn ;
-	BigDecimal		salary ;
-	java.sql.Date	birthday ;
-}
-			</textarea>
-		</td>
-		<td>
-			(sqlaction auto-gen code)
-		</td>
+		<td>table mapper config<img src="mybatis-mapper.xml.png" /></td>
+		<td>table action config<img src="sqlaction.conf.json.png" /></td>
 	</tr>
 	<tr>
-		<td>
-			<textarea cols="50%" rows="23" readonly="yes" disabled="yes" wrap="virtual">
-Write entity class
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAOMapper">
-	<insert id="insertOne" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
-		INSERT INTO sqlaction_benchmark (name,name_cn,salary,birthday) VALUES( #{name}, #{name_cn}, #{salary}, #{birthday} )
-	</insert>
-	<update id="updateOneByName" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
-		UPDATE sqlaction_benchmark SET salary=#{salary} WHERE name=#{name}
-	</update>
-	<select id="selectOneByName" parameterType="java.lang.String" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO" flushCache="true" useCache="false">
-		SELECT * FROM sqlaction_benchmark WHERE name=#{name}
-	</select>
-	<select id="selectAll" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO" flushCache="true" useCache="false">
-		SELECT * FROM sqlaction_benchmark
-	</select>
-	<delete id="deleteOneByName" parameterType="java.lang.String">
-		DELETE FROM sqlaction_benchmark WHERE name=#{name}
-	</delete>
-	<delete id="deleteAll">
-		DELETE FROM sqlaction_benchmark
-	</delete>
-</mapper>
-			</textarea>
-		</td>
-		<td>
-			<textarea cols="50%" rows="18" readonly="yes" disabled="yes" wrap="virtual">
-Configure table actions
-{
-	"database" : "calvindb" ,
-	"tables" : [
-		{
-			"table" : "sqlaction_benchmark" ,
-			"sqlactions" : [
-				"INSERT INTO sqlaction_benchmark" ,
-				"UPDATE sqlaction_benchmark SET salary=? WHERE name=?" ,
-				"SELECT * FROM sqlaction_benchmark WHERE name=?" ,
-				"SELECT * FROM sqlaction_benchmark" ,
-				"DELETE FROM sqlaction_benchmark WHERE name=?" ,
-				"DELETE FROM sqlaction_benchmark"
-			]
-		}
-	] ,
-	"javaPackage" : "xyz.calvinwilliams.sqlaction.benchmark"
-}
-			</textarea>
-		</td>
+		<td>table entity class<img src="SqlactionBenchmarkSAO.java.png" /></td>
+		<td>sqlaction auto-gen</td>
 	</tr>
 	<tr>
-		<td>
-			<textarea cols="50%" rows="13" readonly="yes" disabled="yes" wrap="virtual">
-Write interface class
-package xyz.calvinwilliams.mybatis.benchmark;
-
-import java.util.*;
-
-public interface SqlactionBenchmarkSAOMapper {
-	public void insertOne(SqlactionBenchmarkSAO sqlactionBenchmark);
-	public void updateOneByName(SqlactionBenchmarkSAO sqlactionBenchmark);
-	public SqlactionBenchmarkSAO selectOneByName(String name);
-	public List<SqlactionBenchmarkSAO> selectAll();
-	public void deleteOneByName(String name);
-	public void deleteAll();
-}
-			</textarea>
-		</td>
-		<td>
-			No
-		</td>
+		<td>table interface class<img src="SqlactionBenchmarkSAOMapper.java.png" /></td>
+		<td>Don't need</td>
 	</tr>
 	<tr>
-		<td>
-			No
-		</td>
-		<td>
-			<textarea cols="50%" rows="3" readonly="yes" disabled="yes" wrap="virtual">
-Execute `sqlaction`
-java -Dfile.encoding=UTF-8 -classpath "D:\Work\sqlaction\sqlaction.jar;D:\Work\mysql-connector-java-8.0.15\mysql-connector-java-8.0.15.jar" xyz.calvinwilliams.sqlaction.gencode.SqlActionGencode
-pause
-			</textarea>
-		</td>
+		<td>Don't need</td>
+		<td>sqlaction execute command?<br />java -Dfile.encoding=UTF-8 -classpath "D:\Work\sqlaction\sqlaction.jar;D:\Work\mysql-connector-java-8.0.15\mysql-connector-java-8.0.15.jar" xyz.calvinwilliams.sqlaction.gencode.SqlActionGencode</td>
 	</tr>
 </table>
 
-# 5. Benchmark with MyBatis
+# 5. Benchmark compare to MyBatis
 
 CPU : Intel Core i5-7500 3.4GHz 3.4GHz
 Momey : 16GB

@@ -21,12 +21,12 @@ sqlaction - 自动生成JDBC代码的数据库持久层工具
         - [3.5.3. 拦截器](#353-拦截器)
             - [3.5.3.1. SQL拦截器](#3531-sql拦截器)
 - [4. 为什么这么设计？](#4-为什么这么设计)
+- [5. 与MyBatis的开发量比较](#5-与mybatis的开发量比较)
 - [6. 与MyBatis的性能比较](#6-与mybatis的性能比较)
     - [6.1. 准备`sqlaction`](#61-准备sqlaction)
     - [6.2. 准备`MyBatis`](#62-准备mybatis)
     - [6.3. 测试案例](#63-测试案例)
     - [6.4. 测试结果](#64-测试结果)
-- [5. 与MyBatis的开发量比较](#5-与mybatis的开发量比较)
 - [7. 后续开发](#7-后续开发)
 - [8. 关于本项目](#8-关于本项目)
 - [9. 关于作者](#9-关于作者)
@@ -45,7 +45,9 @@ sqlaction - 自动生成JDBC代码的数据库持久层工具
 
 于是，我花了十多个晚上，结合之前在C技术栈中的设计和经验，结合JAVA特点，写了sqlaction。
 
-`sqlaction`是自动生成JDBC代码的数据库持久层工具，它为应用提供了类似`MyBatis`和`Hibernate`操作数据库能力，但更轻量级和几乎消除了所有的手工冗余编码，提高开发效率，也易于与其它框架搭配使用。`sqlaction`读取数据库中的表结构元信息和少量配置文件信息（SQL），自动生成数据库表实体类，自动生成基于JDBC的SQL动作方法代码，自动生成拦截器框架等代码，应用调用其自动生成的代码就能极其快捷的操作数据库，同时还拥有JDBC的高性能，更重要的是开发者能直接看到底层操作代码，增加自主可控，没有低效的反射，没有复杂的热修改字节码，没有庞大笨重的隐藏核心。
+`sqlaction`是自动生成JDBC代码的数据库持久层工具，它为应用提供了类似`MyBatis`和`Hibernate`操作数据库能力，但更轻量级和几乎消除了所有的手工冗余编码，提高开发效率，也易于与其它框架搭配使用。
+
+`sqlaction`读取数据库中的表结构元信息和少量配置文件信息（SQL），自动生成数据库表实体类，自动生成基于JDBC的SQL动作方法代码，自动生成拦截器框架等代码，应用调用其自动生成的代码就能极其快捷的操作数据库，同时还拥有JDBC的高性能，更重要的是开发者能直接看到底层操作代码，增加自主可控，没有低效的反射，没有复杂的热修改字节码，没有庞大笨重的隐藏核心。
 
 # 2. 一个DEMO
 
@@ -623,9 +625,46 @@ public class UserOrderSAU {
 
 `sqlaction`坚持采用最小化配置原则，规避一切冗余配置，尽力减少开发人员工作量，推荐用缺省值工作，如果需要自定义再提供额外的配置，如SQL动作方法名默认情况下无需配置，按照缺省规则就能自动根据SQL生成一个含义清晰的名字，开发人员无须为每个SQL动作必须配置方法名，甚至无需繁复的XML替代JAVA语言定义方法的输入输出参数（MyBatis），而且配置错误时只有在运行期才告知。
 
-`sqlaction`朴素，无需MyBatis或Hibernate那么复杂、炫耀技术之嫌；`sqlaction`简单，只是代替手工而自动生成JDBC代码段落，没有运行时框架，不做其它事情（如连接池、事务控制等），保持代码架构简单、透明、可控和高效，便于和其它数据库框架/工具协同工作；`sqlaction`对开发友好，大部分错误都能在预处理期或编译期发现和提示，而不像某些“高端”框架只有到了运行期才警示开发问题。
+`sqlaction`朴素，无需MyBatis或Hibernate那么复杂、炫耀技术之嫌；`sqlaction`简单，只是代替手工而自动生成JDBC代码段落，没有运行时框架，不做其它事情（如连接池、分布式事务控制等），保持代码架构简单、透明、可控和高效，便于和其它数据库框架/工具协同工作；`sqlaction`对开发友好，大部分错误都能在预处理期或编译期发现和提示，而不像某些“高端”框架只有到了运行期才警示开发问题。
 
 简洁就是优秀工具的特质，而不是为了解决一种复杂性而带来另一种复杂性。
+
+# 5. 与MyBatis的开发量比较
+
+<table>
+	<tr>
+		<td align="center">MyBatis</td>
+		<td align="center">sqlaction</td>
+	</tr>
+	<tr>
+		<td colspan="2" align="center">每个项目手工开发量<td>
+	</tr>
+	<tr>
+		<td>编写数据库连接信息配置文件<img src="mybatis-config.xml.png" /></td>
+		<td>编写数据库连接信息配置文件<img src="dbserver.conf.json.png" /></td>
+	</tr>
+	<tr>
+		<td colspan="2" align="center">每个表手工开发量<td>
+	</tr>
+	<tr>
+		<td>编写表操作配置文件<img src="mybatis-mapper.xml.png" /></td>
+		<td>编写表操作配置文件<img src="sqlaction.conf.json.png" /></td>
+	</tr>
+	<tr>
+		<td>编写表实体类文件<img src="SqlactionBenchmarkSAO.java.png" /></td>
+		<td>sqlaction原生自动生成</td>
+	</tr>
+	<tr>
+		<td>编写表操作接口类文件<img src="SqlactionBenchmarkSAOMapper.java.png" /></td>
+		<td>sqlaction不需要</td>
+	</tr>
+	<tr>
+		<td>MyBatis不需要</td>
+		<td>sqlaction处理命令行：<br />java -Dfile.encoding=UTF-8 -classpath "D:\Work\sqlaction\sqlaction.jar;D:\Work\mysql-connector-java-8.0.15\mysql-connector-java-8.0.15.jar" xyz.calvinwilliams.sqlaction.gencode.SqlActionGencode</td>
+	</tr>
+</table>
+
+以上表格可以看出，每个项目都要配置一遍的数据库连接信息配置文件，MyBatis比sqlaction大了一倍，日常表配置/源文件，MyBatis要手工编写三个文件（存在很多冗余工作），sqlaction只需手工编写一个文件即可（一点冗余都没有，最大化提高开发效能）。
 
 # 6. 与MyBatis的性能比较
 
@@ -1139,191 +1178,10 @@ All mybatis DELETE WHERE done , count[500] elapse[6.035]s
 
 **从以上性能测试图表中可以看出，`sqlaction`运行性能比`MyBatis`快大约20%，这意味着技术选型`sqlaction`的应用系统的交易延迟比`MyBatis`有明显优势。**
 
-**而且从测试前准备来看，无论配置文件、源代码文件数量还是大小，`sqlaction`都比`MyBatis`工作量少，能更快速的展开业务开发，减轻开发人员学习压力和心智负担，且采用的技术更简单更透明更易掌控。**
+**综合开发效能和运行效率，总结：**
 
-# 5. 与MyBatis的开发量比较
-
-详细源文件内容见 与MyBatis的性能比较 章节
-
-| 文件 | MyBatis | sqlaction |
-|---|---|---|
-| 数据库连接信息配置文件 | mybatis-config.xml（共21行） | dbserver.conf.json（共6行） |
-| 表映射信息配置文件 | mybatis-mapper.xml（共22行） | sqlaction.conf.json（共17行） |
-
-
-<table>
-	<tr>
-		<td>MyBatis</td>
-		<td>sqlaction</td>
-	</tr>
-	<tr>
-		<td colspan="2">每个项目手工开发量<td>
-	</tr>
-	<tr>
-		<td><img src="mybatis-config.xml.png" /></td>
-		<td><img src="dbserver.conf.json.png" /></td>
-	</tr>
-</table>
-
-
-
-<table>
-	<tr>
-		<td>MyBatis</td>
-		<td>sqlaction</td>
-	</tr>
-	<tr>
-		<td colspan="2">每个项目手工开发量<td>
-	</tr>
-	<tr>
-		<td>
-			<textarea cols="50%" rows="21" readonly="yes" disabled="yes" wrap="virtual">
-配置数据库连接信息
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
-<configuration>
-	<settings>
-		<setting name="cacheEnabled" value="false" />
-	</settings>
-	<environments default="development">
-		<environment id="development">
-			<transactionManager type="JDBC"></transactionManager>
-			<dataSource type="POOLED">
-				<property name="driver" value="com.mysql.jdbc.Driver" />
-				<property name="url" value="jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" />
-				<property name="username" value="calvin" />
-				<property name="password" value="calvin" />
-			</dataSource>
-		</environment>
-	</environments>
-	<mappers>
-		<mapper resource="mybatis-mapper.xml" />
-	</mappers>
-</configuration>
-			</textarea>
-		</td>
-		<td>
-			<textarea cols="50%" rows="7" readonly="yes" disabled="yes" wrap="virtual">
-配置数据库连接信息
-{
-	"driver" : "com.mysql.jdbc.Driver" ,
-	"url" : "jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" ,
-	"user" : "calvin" ,
-	"pwd" : "calvin"
-}
-			</textarea>
-		</td>
-	</tr>
-	<tr>
-		<td colspan="2">每张表手工开发量<td>
-	</tr>
-	<tr>
-		<td>
-			<textarea cols="50%" rows="12" readonly="yes" disabled="yes" wrap="virtual">
-编写实体类
-package xyz.calvinwilliams.mybatis.benchmark;
-
-import java.math.*;
-
-public class SqlactionBenchmarkSAO {
-	int				id ; // 编号
-	String			name ; // 英文名
-	String			name_cn ; // 中文名
-	BigDecimal		salary ; // 薪水
-	java.sql.Date	birthday ; // 生日
-}
-			</textarea>
-		</td>
-		<td>
-			（sqlaction原生自动生成）
-		</td>
-	</tr>
-	<tr>
-		<td>
-			<textarea cols="50%" rows="23" readonly="yes" disabled="yes" wrap="virtual">
-配置表Mapper信息
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAOMapper">
-	<insert id="insertOne" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
-		INSERT INTO sqlaction_benchmark (name,name_cn,salary,birthday) VALUES( #{name}, #{name_cn}, #{salary}, #{birthday} )
-	</insert>
-	<update id="updateOneByName" parameterType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO">
-		UPDATE sqlaction_benchmark SET salary=#{salary} WHERE name=#{name}
-	</update>
-	<select id="selectOneByName" parameterType="java.lang.String" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO" flushCache="true" useCache="false">
-		SELECT * FROM sqlaction_benchmark WHERE name=#{name}
-	</select>
-	<select id="selectAll" resultType="xyz.calvinwilliams.mybatis.benchmark.SqlactionBenchmarkSAO" flushCache="true" useCache="false">
-		SELECT * FROM sqlaction_benchmark
-	</select>
-	<delete id="deleteOneByName" parameterType="java.lang.String">
-		DELETE FROM sqlaction_benchmark WHERE name=#{name}
-	</delete>
-	<delete id="deleteAll">
-		DELETE FROM sqlaction_benchmark
-	</delete>
-</mapper>
-			</textarea>
-		</td>
-		<td>
-			<textarea cols="50%" rows="18" readonly="yes" disabled="yes" wrap="virtual">
-配置表动作信息
-{
-	"database" : "calvindb" ,
-	"tables" : [
-		{
-			"table" : "sqlaction_benchmark" ,
-			"sqlactions" : [
-				"INSERT INTO sqlaction_benchmark" ,
-				"UPDATE sqlaction_benchmark SET salary=? WHERE name=?" ,
-				"SELECT * FROM sqlaction_benchmark WHERE name=?" ,
-				"SELECT * FROM sqlaction_benchmark" ,
-				"DELETE FROM sqlaction_benchmark WHERE name=?" ,
-				"DELETE FROM sqlaction_benchmark"
-			]
-		}
-	] ,
-	"javaPackage" : "xyz.calvinwilliams.sqlaction.benchmark"
-}
-			</textarea>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			<textarea cols="50%" rows="13" readonly="yes" disabled="yes" wrap="virtual">
-编写接口类
-package xyz.calvinwilliams.mybatis.benchmark;
-
-import java.util.*;
-
-public interface SqlactionBenchmarkSAOMapper {
-	public void insertOne(SqlactionBenchmarkSAO sqlactionBenchmark);
-	public void updateOneByName(SqlactionBenchmarkSAO sqlactionBenchmark);
-	public SqlactionBenchmarkSAO selectOneByName(String name);
-	public List<SqlactionBenchmarkSAO> selectAll();
-	public void deleteOneByName(String name);
-	public void deleteAll();
-}
-			</textarea>
-		</td>
-		<td>
-			No
-		</td>
-	</tr>
-	<tr>
-		<td>
-			No
-		</td>
-		<td>
-			<textarea cols="50%" rows="3" readonly="yes" disabled="yes" wrap="virtual">
-执行`sqlaction`，处理SQL动作配置
-java -Dfile.encoding=UTF-8 -classpath "D:\Work\sqlaction\sqlaction.jar;D:\Work\mysql-connector-java-8.0.15\mysql-connector-java-8.0.15.jar" xyz.calvinwilliams.sqlaction.gencode.SqlActionGencode
-pause
-			</textarea>
-		</td>
-	</tr>
-</table>
+* 从测试前准备来看，无论配置文件、源代码文件数量还是大小，`sqlaction`的工作量只有`MyBatis`一半，能更快速的展开业务开发，减轻开发人员学习压力和心智负担，且采用的技术更简单更透明更易掌控。
+* 从设计理念来看，`sqlaction`只是在应用和`JDBC`之间自动生成了以往需要手工编写的代码，真正运行时与`sqlaction`无关，性能等价于高效直接的`JDBC`，理论上不可能有比它更快的数据库持久层类库/工具了。`sqlaction`只自动生成了SQL处理对应的JAVA方法操作，可以和其它优秀数据库类库/工具（如连接池、分布式事务控制）更容易的集成使用。
 
 # 7. 后续开发
 

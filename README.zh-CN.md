@@ -679,7 +679,7 @@ public class UserOrderSAU {
 	"user" : "calvin" ,
 	"pwd" : "calvin"
 }
-				<xmp>
+				</xmp>
 			</pre>
 		</td>
 	</tr>

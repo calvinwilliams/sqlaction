@@ -421,6 +421,15 @@ public class SqlActionGencode {
 			columnIndex++;
 			methodParameters.append( ", "+ct.column.javaPropertyType+" _"+columnIndex+"_"+ct.column.javaPropertyName );
 		}
+		if( parser.pageKeyColumn != null ) {
+			methodParameters.append( ", "+parser.pageKeyColumn.javaPropertyType+" _"+columnIndex+"_"+parser.pageKeyColumn.javaPropertyName );
+			
+			if( parser.whereColumnTokenList.size() > 0 ) {
+				parser.statementSql += "AND "+parser.pageKeyColumn.columnName+">=(SELECT "+parser.pageKeyColumn+" FROM "+table.tableName+" ORDER BY "+parser.pageKeyColumn+" LIMIT "+parser.pageSize+"*?,1) LIMIT ?" ;
+			} else {
+				parser.statementSql += "WHERE "+parser.pageKeyColumn.columnName+">=(SELECT "+parser.pageKeyColumn+" FROM "+table.tableName+" ORDER BY "+parser.pageKeyColumn+" LIMIT "+parser.pageSize+"*?,1) LIMIT ?" ;
+			}
+		}
 		
 		saoFileBuffer.append( "\n" );
 		OutAppendSql( saoFileBuffer, parser.sqlaction );
@@ -455,9 +464,22 @@ public class SqlActionGencode {
 					return nret;
 				}
 			}
+		} else {
+			columnIndex = 0 ;
+			saoFileBuffer.append( "\t" + "public static int " + parser.methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
+		}
+		if( parser.pageKeyColumn != null ) {
+			for( int i=0 ; i < 2 ; i++ ) {
+				nret = SqlActionColumn.dumpWhereInputColumn( columnIndex, parser.pageKeyColumn, "_"+columnIndex+"_"+parser.pageKeyColumn.javaPropertyName, saoFileBuffer ) ;
+				if( nret != 0 ) {
+					System.out.println( "DumpPageInputColumn["+table.tableName+"]["+parser.pageKeyColumn+"] failed["+nret+"]" );
+					return nret;
+				}
+			}
+		}
+		if( parser.whereColumnTokenList.size() > 0 ) {
 			saoFileBuffer.append( "\t\t" + "ResultSet rs = prestmt.executeQuery() ;\n" );
 		} else {
-			saoFileBuffer.append( "\t" + "public static int " + parser.methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
 			saoFileBuffer.append( "\t\t" + "Statement stmt = conn.createStatement() ;\n" );
 			if( parser.statementInterceptorMethodName != null ) {
 				saoFileBuffer.append( "\t\t" + "ResultSet rs = stmt.executeQuery( "+table.javaSauClassName+"."+parser.statementInterceptorMethodName+"(\""+parser.statementSql+"\") ) ;\n" );

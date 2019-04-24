@@ -23,6 +23,7 @@
 			"sqlactions" : [
 				"SELECT /* blablabla~ */ * FROM user_order @@STATEMENT_INTERCEPTOR()" ,
 				"SELECT * FROM user_order WHERE user_id=?" ,
+				"SELECT * FROM user_order PAGE_KEY item_name PAGE_SIZE 3 PAGE_NUM ?" ,
 				"SELECT user.name,user.address,user_order.item_name,user_order.amount,user_order.total_price
 					FROM user,user_order
 					WHERE user.name=? AND user.id=user_order.user_id

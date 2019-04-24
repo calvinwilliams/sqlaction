@@ -18,10 +18,8 @@ public class SqlActionTest {
 	public static int testSelectTable( Connection conn ) {
 
 		List<UserSAO>		userList = null ;
-		UserSAO				user = null ;
 		List<UserSAO>		userListForSelectOutput = null ;
 		List<UserOrderSAO>	userOrderListForSelectOutput = null ;
-		UserSAO				userForWhereInput = null ;
 		int					nret = 0 ;
 
 		try {
@@ -224,11 +222,6 @@ public class SqlActionTest {
 
 	public static int testUpdateTable( Connection conn ) {
 
-		UserSAO			userForSetInput = null ;
-		UserSAO			userForWhereInput = null ;
-		UserOrderSAO	userOrderForSetInput = null ;
-		UserOrderSAO	userOrderForWhereInput = null ;
-		UserSAO			user = null ;
 		List<UserSAO>	userList = null ;
 		int				nret = 0 ;
 
@@ -295,7 +288,6 @@ public class SqlActionTest {
 
 	public static int testDeleteTable1( Connection conn ) {
 
-		UserSAO			user ;
 		int				nret = 0 ;
 
 		try {

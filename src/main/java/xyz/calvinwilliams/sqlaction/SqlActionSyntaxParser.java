@@ -29,6 +29,9 @@ public class SqlActionSyntaxParser {
 	
 	public String							otherTokens ;
 	
+	public SqlActionColumn					pageKeyColumn ;
+	public int								pageSize ;
+	
 	String									sqlaction ;
 	String									sql ;
 	String									statementSql ;
@@ -103,6 +106,8 @@ public class SqlActionSyntaxParser {
 				}
 				fromTableTokenList.add(fromTableToken);
 				continue;
+			} else if( token2.equalsIgnoreCase("PAGE_KEY") ) {
+				break;
 			} else {
 				//      1      2
 				// FROM table1 t1
@@ -146,6 +151,8 @@ public class SqlActionSyntaxParser {
 					}
 					fromTableToken.tableAliasName = token2 ;
 					fromTableTokenList.add(fromTableToken);
+					break;
+				} else if( token3.equalsIgnoreCase("PAGE_KEY") ) {
 					break;
 				} else {
 					return -154;
@@ -498,6 +505,9 @@ public class SqlActionSyntaxParser {
 					} else if( token1.equalsIgnoreCase("WHERE") || token1.equalsIgnoreCase("GROUP") || token1.equalsIgnoreCase("ORDER") || token1.equalsIgnoreCase("HAVING") ) {
 						token = token1 ;
 						break;
+					} else if( token1.equalsIgnoreCase("PAGE_KEY") ) {
+						token = token1 ;
+						break;
 					}
 				}
 			} else if( token.equalsIgnoreCase("WHERE") ) {
@@ -680,7 +690,7 @@ public class SqlActionSyntaxParser {
 						}
 					}
 					
-					if( token9.equalsIgnoreCase("AND") ) {
+					if( token9.equalsIgnoreCase("AND") || token9.equalsIgnoreCase("OR") ) {
 						;
 					} else {
 						// WHERE ... others
@@ -692,6 +702,66 @@ public class SqlActionSyntaxParser {
 				otherTokens = " " + token + lexicalParser.getRemainSqlTokens() ;
 				token = null ;
 				break;
+			} else if( token.equalsIgnoreCase("PAGE_KEY") ) {
+				//          1
+				// PAGE_KEY column
+				String token1 = lexicalParser.getSqlToken() ;
+				if( token1 == null ) {
+					System.out.println( "sql["+sql+"] invalid" );
+					return -71;
+				}
+				
+				pageKeyColumn = SqlActionColumn.findColumn( table.columnList, token1 ) ;
+				if( pageKeyColumn == null ) {
+					System.out.println( "\t" + "*** ERROR : column["+token1+"] not found in table["+table.tableName+"] on parsing sql["+sql+"]" );
+					return -72;
+				}
+				
+				//          1      2
+				// PAGE_KEY column PAGE_SIZE
+				String token2 = lexicalParser.getSqlToken() ;
+				if( token2 == null ) {
+					System.out.println( "sql["+sql+"] invalid" );
+					return -73;
+				}
+				
+				if( ! token2.equalsIgnoreCase("PAGE_SIZE") ) {
+					System.out.println( "sql["+sql+"] invalid" );
+					return -74;
+				}
+				
+				//          1      2         3
+				// PAGE_KEY column PAGE_SIZE size
+				String token3 = lexicalParser.getSqlToken() ;
+				if( token3 == null ) {
+					System.out.println( "sql["+sql+"] invalid" );
+					return -75;
+				}
+				
+				pageSize = Integer.parseInt(token3) ;
+				
+				//          1      2         3    4
+				// PAGE_KEY column PAGE_SIZE size PAGE_NUM
+				String token4 = lexicalParser.getSqlToken() ;
+				if( token4 == null ) {
+					System.out.println( "sql["+sql+"] invalid" );
+					return -76;
+				}
+				
+				if( ! token4.equalsIgnoreCase("PAGE_NUM") ) {
+					System.out.println( "sql["+sql+"] invalid" );
+					return -77;
+				}
+				
+				//          1      2         3    4        5
+				// PAGE_KEY column PAGE_SIZE size PAGE_NUM ?
+				String token5 = lexicalParser.getSqlToken() ;
+				if( token5 == null ) {
+					System.out.println( "sql["+sql+"] invalid" );
+					return -78;
+				}
+				
+				token = lexicalParser.getSqlToken() ;
 			} else {
 				System.out.println( "token["+token+"] invalid" );
 				return -9;

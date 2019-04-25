@@ -99,10 +99,10 @@ public class SqlActionTest {
 			}
 
 			for( UserSAO u : userListForSelectOutput ) {
-				System.out.print( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"]" );
+				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"]" );
 			}
 			for( UserOrderSAO o : userOrderListForSelectOutput ) {
-				System.out.println( " | " + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
+				System.out.println( "\t\t" + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
 			}
 
 			userListForSelectOutput = new LinkedList<UserSAO>() ;
@@ -116,10 +116,42 @@ public class SqlActionTest {
 			}
 
 			for( UserSAO u : userListForSelectOutput ) {
-				System.out.print( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"]" );
+				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"]" );
 			}
 			for( UserOrderSAO o : userOrderListForSelectOutput ) {
-				System.out.println( " | " + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
+				System.out.println( "\t\t" + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
+			}
+			
+			for( int pageNum=0 ; ; pageNum++ ) {
+				userOrderListForSelectOutput = new LinkedList<UserOrderSAO>() ;
+				nret = UserOrderSAO.SELECT_ALL_FROM_user_order_PAGEKEY_id( conn, userOrderListForSelectOutput, 3, pageNum ) ;
+				if( nret < 0 ) {
+					System.out.println( "\t" + "SELECT_ALL_FROM_user_order_PAGEKEY_id failed["+nret+"]" );
+					return -23;
+				} else {
+					System.out.println( "\t" + "SELECT_ALL_FROM_user_order_PAGEKEY_id ok , ["+userOrderListForSelectOutput.size()+"]records" );
+					if( userOrderListForSelectOutput.size() == 0 )
+						break;
+					for( UserOrderSAO o : userOrderListForSelectOutput ) {
+						System.out.println( "\t\t" + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
+					}
+				}
+			}
+			
+			for( int pageNum=0 ; ; pageNum++ ) {
+				userOrderListForSelectOutput = new LinkedList<UserOrderSAO>() ;
+				nret = UserOrderSAO.SELECT_ALL_FROM_user_order_WHERE_item_name_NE__PAGEKEY_id( conn, userOrderListForSelectOutput, 3, pageNum ) ;
+				if( nret < 0 ) {
+					System.out.println( "\t" + "SELECT_ALL_FROM_user_order_WHERE_item_name_NE__PAGEKEY_id failed["+nret+"]" );
+					return -24;
+				} else {
+					System.out.println( "\t" + "SELECT_ALL_FROM_user_order_WHERE_item_name_NE__PAGEKEY_id ok , ["+userOrderListForSelectOutput.size()+"]records" );
+					if( userOrderListForSelectOutput.size() == 0 )
+						break;
+					for( UserOrderSAO o : userOrderListForSelectOutput ) {
+						System.out.println( "\t\t" + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
+					}
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -193,17 +225,19 @@ public class SqlActionTest {
 				return -1;
 			}
 
-			userOrder = new UserOrderSAO() ;
-			userOrder.userId = userList.get(0).id ;
-			userOrder.itemName = "我的商品" ;
-			userOrder.amount = 100 ;
-			userOrder.totalPrice = 1000.00 ;
-			nret = UserOrderSAO.INSERT_INTO_user_order( conn, userOrder ) ;
-			if( nret < 0 ) {
-				System.out.println( "\t" + "INSERT_INTO_user_order failed["+nret+"]" );
-				return -21;
-			} else {
-				System.out.println( "\t" + "INSERT_INTO_user_order ok , rows["+nret+"] effected , id["+userOrder.id+"]" );
+			for( int i=0 ; i<10 ; i++ ) {
+				userOrder = new UserOrderSAO() ;
+				userOrder.userId = userList.get(0).id ;
+				userOrder.itemName = "我的商品"+i ;
+				userOrder.amount = 100+i ;
+				userOrder.totalPrice = 1000.00+i*10 ;
+				nret = UserOrderSAO.INSERT_INTO_user_order( conn, userOrder ) ;
+				if( nret < 0 ) {
+					System.out.println( "\t" + "INSERT_INTO_user_order failed["+nret+"]" );
+					return -21;
+				} else {
+					System.out.println( "\t" + "INSERT_INTO_user_order ok , rows["+nret+"] effected , id["+userOrder.id+"]" );
+				}
 			}
 
 			conn.commit();

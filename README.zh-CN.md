@@ -18,8 +18,9 @@ sqlaction - 自动生成JDBC代码的数据库持久层工具
     - [3.5. 元配置](#35-元配置)
         - [3.5.1. 自定义SQL动作方法名](#351-自定义sql动作方法名)
         - [3.5.2. 自动返回自增主键值](#352-自动返回自增主键值)
-        - [3.5.3. 拦截器](#353-拦截器)
-            - [3.5.3.1. SQL拦截器](#3531-sql拦截器)
+        - [3.5.3. 分页](#353-分页)
+        - [3.5.4. 拦截器](#354-拦截器)
+            - [3.5.4.1. SQL拦截器](#3541-sql拦截器)
 - [4. 为什么这么设计？](#4-为什么这么设计)
 - [5. 与MyBatis的开发量比较](#5-与mybatis的开发量比较)
 - [6. 与MyBatis的性能比较](#6-与mybatis的性能比较)
@@ -581,9 +582,104 @@ CREATE TABLE `user` (
 * 当在MySQL等有自增功能的DBMS中，`sqlaction`处理`sqlaction.conf.json`自动生成的JDBC代码中，在INSERT操作完后，追加生成调用"SELECT LAST_INSERT_ID()"的代码，取得自增主键值，赋值到主键字段中；
 * 当在Oracle环境等没有自增功能但有序列的DBMS中，`sqlaction`处理`sqlaction.conf.json`自动生成的JDBC代码中，在INSERT操作前，调用"select user_id_seq.nextval from dual;"取得序列值，赋值到主键字段中，然后再INSERT；
 
-### 3.5.3. 拦截器
+### 3.5.3. 分页
 
-#### 3.5.3.1. SQL拦截器
+在SQL动作追加元配置"@@PAGEKEY(...)"以自动生成分页代码，如：
+```
+"SELECT * FROM user_order @@PAGEKEY(id)" ,
+"SELECT * FROM user_order WHERE item_name<>'' @@PAGEKEY(id)" ,
+```
+
+自动生成的JAVA代码如下：
+```
+	// SELECT * FROM user_order @@PAGEKEY(id)
+	public static int SELECT_ALL_FROM_user_order_PAGEKEY_id( Connection conn, List<UserOrderSAO> userOrderListForSelectOutput, int _1_pageSize, int _2_pageNum ) throws Exception {
+		PreparedStatement prestmt = conn.prepareStatement( "SELECT * FROM user_order WHERE id>=(SELECT id FROM user_order ORDER BY id LIMIT ?,1) LIMIT ?" ) ;
+		prestmt.setInt( 1, _1_pageSize*_2_pageNum );
+		prestmt.setInt( 2, _1_pageSize );
+		ResultSet rs = prestmt.executeQuery() ;
+		while( rs.next() ) {
+			UserOrderSAO userOrder = new UserOrderSAO() ;
+			userOrder.id = rs.getInt( 1 ) ;
+			userOrder.userId = rs.getInt( 2 ) ;
+			userOrder.itemName = rs.getString( 3 ) ;
+			userOrder.amount = rs.getInt( 4 ) ;
+			userOrder.totalPrice = rs.getDouble( 5 ) ;
+			userOrderListForSelectOutput.add(userOrder) ;
+		}
+		rs.close();
+		prestmt.close();
+		return userOrderListForSelectOutput.size();
+	}
+
+	// SELECT * FROM user_order WHERE item_name<>'' @@PAGEKEY(id)
+	public static int SELECT_ALL_FROM_user_order_WHERE_item_name_NE__PAGEKEY_id( Connection conn, List<UserOrderSAO> userOrderListForSelectOutput, int _1_pageSize, int _2_pageNum ) throws Exception {
+		PreparedStatement prestmt = conn.prepareStatement( "SELECT * FROM user_order WHERE item_name<>'' AND id>=(SELECT id FROM user_order ORDER BY id LIMIT ?,1) LIMIT ?" ) ;
+		prestmt.setInt( 1, _1_pageSize*_2_pageNum );
+		prestmt.setInt( 2, _1_pageSize );
+		ResultSet rs = prestmt.executeQuery() ;
+		while( rs.next() ) {
+			UserOrderSAO userOrder = new UserOrderSAO() ;
+			userOrder.id = rs.getInt( 1 ) ;
+			userOrder.userId = rs.getInt( 2 ) ;
+			userOrder.itemName = rs.getString( 3 ) ;
+			userOrder.amount = rs.getInt( 4 ) ;
+			userOrder.totalPrice = rs.getDouble( 5 ) ;
+			userOrderListForSelectOutput.add(userOrder) ;
+		}
+		rs.close();
+		prestmt.close();
+		return userOrderListForSelectOutput.size();
+	}
+```
+
+应用代码如下：
+```
+			for( int pageNum=0 ; ; pageNum++ ) {
+				userOrderListForSelectOutput = new LinkedList<UserOrderSAO>() ;
+				nret = UserOrderSAO.SELECT_ALL_FROM_user_order_PAGEKEY_id( conn, userOrderListForSelectOutput, 3, pageNum ) ;
+				if( nret < 0 ) {
+					System.out.println( "\t" + "SELECT_ALL_FROM_user_order_PAGEKEY_id failed["+nret+"]" );
+					return -23;
+				} else {
+					System.out.println( "\t" + "SELECT_ALL_FROM_user_order_PAGEKEY_id ok , ["+userOrderListForSelectOutput.size()+"]records" );
+					if( userOrderListForSelectOutput.size() == 0 )
+						break;
+					for( UserOrderSAO o : userOrderListForSelectOutput ) {
+						System.out.println( "\t\t" + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
+					}
+				}
+			}
+			
+			for( int pageNum=0 ; ; pageNum++ ) {
+				userOrderListForSelectOutput = new LinkedList<UserOrderSAO>() ;
+				nret = UserOrderSAO.SELECT_ALL_FROM_user_order_WHERE_item_name_NE__PAGEKEY_id( conn, userOrderListForSelectOutput, 3, pageNum ) ;
+				if( nret < 0 ) {
+					System.out.println( "\t" + "SELECT_ALL_FROM_user_order_WHERE_item_name_NE__PAGEKEY_id failed["+nret+"]" );
+					return -24;
+				} else {
+					System.out.println( "\t" + "SELECT_ALL_FROM_user_order_WHERE_item_name_NE__PAGEKEY_id ok , ["+userOrderListForSelectOutput.size()+"]records" );
+					if( userOrderListForSelectOutput.size() == 0 )
+						break;
+					for( UserOrderSAO o : userOrderListForSelectOutput ) {
+						System.out.println( "\t\t" + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
+					}
+				}
+			}
+```
+
+目前只支持单表分页，SQL动作语法如下：
+```
+SELECT [*|column_name[,...]]
+    [ /* hint */ ]
+    FROM table_name
+    [ WHERE column_name [=|<>|>|>=|<|<=] [?|const|column_name2] [AND ...] ]
+    @@PAGEKEY(column_name)
+```
+
+### 3.5.4. 拦截器
+
+#### 3.5.4.1. SQL拦截器
 
 如果需要SQL真正执行前微调一下SQL（如分库分表修改hint），可加入拦截器"@@STATEMENT_INTERCEPTOR(拦截器方法名，填空则自动生成一个)"，配置示例：
 ```
@@ -1200,13 +1296,13 @@ Apache Maven
 <dependency>
   <groupId>xyz.calvinwilliams</groupId>
   <artifactId>sqlaction</artifactId>
-  <version>0.2.2.0</version>
+  <version>0.2.3.0</version>
 </dependency>
 ```
 
 Gradle Kotlin DSL
 ```
-compile("xyz.calvinwilliams:sqlaction:0.2.2.0")
+compile("xyz.calvinwilliams:sqlaction:0.2.3.0")
 ```
 
 # 9. 关于作者

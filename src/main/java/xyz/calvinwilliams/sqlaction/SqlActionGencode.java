@@ -16,7 +16,7 @@ import xyz.calvinwilliams.okjson.*;
 
 public class SqlActionGencode {
 
-	final private static String				SQLACTION_VERSION = "0.2.2.0" ;
+	final private static String				SQLACTION_VERSION = "0.2.3.0" ;
 	
 	final public static String				SELECT_COUNT___ = "count(" ;
 	final private static String				COUNT___ = "_count_" ;
@@ -279,6 +279,25 @@ public class SqlActionGencode {
 						parser.selectKey = sqlaction.substring( beginMetaData+12, endMetaData ) ;
 					}
 					
+					beginMetaData = sqlaction.indexOf( "@@PAGEKEY(" ) ;
+					if( beginMetaData >= 0 ) {
+						endMetaData = sqlaction.indexOf( ")", beginMetaData ) ;
+						if( endMetaData == -1 ) {
+							System.out.println( "*** ERROR : sql["+parser.sql+"] invalid" );
+							return;
+						}
+						String pageKey = sqlaction.substring( beginMetaData+10, endMetaData ) ;
+						parser.pageKeyColumn = SqlActionColumn.findColumn( table.columnList , pageKey ) ;
+						if( parser.pageKeyColumn == null ) {
+							System.out.println( "\t" + "*** ERROR : @@PAGEKEY["+pageKey+"] not found in table["+table.tableName+"]" );
+							return;
+						}
+					}
+					
+					if( parser.pageKeyColumn != null ) {
+						parser.methodName = parser.methodName + "_PAGEKEY_" + parser.pageKeyColumn.columnName ;
+					}
+					
 					System.out.println( "Parse sql action ["+sqlaction+"]" );
 					System.out.println( "\t" + "                           sql["+parser.sql+"]" );
 					System.out.println( "\t" + "                    methodName["+parser.methodName+"]" );
@@ -422,12 +441,13 @@ public class SqlActionGencode {
 			methodParameters.append( ", "+ct.column.javaPropertyType+" _"+columnIndex+"_"+ct.column.javaPropertyName );
 		}
 		if( parser.pageKeyColumn != null ) {
-			methodParameters.append( ", "+parser.pageKeyColumn.javaPropertyType+" _"+columnIndex+"_"+parser.pageKeyColumn.javaPropertyName );
+			columnIndex++;
+			methodParameters.append( ", int _"+columnIndex+"_pageSize, int _"+(columnIndex+1)+"_pageNum" );
 			
-			if( parser.whereColumnTokenList.size() > 0 ) {
-				parser.statementSql += "AND "+parser.pageKeyColumn.columnName+">=(SELECT "+parser.pageKeyColumn+" FROM "+table.tableName+" ORDER BY "+parser.pageKeyColumn+" LIMIT "+parser.pageSize+"*?,1) LIMIT ?" ;
+			if( parser.hasWhereStatement ) {
+				parser.statementSql += " AND "+parser.pageKeyColumn.columnName+">=(SELECT "+parser.pageKeyColumn.columnName+" FROM "+table.tableName+" ORDER BY "+parser.pageKeyColumn.columnName+" LIMIT ?,1) LIMIT ?" ;
 			} else {
-				parser.statementSql += "WHERE "+parser.pageKeyColumn.columnName+">=(SELECT "+parser.pageKeyColumn+" FROM "+table.tableName+" ORDER BY "+parser.pageKeyColumn+" LIMIT "+parser.pageSize+"*?,1) LIMIT ?" ;
+				parser.statementSql += " WHERE "+parser.pageKeyColumn.columnName+">=(SELECT "+parser.pageKeyColumn.columnName+" FROM "+table.tableName+" ORDER BY "+parser.pageKeyColumn.columnName+" LIMIT ?,1) LIMIT ?" ;
 			}
 		}
 		
@@ -448,7 +468,7 @@ public class SqlActionGencode {
 			sauFileBuffer.append( "\t\t" + "return statementSql;\n" );
 			sauFileBuffer.append( "\t" + "}\n" );
 		}
-		if( parser.whereColumnTokenList.size() > 0 ) {
+		if( parser.whereColumnTokenList.size() > 0 || parser.pageKeyColumn != null ) {
 			saoFileBuffer.append( "\t" + "public static int " + parser.methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
 			if( parser.statementInterceptorMethodName != null ) {
 				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( "+table.javaSauClassName+"."+parser.statementInterceptorMethodName+"(\""+parser.statementSql+"\") ) ;\n" );
@@ -464,20 +484,18 @@ public class SqlActionGencode {
 					return nret;
 				}
 			}
+			if( parser.pageKeyColumn != null ) {
+				columnIndex++;
+				int pageColumnIndex = columnIndex ;
+				saoFileBuffer.append("\t\t").append("prestmt.setInt( ").append(columnIndex).append(", ").append("_"+pageColumnIndex+"_pageSize*_"+(pageColumnIndex+1)+"_pageNum").append(" );\n");
+				columnIndex++;
+				saoFileBuffer.append("\t\t").append("prestmt.setInt( ").append(columnIndex).append(", ").append("_"+(pageColumnIndex)+"_pageSize").append(" );\n");
+			}
 		} else {
 			columnIndex = 0 ;
 			saoFileBuffer.append( "\t" + "public static int " + parser.methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
 		}
-		if( parser.pageKeyColumn != null ) {
-			for( int i=0 ; i < 2 ; i++ ) {
-				nret = SqlActionColumn.dumpWhereInputColumn( columnIndex, parser.pageKeyColumn, "_"+columnIndex+"_"+parser.pageKeyColumn.javaPropertyName, saoFileBuffer ) ;
-				if( nret != 0 ) {
-					System.out.println( "DumpPageInputColumn["+table.tableName+"]["+parser.pageKeyColumn+"] failed["+nret+"]" );
-					return nret;
-				}
-			}
-		}
-		if( parser.whereColumnTokenList.size() > 0 ) {
+		if( parser.whereColumnTokenList.size() > 0 || parser.pageKeyColumn != null ) {
 			saoFileBuffer.append( "\t\t" + "ResultSet rs = prestmt.executeQuery() ;\n" );
 		} else {
 			saoFileBuffer.append( "\t\t" + "Statement stmt = conn.createStatement() ;\n" );
@@ -511,7 +529,7 @@ public class SqlActionGencode {
 		}
 		saoFileBuffer.append( "\t\t" + "}\n" );
 		saoFileBuffer.append( "\t\t" + "rs.close();\n" );
-		if( parser.whereColumnTokenList.size() > 0 ) {
+		if( parser.whereColumnTokenList.size() > 0 || parser.pageKeyColumn != null ) {
 			saoFileBuffer.append( "\t\t" + "prestmt.close();\n" );
 		} else {
 			saoFileBuffer.append( "\t\t" + "stmt.close();\n" );

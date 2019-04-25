@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>xyz.calvinwilliams</groupId>
 	<artifactId>sqlaction</artifactId>
-	<version>0.2.2.0</version>
+	<version>0.2.3.0</version>
 	<dependencies>
 		<dependency>
 			<groupId>xyz.calvinwilliams</groupId>
@@ -19,8 +19,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.2.5.jre7</version>
-			<type>bundle</type>
+			<version>42.2.5</version>
 		</dependency>
 	</dependencies>
 

@@ -1,16 +1,19 @@
+0.2.4.0		2019-04-27		calvin
+			* 新增支持PostgreSQL数据库
+
 0.2.3.0		2019-04-25		calvin
-			* 新增元配置"@@PAGEKEY(...)"用于自动生成分页代码
+			* 新增元配罄1�7"@@PAGEKEY(...)"用于自动生成分页代码
 
 0.2.2.0		2019-04-20		calvin
-			* 重构了内部属性存储
-			* 新增元配置"@@SELECTKEY(...)"用于返回插入的主键值
+			* 重构了内部属性存傄1�7
+			* 新增元配罄1�7"@@SELECTKEY(...)"用于返回插入的主键��1�7
 			* 修正了自动生成JDBC代码中的Statement和ResultSet对象泄露问题
 
 0.2.1.0		2019-04-17		calvin
-			* 新增元配置"@@STATEMENT_INTERCEPTOR(...)"用于指定SQL拦截器方法名
+			* 新增元配罄1�7"@@STATEMENT_INTERCEPTOR(...)"用于指定SQL拦截器方法名
 
 0.2.0.0		2019-04-14		calvin
-			* 重整了项目露露结构
+			* 重整了项目露露结构1�7
 
 0.1.1.0		2019-04-07		calvin
 			* SQL动作配置文件支持SQL折行
@@ -18,10 +21,10 @@
 0.1.0.0		2019-04-06		calvin
 			* 重构了语法分析器
 			* 调整了自动生成方法名原型
-			* 开始写文档
+			* 弢�始写文档
 			
 0.0.8.0		2019-04-03		calvin
-			* 支持元配置"@@METHOD(...)"用于指定自定义方法名
+			* 支持元配罄1�7"@@METHOD(...)"用于指定自定义方法名
 			
 0.0.7.0		2019-04-02		calvin
 			* 支持hint
@@ -32,19 +35,19 @@
 
 0.0.5.0		2019-03-31		calvin
 			* 支持在dbserver.conf.json中用户自定义数据类型
-			  ，比如MySQL的"decimal(12,2)"对应jdbc的"SQLACTION_DATA_TYPE_DECIMAL"
-			  通过配置可转定义为jdbc的"SQLACTION_DATA_TYPE_DOUBLE"，自动生成JAVA实体属性类型为"double"
+			  ，比如MySQL的1�7"decimal(12,2)"对应jdbc的1�7"SQLACTION_DATA_TYPE_DECIMAL"
+			  通过配置可转定义为jdbc的1�7"SQLACTION_DATA_TYPE_DOUBLE"，自动生成JAVA实体属��类型为"double"
 
 0.0.4.0		2019-03-31		calvin
 			* SELECT后支持COUNT(*)
 			* FROM后支持GROUP、HAVING、ORDER
 
 0.0.3.0		2019-03-30		calvin
-			* 调整了增删改查方法名和原型
+			* 调整了增删改查方法名和原垄1�7
 			* 支持SELECT多表连接查询
-			* 支持表别名功能
-			* 支持单个目录里同时生成多个表实体类
-			* 支持SET和WHERE直接写值常量
+			* 支持表别名功胄1�7
+			* 支持单个目录里同时生成多个表实体籄1�7
+			* 支持SET和WHERE直接写��常釄1�7
 
 0.0.2.0		2019-03-26		calvin
 			* 实现单表的增删改查jdbc代码自动生成

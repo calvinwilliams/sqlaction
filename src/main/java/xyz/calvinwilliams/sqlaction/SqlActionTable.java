@@ -43,6 +43,10 @@ public class SqlActionTable {
 			prestmt = conn.prepareStatement("SELECT table_name,table_type FROM information_schema.TABLES WHERE table_schema=? AND table_name=?") ;
 			prestmt.setString( 1, database.databaseName );
 			prestmt.setString( 2, tableName );
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL ) {
+			prestmt = conn.prepareStatement("SELECT table_name,table_type FROM information_schema.TABLES WHERE table_catalog=? AND table_name=?") ;
+			prestmt.setString( 1, database.databaseName );
+			prestmt.setString( 2, tableName );
 		}
 		rs = prestmt.executeQuery() ;
 		rs.next();
@@ -89,7 +93,7 @@ public class SqlActionTable {
 			
 			for( int n = 0 ; n < depth ; n++ )
 				System.out.print( "\t" );
-			System.out.println( "tableName["+t.tableName+"] primaryKey["+(t.primaryKey==null?null:t.primaryKey.columnName)+"] javaObjectName["+t.javaObjectName+"] primaryKey.javaPropertyName["+t.primaryKey.javaPropertyName+"]" );
+			System.out.println( "tableName["+t.tableName+"] primaryKey["+(t.primaryKey==null?"null":t.primaryKey.columnName)+"] javaObjectName["+t.javaObjectName+"]" );
 			
 			SqlActionColumn.travelAllColumnsMetadata( dbserverConf, sqlactionConf, t.columnList, depth+1 );
 			

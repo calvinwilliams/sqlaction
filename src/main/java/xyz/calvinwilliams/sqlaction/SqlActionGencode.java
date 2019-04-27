@@ -16,7 +16,7 @@ import xyz.calvinwilliams.okjson.*;
 
 public class SqlActionGencode {
 
-	final private static String				SQLACTION_VERSION = "0.2.3.0" ;
+	final private static String				SQLACTION_VERSION = "0.2.4.0" ;
 	
 	final public static String				SELECT_COUNT___ = "count(" ;
 	final private static String				COUNT___ = "_count_" ;
@@ -72,11 +72,13 @@ public class SqlActionGencode {
 			if( dbserverConf.dbms == null ) {
 				if( dbserverConf.url.indexOf("mysql") >= 0 )
 					dbserverConf.dbms = SqlActionDatabase.DBMS_MYSQL ;
+				else if( dbserverConf.url.indexOf("postgresql") >= 0 )
+					dbserverConf.dbms = SqlActionDatabase.DBMS_POSTGRESQL ;
 			}
 			
 			if( dbserverConf.dbms == null ) {
 				System.out.println( "dbserverConf.dbms null" );
-			} else if( dbserverConf.dbms != SqlActionDatabase.DBMS_MYSQL ) {
+			} else if( dbserverConf.dbms != SqlActionDatabase.DBMS_MYSQL && dbserverConf.dbms != SqlActionDatabase.DBMS_POSTGRESQL ) {
 				System.out.println( "dbserverConf.dbms["+dbserverConf.dbms+"] not support" );
 				return;
 			}
@@ -269,6 +271,16 @@ public class SqlActionGencode {
 							parser.statementInterceptorMethodName = "STATEMENT_INTERCEPTOR_for_"+parser.methodName ;
 					}
 					
+					beginMetaData = sqlaction.indexOf( "@@SELECTSEQ(" ) ;
+					if( beginMetaData >= 0 ) {
+						endMetaData = sqlaction.indexOf( ")", beginMetaData ) ;
+						if( endMetaData == -1 ) {
+							System.out.println( "*** ERROR : sql["+parser.sql+"] invalid" );
+							return;
+						}
+						parser.selectSeq = sqlaction.substring( beginMetaData+12, endMetaData ) ;
+					}
+					
 					beginMetaData = sqlaction.indexOf( "@@SELECTKEY(" ) ;
 					if( beginMetaData >= 0 ) {
 						endMetaData = sqlaction.indexOf( ")", beginMetaData ) ;
@@ -277,6 +289,11 @@ public class SqlActionGencode {
 							return;
 						}
 						parser.selectKey = sqlaction.substring( beginMetaData+12, endMetaData ) ;
+						parser.selectKeyColumn = SqlActionColumn.findColumn( table.columnList , parser.selectKey ) ;
+						if( parser.selectKeyColumn == null ) {
+							System.out.println( "\t" + "*** ERROR : @@PAGEKEY["+parser.selectKey+"] not found in table["+table.tableName+"]" );
+							return;
+						}
 					}
 					
 					beginMetaData = sqlaction.indexOf( "@@PAGEKEY(" ) ;
@@ -286,10 +303,10 @@ public class SqlActionGencode {
 							System.out.println( "*** ERROR : sql["+parser.sql+"] invalid" );
 							return;
 						}
-						String pageKey = sqlaction.substring( beginMetaData+10, endMetaData ) ;
-						parser.pageKeyColumn = SqlActionColumn.findColumn( table.columnList , pageKey ) ;
+						parser.pageKey = sqlaction.substring( beginMetaData+10, endMetaData ) ;
+						parser.pageKeyColumn = SqlActionColumn.findColumn( table.columnList , parser.pageKey ) ;
 						if( parser.pageKeyColumn == null ) {
-							System.out.println( "\t" + "*** ERROR : @@PAGEKEY["+pageKey+"] not found in table["+table.tableName+"]" );
+							System.out.println( "\t" + "*** ERROR : @@PAGEKEY["+parser.pageKey+"] not found in table["+table.tableName+"]" );
 							return;
 						}
 					}
@@ -444,10 +461,14 @@ public class SqlActionGencode {
 			columnIndex++;
 			methodParameters.append( ", int _"+columnIndex+"_pageSize, int _"+(columnIndex+1)+"_pageNum" );
 			
-			if( parser.hasWhereStatement ) {
-				parser.statementSql += " AND "+parser.pageKeyColumn.columnName+">=(SELECT "+parser.pageKeyColumn.columnName+" FROM "+table.tableName+" ORDER BY "+parser.pageKeyColumn.columnName+" LIMIT ?,1) LIMIT ?" ;
-			} else {
-				parser.statementSql += " WHERE "+parser.pageKeyColumn.columnName+">=(SELECT "+parser.pageKeyColumn.columnName+" FROM "+table.tableName+" ORDER BY "+parser.pageKeyColumn.columnName+" LIMIT ?,1) LIMIT ?" ;
+			if( dbserverConf.dbms == SqlActionDatabase.DBMS_MYSQL ) {
+				if( parser.hasWhereStatement ) {
+					parser.statementSql += " AND "+parser.pageKeyColumn.columnName+">=(SELECT "+parser.pageKeyColumn.columnName+" FROM "+table.tableName+" ORDER BY "+parser.pageKeyColumn.columnName+" LIMIT ?,1) LIMIT ?" ;
+				} else {
+					parser.statementSql += " WHERE "+parser.pageKeyColumn.columnName+">=(SELECT "+parser.pageKeyColumn.columnName+" FROM "+table.tableName+" ORDER BY "+parser.pageKeyColumn.columnName+" LIMIT ?,1) LIMIT ?" ;
+				}
+			} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL ) {
+				parser.statementSql += " OFFSET ? LIMIT ?" ;
 			}
 		}
 		
@@ -468,8 +489,8 @@ public class SqlActionGencode {
 			sauFileBuffer.append( "\t\t" + "return statementSql;\n" );
 			sauFileBuffer.append( "\t" + "}\n" );
 		}
+		saoFileBuffer.append( "\t" + "public static int " + parser.methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
 		if( parser.whereColumnTokenList.size() > 0 || parser.pageKeyColumn != null ) {
-			saoFileBuffer.append( "\t" + "public static int " + parser.methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
 			if( parser.statementInterceptorMethodName != null ) {
 				saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( "+table.javaSauClassName+"."+parser.statementInterceptorMethodName+"(\""+parser.statementSql+"\") ) ;\n" );
 			} else {
@@ -491,11 +512,6 @@ public class SqlActionGencode {
 				columnIndex++;
 				saoFileBuffer.append("\t\t").append("prestmt.setInt( ").append(columnIndex).append(", ").append("_"+(pageColumnIndex)+"_pageSize").append(" );\n");
 			}
-		} else {
-			columnIndex = 0 ;
-			saoFileBuffer.append( "\t" + "public static int " + parser.methodName.toString() + "( "+methodParameters.toString()+" ) throws Exception {\n" );
-		}
-		if( parser.whereColumnTokenList.size() > 0 || parser.pageKeyColumn != null ) {
 			saoFileBuffer.append( "\t\t" + "ResultSet rs = prestmt.executeQuery() ;\n" );
 		} else {
 			saoFileBuffer.append( "\t\t" + "Statement stmt = conn.createStatement() ;\n" );
@@ -554,24 +570,26 @@ public class SqlActionGencode {
 		
 		columnIndex = 0 ;
 		for( SqlActionColumn c : table.columnList ) {
-			if( c.isAutoIncrement == false ) {
-				columnIndex++;
-				if( columnIndex > 1 )
-					statementSqlBuilder.append( "," );
-				statementSqlBuilder.append( c.columnName );
-			}
+			if( dbserverConf.dbms == SqlActionDatabase.DBMS_MYSQL && c.isAutoIncrement == true )
+				continue;
+			
+			columnIndex++;
+			if( columnIndex > 1 )
+				statementSqlBuilder.append( "," );
+			statementSqlBuilder.append( c.columnName );
 		}
 		
 		statementSqlBuilder.append( ") VALUES (" );
 		
 		columnIndex = 0 ;
 		for( SqlActionColumn c : table.columnList ) {
-			if( c.isAutoIncrement == false ) {
-				columnIndex++;
-				if( columnIndex > 1 )
-					statementSqlBuilder.append( "," );
-				statementSqlBuilder.append( "?" );
-			}
+			if( dbserverConf.dbms == SqlActionDatabase.DBMS_MYSQL && c.isAutoIncrement == true )
+				continue;
+			
+			columnIndex++;
+			if( columnIndex > 1 )
+				statementSqlBuilder.append( "," );
+			statementSqlBuilder.append( "?" );
 		}
 		
 		statementSqlBuilder.append( ")" );
@@ -598,10 +616,26 @@ public class SqlActionGencode {
 			sauFileBuffer.append( "\t" + "}\n" );
 		}
 		saoFileBuffer.append( "\t" + "public static int " + parser.methodName + "( "+methodParameters.toString()+" ) throws Exception {\n" );
+		saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt ;\n" );
+		saoFileBuffer.append( "\t\t" + "Statement stmt ;\n" );
+		saoFileBuffer.append( "\t\t" + "ResultSet rs ;\n" );
+		if( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL && parser.selectSeq != null && parser.selectKey != null ) {
+			saoFileBuffer.append( "\t\t" + "stmt = conn.createStatement() ;\n" );
+			saoFileBuffer.append( "\t\t" + "rs = stmt.executeQuery( \"SELECT NEXTVAL('"+parser.selectSeq+"')\" ) ;\n" );
+			saoFileBuffer.append( "\t\t" + "rs.next();\n" );
+			nret = SqlActionColumn.dumpSelectOutputColumn( "\t\t", 1, parser.selectKeyColumn, table.javaObjectName+"."+parser.selectKeyColumn.javaPropertyName, saoFileBuffer ) ;
+			if( nret != 0 ) {
+				System.out.println( "DumpSelectOutputColumn["+table.tableName+"]["+parser.selectKeyColumn.columnName+"] failed["+nret+"]" );
+				return nret;
+			}
+			saoFileBuffer.append( "\t\t" + "rs.close();\n" );
+			saoFileBuffer.append( "\t\t" + "stmt.close();\n" );
+			saoFileBuffer.append( "\t\t" + "\n" );
+		}
 		if( parser.statementInterceptorMethodName != null ) {
-			saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( "+table.javaSauClassName+"."+parser.statementInterceptorMethodName+"(\""+parser.statementSql+"\") ) ;\n" );
+			saoFileBuffer.append( "\t\t" + "prestmt = conn.prepareStatement( "+table.javaSauClassName+"."+parser.statementInterceptorMethodName+"(\""+parser.statementSql+"\") ) ;\n" );
 		} else {
-			saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt = conn.prepareStatement( \""+statementSqlBuilder+"\" ) ;\n" );
+			saoFileBuffer.append( "\t\t" + "prestmt = conn.prepareStatement( \""+statementSqlBuilder+"\" ) ;\n" );
 		}
 		columnIndex = 0 ;
 		for( SqlActionColumn c : table.columnList ) {
@@ -614,27 +648,33 @@ public class SqlActionGencode {
 				}
 			}
 		}
-		if( parser.selectKey == null || table.primaryKey == null ) {
-			saoFileBuffer.append( "\t\t" + "int count = prestmt.executeUpdate() ;\n" );
-			saoFileBuffer.append( "\t\t" + "prestmt.close();\n" );
-			saoFileBuffer.append( "\t\t" + "return count;\n" );
-		} else {
-			saoFileBuffer.append( "\t\t" + "int count = prestmt.executeUpdate() ;\n" );
-			saoFileBuffer.append( "\t\t" + "prestmt.close();\n" );
-			saoFileBuffer.append( "\t\t" + "if( count == 0 )\n" );
-			saoFileBuffer.append( "\t\t" + "	return 0;\n" );
-			saoFileBuffer.append( "\t\t" + "\n" );
-			saoFileBuffer.append( "\t\t" + "Statement stmt = conn.createStatement() ;\n" );
-			saoFileBuffer.append( "\t\t" + "ResultSet rs = stmt.executeQuery( \"SELECT LAST_INSERT_ID()\" ) ;\n" );
-			saoFileBuffer.append( "\t\t" + "rs.next();\n" );
-			nret = SqlActionColumn.dumpSelectOutputColumn( "\t\t", 1, table.primaryKey, table.javaObjectName+"."+table.primaryKey.javaPropertyName, saoFileBuffer ) ;
-			if( nret != 0 ) {
-				System.out.println( "DumpSelectOutputColumn["+table.tableName+"]["+table.primaryKey.columnName+"] failed["+nret+"]" );
-				return nret;
+		if( dbserverConf.dbms == SqlActionDatabase.DBMS_MYSQL ) {
+			if( parser.selectKeyColumn == null ) {
+				saoFileBuffer.append( "\t\t" + "int count = prestmt.executeUpdate() ;\n" );
+				saoFileBuffer.append( "\t\t" + "prestmt.close();\n" );
+				saoFileBuffer.append( "\t\t" + "return count;\n" );
+			} else {
+				saoFileBuffer.append( "\t\t" + "int count = prestmt.executeUpdate() ;\n" );
+				saoFileBuffer.append( "\t\t" + "prestmt.close();\n" );
+				saoFileBuffer.append( "\t\t" + "if( count != 1 )\n" );
+				saoFileBuffer.append( "\t\t" + "	return count;\n" );
+				saoFileBuffer.append( "\t\t" + "\n" );
+				saoFileBuffer.append( "\t\t" + "stmt = conn.createStatement() ;\n" );
+				saoFileBuffer.append( "\t\t" + "rs = stmt.executeQuery( \"SELECT LAST_INSERT_ID()\" ) ;\n" );
+				saoFileBuffer.append( "\t\t" + "rs.next();\n" );
+				nret = SqlActionColumn.dumpSelectOutputColumn( "\t\t", 1, parser.selectKeyColumn, table.javaObjectName+"."+parser.selectKeyColumn.javaPropertyName, saoFileBuffer ) ;
+				if( nret != 0 ) {
+					System.out.println( "DumpSelectOutputColumn["+table.tableName+"]["+parser.selectKeyColumn.columnName+"] failed["+nret+"]" );
+					return nret;
+				}
+				saoFileBuffer.append( "\t\t" + "rs.close();\n" );
+				saoFileBuffer.append( "\t\t" + "stmt.close();\n" );
+				saoFileBuffer.append( "\t\t" + "\n" );
+				saoFileBuffer.append( "\t\t" + "return count;\n" );
 			}
-			saoFileBuffer.append( "\t\t" + "rs.close();\n" );
-			saoFileBuffer.append( "\t\t" + "stmt.close();\n" );
-			saoFileBuffer.append( "\t\t" + "\n" );
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL ) {
+			saoFileBuffer.append( "\t\t" + "int count = prestmt.executeUpdate() ;\n" );
+			saoFileBuffer.append( "\t\t" + "prestmt.close();\n" );
 			saoFileBuffer.append( "\t\t" + "return count;\n" );
 		}
 		saoFileBuffer.append( "\t" + "}\n" );

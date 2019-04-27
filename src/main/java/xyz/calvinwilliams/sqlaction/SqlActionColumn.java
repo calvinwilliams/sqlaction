@@ -39,7 +39,7 @@ public class SqlActionColumn {
 		return null;
 	}
 	
-	public static int getColumnMetadataFromResultSet( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionDatabase database, SqlActionTable table, SqlActionColumn column, ResultSet rs ) throws Exception {
+	public static int getColumnMetadataFromResultSet_for_MYSQL( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionDatabase database, SqlActionTable table, SqlActionColumn column, ResultSet rs ) throws Exception {
 		String		sourceDataType ;
 		String		sourceDataTypeAndLength ;
 		String		userDefineDataTypeAndLength ;
@@ -181,6 +181,102 @@ public class SqlActionColumn {
 		return 0;
 	}
 	
+	public static int getColumnMetadataFromResultSet_for_POSTGRESQL( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionDatabase database, SqlActionTable table, SqlActionColumn column, ResultSet rs ) throws Exception {
+		String		sourceDataType ;
+		String		sourceDataTypeAndLength ;
+		String		userDefineDataTypeAndLength ;
+		
+		column.columnName = rs.getString(1) ;
+		column.columnDefault = rs.getString(2) ;
+		if( rs.getString(3).equals("NO") )
+			column.isNullable = false ;
+		else
+			column.isNullable = true ;
+		sourceDataType = rs.getString(4) ;
+		column.columnMaximumLength = rs.getLong(5);
+		column.numericPrecision = rs.getInt(6) ;
+		column.numericScale = rs.getInt(7) ;
+		sourceDataTypeAndLength = sourceDataType+","+column.columnMaximumLength+","+column.numericPrecision+","+column.numericScale ;
+		userDefineDataTypeAndLength = getUserDefineDataType( dbserverConf, sourceDataTypeAndLength ) ;
+		if( userDefineDataTypeAndLength != null ) {
+			String[] sa = userDefineDataTypeAndLength.split(",") ;
+			sourceDataType = sa[0] ;
+			if( ! sa[1].equals("*") )
+				column.columnMaximumLength = Long.parseLong(sa[1]) ;
+			if( ! sa[2].equals("*") )
+				column.numericPrecision = Integer.parseInt(sa[2]) ;
+			if( ! sa[3].equals("*") )
+				column.numericScale = Integer.parseInt(sa[3]) ;
+		}
+		if( sourceDataType.equalsIgnoreCase("boolean") ) {
+				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_BIT ;
+				column.javaPropertyType = "boolean" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("smallint") ) {
+				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_SMALLINT ;
+				column.javaPropertyType = "short" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("integer") ) {
+				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_INTEGER ;
+				column.javaPropertyType = "int" ;
+				column.javaDefineTabsBetweenTypeAndName = 4 ;
+		} else if( sourceDataType.equalsIgnoreCase("bigint") ) {
+				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_BIGINT ;
+				column.javaPropertyType = "long" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("real") ) {
+				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_REAL ;
+				column.javaPropertyType = "float" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("double precision") ) {
+				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_DOUBLE ;
+				column.javaPropertyType = "double" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("decimal") ) {
+				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_DECIMAL ;
+				column.javaPropertyType = "BigDecimal" ;
+				column.javaDefineTabsBetweenTypeAndName = 2 ;
+		} else if( sourceDataType.equalsIgnoreCase("numeric") ) {
+				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_NUMBERIC ;
+				column.javaPropertyType = "BigDecimal" ;
+				column.javaDefineTabsBetweenTypeAndName = 2 ;
+		} else if( sourceDataType.equalsIgnoreCase("character") ) {
+				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_CHAR ;
+				column.javaPropertyType = "String" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("character varying") ) {
+				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_VARCHAR ;
+				column.javaPropertyType = "String" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("text") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_VARCHAR ;
+			column.javaPropertyType = "String" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("date") ) {
+				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_DATE ;
+				column.javaPropertyType = "java.sql.Date" ;
+				column.javaDefineTabsBetweenTypeAndName = 1 ;
+		} else if( sourceDataType.equalsIgnoreCase("time") ) {
+				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_TIME ;
+				column.javaPropertyType = "java.sql.Time" ;
+				column.javaDefineTabsBetweenTypeAndName = 1 ;
+		} else if( sourceDataType.equalsIgnoreCase("timestamp") ) {
+				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_TIMESTAMP ;
+				column.javaPropertyType = "Timestamp" ;
+				column.javaDefineTabsBetweenTypeAndName = 2 ;
+		} else if( sourceDataType.equalsIgnoreCase("bytea") ) {
+				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_VARBINARY ;
+				column.javaPropertyType = "byte[]" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else {
+				column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_VARCHAR ;
+				column.javaPropertyType = "String" ;
+				column.javaDefineTabsBetweenTypeAndName = 3 ;
+		}
+		
+		return 0;
+	}
+	
 	public static int fetchAllColumnsMetadataInTable( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception  {
 		PreparedStatement	prestmt = null ;
 		ResultSet			rs ;
@@ -193,14 +289,22 @@ public class SqlActionColumn {
 			prestmt = conn.prepareStatement("SELECT column_name,column_default,is_nullable,data_type,character_maximum_length,numeric_precision,numeric_scale,column_key,extra,column_comment FROM information_schema.COLUMNS WHERE table_schema=? AND table_name=? ORDER BY ordinal_position ASC") ;
 			prestmt.setString( 1, database.databaseName );
 			prestmt.setString( 2, table.tableName );
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL ) {
+			prestmt = conn.prepareStatement("SELECT column_name,column_default,is_nullable,data_type,character_maximum_length,numeric_precision,numeric_scale FROM information_schema.COLUMNS WHERE table_catalog=? AND table_name=? ORDER BY ordinal_position ASC") ;
+			prestmt.setString( 1, database.databaseName );
+			prestmt.setString( 2, table.tableName );
 		}
 		rs = prestmt.executeQuery() ;
 		while( rs.next() ) {
 			column = new SqlActionColumn() ;
 			
-			nret = getColumnMetadataFromResultSet( dbserverConf, sqlactionConf, database, table, column, rs );
+			if( dbserverConf.dbms == SqlActionDatabase.DBMS_MYSQL ) {
+				nret = getColumnMetadataFromResultSet_for_MYSQL( dbserverConf, sqlactionConf, database, table, column, rs );
+			} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL ) {
+				nret = getColumnMetadataFromResultSet_for_POSTGRESQL( dbserverConf, sqlactionConf, database, table, column, rs );
+			}
 			if( nret != 0 ) {
-				System.out.println( "GetColumnFromResultSet failed["+nret+"] , database["+database.databaseName+"] table["+table.tableName+"] column["+column.columnName+"]" );
+				System.out.println( "GetColumnFromResultSet_for__ failed["+nret+"] , database["+database.databaseName+"] table["+table.tableName+"] column["+column.columnName+"]" );
 				return nret;
 			}
 			

@@ -30,6 +30,7 @@ public class SqlActionSyntaxParser {
 	
 	public String							otherTokens ;
 	
+	String									pageKey ;
 	public SqlActionColumn					pageKeyColumn ;
 	
 	String									sqlaction ;
@@ -37,7 +38,9 @@ public class SqlActionSyntaxParser {
 	String									statementSql ;
 	String									methodName ;
 	String									statementInterceptorMethodName ;
+	String									selectSeq ;
 	String									selectKey ;
+	public SqlActionColumn					selectKeyColumn ;
 	
 	public int parseStatementSyntax_FROM( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception {
 		SqlActionLexicalParser	lexicalParser ;

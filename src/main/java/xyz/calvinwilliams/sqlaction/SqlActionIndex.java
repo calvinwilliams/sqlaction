@@ -29,6 +29,8 @@ public class SqlActionIndex {
 			prestmt = conn.prepareStatement("SELECT non_unique,index_name FROM information_schema.STATISTICS WHERE table_schema=? AND table_name=? AND seq_in_index=1 ORDER BY index_name ASC") ;
 			prestmt.setString( 1, database.databaseName );
 			prestmt.setString( 2, table.tableName );
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL ) {
+			return 0;
 		}
 		rs = prestmt.executeQuery() ;
 		while( rs.next() ) {
@@ -72,7 +74,7 @@ public class SqlActionIndex {
 				}
 				rs = prestmt.executeQuery() ;
 				while( rs.next() ) {
-					nret = SqlActionColumn.getColumnMetadataFromResultSet( dbserverConf, sqlactionConf, database, table, c, rs );
+					nret = SqlActionColumn.getColumnMetadataFromResultSet_for_MYSQL( dbserverConf, sqlactionConf, database, table, c, rs );
 					if( nret != 0 ) {
 						System.out.println( "GetColumnFromResultSet failed["+nret+"] , database["+database.databaseName+"] table["+table.tableName+"] column["+c.columnName+"]" );
 						return nret;

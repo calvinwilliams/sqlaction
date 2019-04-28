@@ -74,11 +74,13 @@ public class SqlActionGencode {
 					dbserverConf.dbms = SqlActionDatabase.DBMS_MYSQL ;
 				else if( dbserverConf.url.indexOf("postgresql") >= 0 )
 					dbserverConf.dbms = SqlActionDatabase.DBMS_POSTGRESQL ;
+				else if( dbserverConf.url.indexOf("oracle") >= 0 )
+					dbserverConf.dbms = SqlActionDatabase.DBMS_ORACLE ;
 			}
 			
 			if( dbserverConf.dbms == null ) {
 				System.out.println( "dbserverConf.dbms null" );
-			} else if( dbserverConf.dbms != SqlActionDatabase.DBMS_MYSQL && dbserverConf.dbms != SqlActionDatabase.DBMS_POSTGRESQL ) {
+			} else if( dbserverConf.dbms != SqlActionDatabase.DBMS_MYSQL && dbserverConf.dbms != SqlActionDatabase.DBMS_POSTGRESQL && dbserverConf.dbms != SqlActionDatabase.DBMS_ORACLE ) {
 				System.out.println( "dbserverConf.dbms["+dbserverConf.dbms+"] not support" );
 				return;
 			}

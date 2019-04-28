@@ -47,6 +47,9 @@ public class SqlActionTable {
 			prestmt = conn.prepareStatement("SELECT table_name,table_type FROM information_schema.TABLES WHERE table_catalog=? AND table_name=?") ;
 			prestmt.setString( 1, database.databaseName );
 			prestmt.setString( 2, tableName );
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_ORACLE ) {
+			prestmt = conn.prepareStatement("SELECT table_name FROM user_tables WHERE table_name=?") ;
+			prestmt.setString( 1, tableName );
 		}
 		rs = prestmt.executeQuery() ;
 		rs.next();

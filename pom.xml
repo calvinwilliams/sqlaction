@@ -22,6 +22,12 @@
 			<version>42.2.5</version>
 		</dependency>
 	</dependencies>
+	<dependency>
+		<groupId>com.oracle</groupId>
+		<artifactId>ojdbc6</artifactId>
+		<version>12.1.0.1-atlassian-hosted</version>
+		<scope>test</scope>
+	</dependency>
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>

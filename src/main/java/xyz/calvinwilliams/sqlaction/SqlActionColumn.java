@@ -163,9 +163,8 @@ public class SqlActionColumn {
 			column.javaPropertyType = "byte[]" ;
 			column.javaDefineTabsBetweenTypeAndName = 3 ;
 		} else {
-			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_VARCHAR ;
-			column.javaPropertyType = "String" ;
-			column.javaDefineTabsBetweenTypeAndName = 3 ;
+			System.out.println( "*** ERROR : sourceDataType["+sourceDataType+"] not support" );
+			return -1;
 		}
 		if( rs.getString(8).equals("PRI") ) {
 			column.isPrimaryKey = true ;
@@ -269,9 +268,8 @@ public class SqlActionColumn {
 			column.javaPropertyType = "byte[]" ;
 			column.javaDefineTabsBetweenTypeAndName = 3 ;
 		} else {
-			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_VARCHAR ;
-			column.javaPropertyType = "String" ;
-			column.javaDefineTabsBetweenTypeAndName = 3 ;
+			System.out.println( "*** ERROR : sourceDataType["+sourceDataType+"] not support" );
+			return -1;
 		}
 
 		return 0;
@@ -314,6 +312,30 @@ public class SqlActionColumn {
 				column.javaPropertyType = "double" ;
 				column.javaDefineTabsBetweenTypeAndName = 4 ;
 			}
+		} else if( sourceDataType.equalsIgnoreCase("INT") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_INTEGER ;
+			column.javaPropertyType = "int" ;
+			column.javaDefineTabsBetweenTypeAndName = 4 ;
+		} else if( sourceDataType.equalsIgnoreCase("integer") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_INTEGER ;
+			column.javaPropertyType = "int" ;
+			column.javaDefineTabsBetweenTypeAndName = 4 ;
+		} else if( sourceDataType.equalsIgnoreCase("real") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_REAL ;
+			column.javaPropertyType = "float" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("double precision") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_DOUBLE ;
+			column.javaPropertyType = "double" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("decimal") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_DECIMAL ;
+			column.javaPropertyType = "BigDecimal" ;
+			column.javaDefineTabsBetweenTypeAndName = 2 ;
+		} else if( sourceDataType.equalsIgnoreCase("numeric") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_NUMBERIC ;
+			column.javaPropertyType = "BigDecimal" ;
+			column.javaDefineTabsBetweenTypeAndName = 2 ;
 		} else if( sourceDataType.equalsIgnoreCase("VARCHAR2") ) {
 			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_VARCHAR ;
 			column.javaPropertyType = "String" ;
@@ -327,9 +349,8 @@ public class SqlActionColumn {
 			column.javaPropertyType = "Timestamp" ;
 			column.javaDefineTabsBetweenTypeAndName = 2 ;
 		} else {
-			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_VARCHAR ;
-			column.javaPropertyType = "String" ;
-			column.javaDefineTabsBetweenTypeAndName = 3 ;
+			System.out.println( "*** ERROR : sourceDataType["+sourceDataType+"] not support" );
+			return -1;
 		}
 		
 		return 0;
@@ -367,7 +388,7 @@ public class SqlActionColumn {
 				nret = getColumnMetadataFromResultSet_for_ORACLE( dbserverConf, sqlactionConf, database, table, column, rs );
 			}
 			if( nret != 0 ) {
-				System.out.println( "GetColumnFromResultSet_for__ failed["+nret+"] , database["+database.databaseName+"] table["+table.tableName+"] column["+column.columnName+"]" );
+				System.out.println( "*** ERROR : GetColumnFromResultSet_for__ failed["+nret+"] , database["+database.databaseName+"] table["+table.tableName+"] column["+column.columnName+"]" );
 				return nret;
 			}
 			

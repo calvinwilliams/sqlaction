@@ -124,7 +124,7 @@ public class SqlActionTest {
 				System.out.println( "\t\t" + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
 			}
 			
-			for( int pageNum=0 ; ; pageNum++ ) {
+			for( int pageNum=1 ; ; pageNum++ ) {
 				userOrderListForSelectOutput = new LinkedList<UserOrderSAO>() ;
 				nret = UserOrderSAO.SELECT_ALL_FROM_user_order_PAGEKEY_id( conn, userOrderListForSelectOutput, 3, pageNum ) ;
 				if( nret < 0 ) {
@@ -140,7 +140,7 @@ public class SqlActionTest {
 				}
 			}
 			
-			for( int pageNum=0 ; ; pageNum++ ) {
+			for( int pageNum=1 ; ; pageNum++ ) {
 				userOrderListForSelectOutput = new LinkedList<UserOrderSAO>() ;
 				nret = UserOrderSAO.SELECT_ALL_FROM_user_order_WHERE_item_name_NE__PAGEKEY_id( conn, userOrderListForSelectOutput, 3, pageNum ) ;
 				if( nret < 0 ) {
@@ -148,6 +148,22 @@ public class SqlActionTest {
 					return -24;
 				} else {
 					System.out.println( "\t" + "SELECT_ALL_FROM_user_order_WHERE_item_name_NE__PAGEKEY_id ok , ["+userOrderListForSelectOutput.size()+"]records" );
+					if( userOrderListForSelectOutput.size() == 0 )
+						break;
+					for( UserOrderSAO o : userOrderListForSelectOutput ) {
+						System.out.println( "\t\t" + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
+					}
+				}
+			}
+			
+			for( int pageNum=1 ; ; pageNum++ ) {
+				userOrderListForSelectOutput = new LinkedList<UserOrderSAO>() ;
+				nret = UserOrderSAO.SELECT_ALL_FROM_user_order_WHERE_item_name_NE_ORDER_BY_total_price_PAGEKEY_id( conn, userOrderListForSelectOutput, 3, pageNum ) ;
+				if( nret < 0 ) {
+					System.out.println( "\t" + "SELECT_ALL_FROM_user_order_WHERE_item_name_NE_ORDER_BY_total_price_PAGEKEY_id failed["+nret+"]" );
+					return -24;
+				} else {
+					System.out.println( "\t" + "SELECT_ALL_FROM_user_order_WHERE_item_name_NE_ORDER_BY_total_price_PAGEKEY_id ok , ["+userOrderListForSelectOutput.size()+"]records" );
 					if( userOrderListForSelectOutput.size() == 0 )
 						break;
 					for( UserOrderSAO o : userOrderListForSelectOutput ) {

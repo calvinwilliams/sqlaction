@@ -18,7 +18,7 @@ public class UserOrderSAO {
 	int				userId ;
 	String			itemName ;
 	int				amount ;
-	double			totalPrice ;
+	double				totalPrice ;
 
 	int				_count_ ; // defining for 'SELECT COUNT(*)'
 
@@ -67,9 +67,9 @@ public class UserOrderSAO {
 
 	// SELECT * FROM user_order @@PAGEKEY(id)
 	public static int SELECT_ALL_FROM_user_order_PAGEKEY_id( Connection conn, List<UserOrderSAO> userOrderListForSelectOutput, int _1_pageSize, int _2_pageNum ) throws Exception {
-		PreparedStatement prestmt = conn.prepareStatement( "SELECT * FROM user_order OFFSET ? LIMIT ?" ) ;
+		PreparedStatement prestmt = conn.prepareStatement( "SELECT * FROM ( SELECT t.*,ROWNUM AS rowno FROM user_order t WHERE ROWNUM < ? ) WHERE rowno >= ?" ) ;
 		prestmt.setInt( 1, _1_pageSize*_2_pageNum );
-		prestmt.setInt( 2, _1_pageSize );
+		prestmt.setInt( 2, _1_pageSize*(_2_pageNum-1) );
 		ResultSet rs = prestmt.executeQuery() ;
 		while( rs.next() ) {
 			UserOrderSAO userOrder = new UserOrderSAO() ;
@@ -87,9 +87,49 @@ public class UserOrderSAO {
 
 	// SELECT * FROM user_order WHERE item_name<>'' @@PAGEKEY(id)
 	public static int SELECT_ALL_FROM_user_order_WHERE_item_name_NE__PAGEKEY_id( Connection conn, List<UserOrderSAO> userOrderListForSelectOutput, int _1_pageSize, int _2_pageNum ) throws Exception {
-		PreparedStatement prestmt = conn.prepareStatement( "SELECT * FROM user_order WHERE item_name<>'' OFFSET ? LIMIT ?" ) ;
+		PreparedStatement prestmt = conn.prepareStatement( "SELECT * FROM ( SELECT t.*,ROWNUM AS rowno FROM user_order WHERE item_name<>'' t WHERE ROWNUM < ? ) WHERE rowno >= ?" ) ;
 		prestmt.setInt( 1, _1_pageSize*_2_pageNum );
-		prestmt.setInt( 2, _1_pageSize );
+		prestmt.setInt( 2, _1_pageSize*(_2_pageNum-1) );
+		ResultSet rs = prestmt.executeQuery() ;
+		while( rs.next() ) {
+			UserOrderSAO userOrder = new UserOrderSAO() ;
+			userOrder.id = rs.getInt( 1 ) ;
+			userOrder.userId = rs.getInt( 2 ) ;
+			userOrder.itemName = rs.getString( 3 ) ;
+			userOrder.amount = rs.getInt( 4 ) ;
+			userOrder.totalPrice = rs.getDouble( 5 ) ;
+			userOrderListForSelectOutput.add(userOrder) ;
+		}
+		rs.close();
+		prestmt.close();
+		return userOrderListForSelectOutput.size();
+	}
+
+	// SELECT * FROM user_order ORDER BY total_price @@PAGEKEY(id)
+	public static int SELECT_ALL_FROM_user_order_ORDER_BY_total_price_PAGEKEY_id( Connection conn, List<UserOrderSAO> userOrderListForSelectOutput, int _1_pageSize, int _2_pageNum ) throws Exception {
+		PreparedStatement prestmt = conn.prepareStatement( "SELECT * FROM ( SELECT t.*,ROWNUM AS rowno FROM user_order ORDER BY total_price t WHERE ROWNUM < ? ) WHERE rowno >= ?" ) ;
+		prestmt.setInt( 1, _1_pageSize*_2_pageNum );
+		prestmt.setInt( 2, _1_pageSize*(_2_pageNum-1) );
+		ResultSet rs = prestmt.executeQuery() ;
+		while( rs.next() ) {
+			UserOrderSAO userOrder = new UserOrderSAO() ;
+			userOrder.id = rs.getInt( 1 ) ;
+			userOrder.userId = rs.getInt( 2 ) ;
+			userOrder.itemName = rs.getString( 3 ) ;
+			userOrder.amount = rs.getInt( 4 ) ;
+			userOrder.totalPrice = rs.getDouble( 5 ) ;
+			userOrderListForSelectOutput.add(userOrder) ;
+		}
+		rs.close();
+		prestmt.close();
+		return userOrderListForSelectOutput.size();
+	}
+
+	// SELECT * FROM user_order WHERE item_name<>'' ORDER BY total_price @@PAGEKEY(id)
+	public static int SELECT_ALL_FROM_user_order_WHERE_item_name_NE_ORDER_BY_total_price_PAGEKEY_id( Connection conn, List<UserOrderSAO> userOrderListForSelectOutput, int _1_pageSize, int _2_pageNum ) throws Exception {
+		PreparedStatement prestmt = conn.prepareStatement( "SELECT * FROM ( SELECT t.*,ROWNUM AS rowno FROM user_order WHERE item_name<>'' ORDER BY total_price t WHERE ROWNUM < ? ) WHERE rowno >= ?" ) ;
+		prestmt.setInt( 1, _1_pageSize*_2_pageNum );
+		prestmt.setInt( 2, _1_pageSize*(_2_pageNum-1) );
 		ResultSet rs = prestmt.executeQuery() ;
 		while( rs.next() ) {
 			UserOrderSAO userOrder = new UserOrderSAO() ;

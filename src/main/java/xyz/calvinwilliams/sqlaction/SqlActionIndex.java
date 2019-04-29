@@ -31,6 +31,8 @@ public class SqlActionIndex {
 			prestmt.setString( 2, table.tableName );
 		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL ) {
 			return 0;
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_ORACLE ) {
+			return 0;
 		}
 		rs = prestmt.executeQuery() ;
 		while( rs.next() ) {

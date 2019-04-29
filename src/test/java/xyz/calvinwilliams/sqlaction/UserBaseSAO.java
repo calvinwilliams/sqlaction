@@ -17,7 +17,7 @@ public class UserBaseSAO {
 	int				id ;
 	String			name ;
 	String			gender ;
-	short			age ;
+	int				age ;
 	String			address ;
 	int				level ;
 
@@ -32,7 +32,7 @@ public class UserBaseSAO {
 			userBase.id = rs.getInt( 1 ) ;
 			userBase.name = rs.getString( 2 ) ;
 			userBase.gender = rs.getString( 3 ) ;
-			userBase.age = rs.getShort( 4 ) ;
+			userBase.age = rs.getInt( 4 ) ;
 			userBase.address = rs.getString( 5 ) ;
 			userBase.level = rs.getInt( 6 ) ;
 			userBaseListForSelectOutput.add(userBase) ;
@@ -52,7 +52,7 @@ public class UserBaseSAO {
 			userBase.id = rs.getInt( 1 ) ;
 			userBase.name = rs.getString( 2 ) ;
 			userBase.gender = rs.getString( 3 ) ;
-			userBase.age = rs.getShort( 4 ) ;
+			userBase.age = rs.getInt( 4 ) ;
 			userBase.address = rs.getString( 5 ) ;
 			userBase.level = rs.getInt( 6 ) ;
 			userBaseListForSelectOutput.add(userBase) ;
@@ -63,9 +63,9 @@ public class UserBaseSAO {
 	}
 
 	// SELECT name,address FROM user_base WHERE age<=? AND gender=?
-	public static int SELECT_name_j_address_FROM_user_base_WHERE_age_LE_AND_gender_E_( Connection conn, List<UserBaseSAO> userBaseListForSelectOutput, short _1_age, String _2_gender ) throws Exception {
+	public static int SELECT_name_j_address_FROM_user_base_WHERE_age_LE_AND_gender_E_( Connection conn, List<UserBaseSAO> userBaseListForSelectOutput, int _1_age, String _2_gender ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement( "SELECT name,address FROM user_base WHERE age<=? AND gender=?" ) ;
-		prestmt.setShort( 1, _1_age );
+		prestmt.setInt( 1, _1_age );
 		prestmt.setString( 2, _2_gender );
 		ResultSet rs = prestmt.executeQuery() ;
 		while( rs.next() ) {
@@ -88,7 +88,7 @@ public class UserBaseSAO {
 			userBase.id = rs.getInt( 1 ) ;
 			userBase.name = rs.getString( 2 ) ;
 			userBase.gender = rs.getString( 3 ) ;
-			userBase.age = rs.getShort( 4 ) ;
+			userBase.age = rs.getInt( 4 ) ;
 			userBase.address = rs.getString( 5 ) ;
 			userBase.level = rs.getInt( 6 ) ;
 			userBaseListForSelectOutput.add(userBase) ;
@@ -129,7 +129,7 @@ public class UserBaseSAO {
 		prestmt.setInt( 1, userBase.id );
 		prestmt.setString( 2, userBase.name );
 		prestmt.setString( 3, userBase.gender );
-		prestmt.setShort( 4, userBase.age );
+		prestmt.setInt( 4, userBase.age );
 		prestmt.setString( 5, userBase.address );
 		prestmt.setInt( 6, userBase.level );
 		int count = prestmt.executeUpdate() ;
@@ -155,10 +155,10 @@ public class UserBaseSAO {
 	}
 
 	// UPDATE user_base SET level=? WHERE age>? AND gender=?
-	public static int UPDATE_user_base_SET_level_E_WHERE_age_GT_AND_gender_E_( Connection conn, int _1_level_ForSetInput, short _1_age_ForWhereInput, String _2_gender_ForWhereInput ) throws Exception {
+	public static int UPDATE_user_base_SET_level_E_WHERE_age_GT_AND_gender_E_( Connection conn, int _1_level_ForSetInput, int _1_age_ForWhereInput, String _2_gender_ForWhereInput ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement( "UPDATE user_base SET level=? WHERE age>? AND gender=?" ) ;
 		prestmt.setInt( 1, _1_level_ForSetInput );
-		prestmt.setShort( 2, _1_age_ForWhereInput );
+		prestmt.setInt( 2, _1_age_ForWhereInput );
 		prestmt.setString( 3, _2_gender_ForWhereInput );
 		int count = prestmt.executeUpdate() ;
 		prestmt.close();
@@ -182,9 +182,9 @@ public class UserBaseSAO {
 	}
 
 	// DELETE FROM user_base WHERE age<>? AND gender<>?
-	public static int DELETE_FROM_user_base_WHERE_age_NE_AND_gender_NE_( Connection conn, short _1_age, String _2_gender ) throws Exception {
+	public static int DELETE_FROM_user_base_WHERE_age_NE_AND_gender_NE_( Connection conn, int _1_age, String _2_gender ) throws Exception {
 		PreparedStatement prestmt = conn.prepareStatement( "DELETE FROM user_base WHERE age<>? AND gender<>?" ) ;
-		prestmt.setShort( 1, _1_age );
+		prestmt.setInt( 1, _1_age );
 		prestmt.setString( 2, _2_gender );
 		int count = prestmt.executeUpdate() ;
 		prestmt.close();

@@ -102,4 +102,24 @@ public class SqlActionUtil {
 		return sql;
 	}
 	
+	public static int indexOfWord( String str, String word ) {
+		int offset = 0 ;
+		int pos ;
+		int pos2 ;
+		
+		while(true) {
+			pos = str.indexOf( word, offset ) ;
+			if( pos == -1 )
+				return -1;
+			pos2 = pos + word.length() ;
+			if(
+				( pos == 0 || ( pos > 0 && " \t\r\n".indexOf(str.charAt(pos-1))>=0 ) )
+				&&
+				( pos2 == str.length()-1 || ( pos2 < str.length()-1 && " \t\r\n".indexOf(str.charAt(pos2+1))>=0 ) )
+			)
+				return pos;
+			else
+				offset = pos + 1 ;
+		}
+	}
 }

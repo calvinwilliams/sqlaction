@@ -445,9 +445,12 @@ public class SqlActionGencode {
 											SqlActionSyntaxParser parser,
 											StringBuilder saoFileBuffer, StringBuilder sauFileBuffer ) {
 		
-		StringBuilder		methodParameters = new StringBuilder() ;
-		int					columnIndex ;
-		int					nret = 0 ;
+		StringBuilder	methodParameters = new StringBuilder() ;
+		int				fromPos = -1 ;
+		int				wherePos = -1 ;
+		int				orderPos = -1 ;
+		int				columnIndex ;
+		int				nret = 0 ;
 		
 		methodParameters.append( "Connection conn" );
 		for( SqlActionFromTableToken ct : parser.fromTableTokenList ) {
@@ -471,6 +474,35 @@ public class SqlActionGencode {
 				}
 			} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL ) {
 				parser.statementSql += " OFFSET ? LIMIT ?" ;
+			} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_ORACLE ) {
+				fromPos = parser.statementSql.toUpperCase().indexOf("FROM") ;
+				wherePos = SqlActionUtil.indexOfWord( parser.statementSql.toUpperCase() , "WHERE" ) ;
+				orderPos = SqlActionUtil.indexOfWord( parser.statementSql.toUpperCase() , "ORDER" ) ;
+				if( wherePos == -1 && orderPos == -1 ) {
+					// [SQL1   ][SQL2         ]
+					// SELECT * FROM user_order
+					// [SQL1   ][CONST                           ][SQL2         ][CONST                              ]
+					// SELECT * FROM ( SELECT t.*,ROWNUM AS rowno FROM user_order t WHERE ROWNUM < ? ) WHERE rowno >= ?
+					parser.statementSql = parser.statementSql.substring(0,fromPos) + "FROM ( SELECT t.*,ROWNUM AS rowno " + parser.statementSql.substring(fromPos) + " t WHERE ROWNUM < ? ) WHERE rowno >= ?" ;
+				} else if( wherePos >= 0 && orderPos == -1 ) {
+					// [SQL1   ][SQL2                   ]
+					// SELECT * FROM user_order WHERE ...
+					// [SQL1   ][CONST                                           ][SQL2                   ][CONST                          ]
+					// SELECT * FROM ( SELECT t.*,ROWNUM AS rowno FROM ( SELECT * FROM user_order WHERE ... AND ROWNUM < ? ) WHERE rowno >= ?
+					parser.statementSql = parser.statementSql.substring(0,fromPos) + "FROM ( SELECT t.*,ROWNUM AS rowno FROM ( SELECT *" + parser.statementSql.substring(fromPos) + " AND ROWNUM < ? ) WHERE rowno >= ?" ;
+				} else if( wherePos == -1 && orderPos >= 0 ) {
+					// [SQL1   ][SQL2                      ]
+					// SELECT * FROM user_order ORDER BY ...
+					// [SQL1   ][CONST                                           ][SQL2                                  ][CONST                                ]
+					// SELECT * FROM ( SELECT t.*,ROWNUM AS rowno FROM ( SELECT * FROM user_order ORDER BY total_price ASC ) t WHERE ROWNUM < ? ) WHERE rowno >= ?
+					parser.statementSql = parser.statementSql.substring(0,fromPos) + "FROM ( SELECT t.*,ROWNUM AS rowno FROM ( SELECT * " + parser.statementSql.substring(fromPos) + " ) t WHERE ROWNUM < ? ) WHERE rowno >= ?" ;
+				} else {
+					// [SQL1   ][SQL2                                ]
+					// SELECT * FROM user_order WHERE ... ORDER BY ...
+					// [SQL1   ][CONST                                           ][SQL2                                            ][CONST                                ]
+					// SELECT * FROM ( SELECT t.*,ROWNUM AS rowno FROM ( SELECT * FROM user_order WHERE ... ORDER BY total_price ASC ) t WHERE ROWNUM < ? ) WHERE rowno >= ?
+					parser.statementSql = parser.statementSql.substring(0,fromPos) + "FROM ( SELECT t.*,ROWNUM AS rowno FROM ( SELECT * " + parser.statementSql.substring(fromPos) + " ) t WHERE ROWNUM < ? ) WHERE rowno >= ?" ;
+				}
 			}
 		}
 		
@@ -510,9 +542,15 @@ public class SqlActionGencode {
 			if( parser.pageKeyColumn != null ) {
 				columnIndex++;
 				int pageColumnIndex = columnIndex ;
-				saoFileBuffer.append("\t\t").append("prestmt.setInt( ").append(columnIndex).append(", ").append("_"+pageColumnIndex+"_pageSize*_"+(pageColumnIndex+1)+"_pageNum").append(" );\n");
-				columnIndex++;
-				saoFileBuffer.append("\t\t").append("prestmt.setInt( ").append(columnIndex).append(", ").append("_"+(pageColumnIndex)+"_pageSize").append(" );\n");
+				if( dbserverConf.dbms == SqlActionDatabase.DBMS_MYSQL || dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL ) {
+					saoFileBuffer.append("\t\t").append("prestmt.setInt( ").append(columnIndex).append(", ").append("_"+pageColumnIndex+"_pageSize*(_"+(pageColumnIndex+1)+"_pageNum-1)").append(" );\n");
+					columnIndex++;
+					saoFileBuffer.append("\t\t").append("prestmt.setInt( ").append(columnIndex).append(", ").append("_"+(pageColumnIndex)+"_pageSize").append(" );\n");
+				} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_ORACLE ) {
+					saoFileBuffer.append("\t\t").append("prestmt.setInt( ").append(columnIndex).append(", ").append("_"+pageColumnIndex+"_pageSize*_"+(pageColumnIndex+1)+"_pageNum").append(" );\n");
+					columnIndex++;
+					saoFileBuffer.append("\t\t").append("prestmt.setInt( ").append(columnIndex).append(", ").append("_"+pageColumnIndex+"_pageSize*(_"+(pageColumnIndex+1)+"_pageNum-1)").append(" );\n");
+				}
 			}
 			saoFileBuffer.append( "\t\t" + "ResultSet rs = prestmt.executeQuery() ;\n" );
 		} else {
@@ -621,7 +659,7 @@ public class SqlActionGencode {
 		saoFileBuffer.append( "\t\t" + "PreparedStatement prestmt ;\n" );
 		saoFileBuffer.append( "\t\t" + "Statement stmt ;\n" );
 		saoFileBuffer.append( "\t\t" + "ResultSet rs ;\n" );
-		if( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL && parser.selectSeq != null && parser.selectKey != null ) {
+		if( ( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL || dbserverConf.dbms == SqlActionDatabase.DBMS_ORACLE ) && parser.selectSeq != null && parser.selectKey != null ) {
 			saoFileBuffer.append( "\t\t" + "stmt = conn.createStatement() ;\n" );
 			saoFileBuffer.append( "\t\t" + "rs = stmt.executeQuery( \"SELECT NEXTVAL('"+parser.selectSeq+"')\" ) ;\n" );
 			saoFileBuffer.append( "\t\t" + "rs.next();\n" );
@@ -674,7 +712,7 @@ public class SqlActionGencode {
 				saoFileBuffer.append( "\t\t" + "\n" );
 				saoFileBuffer.append( "\t\t" + "return count;\n" );
 			}
-		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL ) {
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL || dbserverConf.dbms == SqlActionDatabase.DBMS_ORACLE ) {
 			saoFileBuffer.append( "\t\t" + "int count = prestmt.executeUpdate() ;\n" );
 			saoFileBuffer.append( "\t\t" + "prestmt.close();\n" );
 			saoFileBuffer.append( "\t\t" + "return count;\n" );

@@ -56,9 +56,17 @@ public class SqlActionTable {
 		
 		table = new SqlActionTable() ;
 		table.tableName = rs.getString(1) ;
-		tableType = rs.getString(2) ;
-		if( ! tableType.equals("BASE TABLE") )
-			return null;
+		if( dbserverConf.dbms == SqlActionDatabase.DBMS_MYSQL ) {
+			tableType = rs.getString(2) ;
+			if( ! tableType.equals("BASE TABLE") )
+				return null;
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL ) {
+			tableType = rs.getString(2) ;
+			if( ! tableType.equals("BASE TABLE") )
+				return null;
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_ORACLE ) {
+			;
+		}
 		database.tableList.add( table );
 		
 		rs.close();

@@ -25,6 +25,8 @@
 				"SELECT * FROM user_order WHERE user_id=?" ,
 				"SELECT * FROM user_order @@PAGEKEY(id)" ,
 				"SELECT * FROM user_order WHERE item_name<>'' @@PAGEKEY(id)" ,
+				"SELECT * FROM user_order ORDER BY total_price @@PAGEKEY(id)" ,
+				"SELECT * FROM user_order WHERE item_name<>'' ORDER BY total_price @@PAGEKEY(id)" ,
 				"SELECT user_base.name,user_base.address,user_order.item_name,user_order.amount,user_order.total_price
 					FROM user_base,user_order
 					WHERE user_base.name=? AND user_base.id=user_order.user_id

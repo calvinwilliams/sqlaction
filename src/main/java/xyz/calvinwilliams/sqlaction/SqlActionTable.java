@@ -52,6 +52,10 @@ public class SqlActionTable {
 			prestmt.setString( 1, tableName );
 		}
 		rs = prestmt.executeQuery() ;
+//		if( rs.getRow() < 1 ) {
+//			System.out.println( "GetAllColumnsInTable table not found , database["+database.databaseName+"] table["+tableName+"]" );
+//			return null;
+//		}
 		rs.next();
 		
 		table = new SqlActionTable() ;

@@ -10,9 +10,9 @@
 				"SELECT * FROM user_base ORDER BY name DESC" ,
 				"SELECT gender,count(*) FROM user_base GROUP BY gender" ,
 				"INSERT INTO user_base @@SELECTSEQ(user_base_seq_id) @@SELECTKEY(id)" ,
-				"UPDATE user_base SET level=?" ,
-				"UPDATE user_base SET address='calvin address',level=10 WHERE name='Calvin'" ,
-				"UPDATE user_base SET level=? WHERE age>? AND gender=?" ,
+				"UPDATE user_base SET lvl=?" ,
+				"UPDATE user_base SET address='calvin address',lvl=10 WHERE name='Calvin'" ,
+				"UPDATE user_base SET lvl=? WHERE age>? AND gender=?" ,
 				"DELETE FROM user_base" ,
 				"DELETE FROM user_base WHERE name='Calvin'" ,
 				"DELETE FROM user_base WHERE age<>? AND gender<>?"
@@ -24,9 +24,7 @@
 				"SELECT /* blablabla~ */ * FROM user_order @@STATEMENT_INTERCEPTOR()" ,
 				"SELECT * FROM user_order WHERE user_id=?" ,
 				"SELECT * FROM user_order @@PAGEKEY(id)" ,
-				"SELECT * FROM user_order WHERE item_name<>'' @@PAGEKEY(id)" ,
-				"SELECT * FROM user_order ORDER BY total_price @@PAGEKEY(id)" ,
-				"SELECT * FROM user_order WHERE item_name<>'' ORDER BY total_price @@PAGEKEY(id)" ,
+				"SELECT * FROM user_order WHERE item_name<>'' @@PAGEKEY(id) @@PAGESORT(DESC)" ,
 				"SELECT user_base.name,user_base.address,user_order.item_name,user_order.amount,user_order.total_price
 					FROM user_base,user_order
 					WHERE user_base.name=? AND user_base.id=user_order.user_id

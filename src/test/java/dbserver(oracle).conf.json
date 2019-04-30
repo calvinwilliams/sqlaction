@@ -1,9 +1,9 @@
 {
-	"driver" : "com.mysql.jdbc.Driver" ,
-	"url" : "jdbc:mysql://127.0.0.1:3306/calvindb?serverTimezone=GMT" ,
-	"user" : "root" ,
-	"pwd" : "root" ,
+	"driver" : "oracle.jdbc.driver.OracleDriver" ,
+	"url" : "jdbc:oracle:thin:@//127.0.0.1:1521/calvindb" ,
+	"user" : "calvin" ,
+	"pwd" : "calvin" ,
 	"userDefineDataTypes" : [
-		{ "source":"decimal,*,12,2" , "redefine":"double,*,14,*" }
+		{ "source":"numeric,*,12,2" , "redefine":"double precision,*,14,*" }
 	]
 }

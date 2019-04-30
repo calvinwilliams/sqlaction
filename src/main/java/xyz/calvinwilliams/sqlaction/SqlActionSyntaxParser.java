@@ -32,6 +32,7 @@ public class SqlActionSyntaxParser {
 	
 	String									pageKey ;
 	public SqlActionColumn					pageKeyColumn ;
+	String									pageSort ;
 	
 	String									sqlaction ;
 	String									sql ;

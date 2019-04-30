@@ -15,6 +15,17 @@ import java.util.*;
 
 import xyz.calvinwilliams.okjson.OKJSON;
 
+//INSERT INTO user_order VALUES(1,1,"item_name1",100,10000);
+//INSERT INTO user_order VALUES(2,1,"item_name2",100,10000);
+//INSERT INTO user_order VALUES(3,1,"item_name3",100,10000);
+//INSERT INTO user_order VALUES(4,1,"item_name4",100,10000);
+//INSERT INTO user_order VALUES(5,1,"item_name5",100,10000);
+//INSERT INTO user_order VALUES(6,1,"item_name6",100,10000);
+//INSERT INTO user_order VALUES(7,1,"item_name7",100,10000);
+//INSERT INTO user_order VALUES(8,1,"item_name8",100,10000);
+//INSERT INTO user_order VALUES(9,1,"item_name9",100,10000);
+//INSERT INTO user_order VALUES(10,1,"item_name10",100,10000);
+
 public class SqlActionTest {
 
 	public static int testSelectTable( Connection conn ) {
@@ -35,7 +46,7 @@ public class SqlActionTest {
 			}
 
 			for( UserBaseSAO u : userList ) {
-				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"]" );
+				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] lvl["+u.lvl+"]" );
 			}
 
 			userList = new LinkedList<UserBaseSAO>() ;
@@ -48,7 +59,7 @@ public class SqlActionTest {
 			}
 
 			for( UserBaseSAO u : userList ) {
-				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"]" );
+				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] lvl["+u.lvl+"]" );
 			}
 
 			userList = new LinkedList<UserBaseSAO>() ;
@@ -61,7 +72,7 @@ public class SqlActionTest {
 			}
 
 			for( UserBaseSAO u : userList ) {
-				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"]" );
+				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] lvl["+u.lvl+"]" );
 			}
 
 			userList = new LinkedList<UserBaseSAO>() ;
@@ -74,7 +85,7 @@ public class SqlActionTest {
 			}
 			
 			for( UserBaseSAO u : userList ) {
-				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"] _count_["+u._count_+"]" );
+				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] lvl["+u.lvl+"] _count_["+u._count_+"]" );
 			}
 			
 			userList = new LinkedList<UserBaseSAO>() ;
@@ -87,7 +98,7 @@ public class SqlActionTest {
 			}
 			
 			for( UserBaseSAO u : userList ) {
-				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"] _count_["+u._count_+"]" );
+				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] lvl["+u.lvl+"] _count_["+u._count_+"]" );
 			}
 			
 			userListForSelectOutput = new LinkedList<UserBaseSAO>() ;
@@ -101,7 +112,7 @@ public class SqlActionTest {
 			}
 
 			for( UserBaseSAO u : userListForSelectOutput ) {
-				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"]" );
+				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] lvl["+u.lvl+"]" );
 			}
 			for( UserOrderSAO o : userOrderListForSelectOutput ) {
 				System.out.println( "\t\t" + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
@@ -118,7 +129,7 @@ public class SqlActionTest {
 			}
 
 			for( UserBaseSAO u : userListForSelectOutput ) {
-				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] level["+u.level+"]" );
+				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] lvl["+u.lvl+"]" );
 			}
 			for( UserOrderSAO o : userOrderListForSelectOutput ) {
 				System.out.println( "\t\t" + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
@@ -155,22 +166,6 @@ public class SqlActionTest {
 					}
 				}
 			}
-			
-			for( int pageNum=1 ; ; pageNum++ ) {
-				userOrderListForSelectOutput = new LinkedList<UserOrderSAO>() ;
-				nret = UserOrderSAO.SELECT_ALL_FROM_user_order_WHERE_item_name_NE_ORDER_BY_total_price_PAGEKEY_id( conn, userOrderListForSelectOutput, 3, pageNum ) ;
-				if( nret < 0 ) {
-					System.out.println( "\t" + "SELECT_ALL_FROM_user_order_WHERE_item_name_NE_ORDER_BY_total_price_PAGEKEY_id failed["+nret+"]" );
-					return -24;
-				} else {
-					System.out.println( "\t" + "SELECT_ALL_FROM_user_order_WHERE_item_name_NE_ORDER_BY_total_price_PAGEKEY_id ok , ["+userOrderListForSelectOutput.size()+"]records" );
-					if( userOrderListForSelectOutput.size() == 0 )
-						break;
-					for( UserOrderSAO o : userOrderListForSelectOutput ) {
-						System.out.println( "\t\t" + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
-					}
-				}
-			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return -1;
@@ -192,7 +187,7 @@ public class SqlActionTest {
 			user.gender = "M" ;
 			user.age = 30 ;
 			user.address = "Calvin address" ;
-			user.level = 8 ;
+			user.lvl = 8 ;
 			nret = UserBaseSAO.INSERT_INTO_user_base( conn, user ) ;
 			if( nret <= 0 ) {
 				System.out.println( "\t" + "INSERT_INTO_user_base failed["+nret+"]" );
@@ -206,7 +201,7 @@ public class SqlActionTest {
 			user.gender = "F" ;
 			user.age = 20 ;
 			user.address = "Dozimoyi address" ;
-			user.level = 7 ;
+			user.lvl = 7 ;
 			nret = UserBaseSAO.INSERT_INTO_user_base( conn, user ) ;
 			if( nret <= 0 ) {
 				System.out.println( "\t" + "INSERT_INTO_user_base failed["+nret+"]" );
@@ -220,7 +215,7 @@ public class SqlActionTest {
 			user.gender = "M" ;
 			user.age = 3 ;
 			user.address = "Mark address" ;
-			user.level = 2 ;
+			user.lvl = 2 ;
 			nret = UserBaseSAO.INSERT_INTO_user_base( conn, user ) ;
 			if( nret <= 0 ) {
 				System.out.println( "\t" + "INSERT_INTO_user_base failed["+nret+"]" );
@@ -278,28 +273,28 @@ public class SqlActionTest {
 		int				nret = 0 ;
 
 		try {
-			nret = UserBaseSAO.UPDATE_user_base_SET_level_E_( conn, 6 ) ;
+			nret = UserBaseSAO.UPDATE_user_base_SET_lvl_E_( conn, 6 ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "UPDATE_user_base_SET_level_E_ failed["+nret+"]" );
+				System.out.println( "\t" + "UPDATE_user_base_SET_lvl_E_ failed["+nret+"]" );
 				return -11;
 			} else {
-				System.out.println( "\t" + "UPDATE_user_base_SET_level_E_ ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "UPDATE_user_base_SET_lvl_E_ ok , rows["+nret+"] effected" );
 			}
 
-			nret = UserBaseSAO.UPDATE_user_base_SET_address_E_calvin_address_j_level_E_10_WHERE_name_E_Calvin_( conn ) ;
+			nret = UserBaseSAO.UPDATE_user_base_SET_address_E_calvin_address_j_lvl_E_10_WHERE_name_E_Calvin_( conn ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "UPDATE_user_base_SET_address_E_calvin_address_j_level_E_10_WHERE_name_E_Calvin_ failed["+nret+"]" );
+				System.out.println( "\t" + "UPDATE_user_base_SET_address_E_calvin_address_j_lvl_E_10_WHERE_name_E_Calvin_ failed["+nret+"]" );
 				return -12;
 			} else {
-				System.out.println( "\t" + "UPDATE_user_base_SET_address_E_calvin_address_j_level_E_10_WHERE_name_E_Calvin_ ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "UPDATE_user_base_SET_address_E_calvin_address_j_lvl_E_10_WHERE_name_E_Calvin_ ok , rows["+nret+"] effected" );
 			}
 
-			nret = UserBaseSAO.UPDATE_user_base_SET_level_E_WHERE_age_GT_AND_gender_E_( conn, 8, (short)19, "F" ) ;
+			nret = UserBaseSAO.UPDATE_user_base_SET_lvl_E_WHERE_age_GT_AND_gender_E_( conn, 8, (short)19, "F" ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "UPDATE_user_base_SET_level_E_WHERE_age_GT_AND_gender_E_ failed["+nret+"]" );
+				System.out.println( "\t" + "UPDATE_user_base_SET_lvl_E_WHERE_age_GT_AND_gender_E_ failed["+nret+"]" );
 				return -21;
 			} else {
-				System.out.println( "\t" + "UPDATE_user_base_SET_level_E_WHERE_age_GT_AND_gender_E_ ok , rows["+nret+"] effected" );
+				System.out.println( "\t" + "UPDATE_user_base_SET_lvl_E_WHERE_age_GT_AND_gender_E_ ok , rows["+nret+"] effected" );
 			}
 
 			userList = new LinkedList<UserBaseSAO>() ;

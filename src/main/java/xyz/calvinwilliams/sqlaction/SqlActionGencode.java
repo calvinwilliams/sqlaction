@@ -16,7 +16,7 @@ import xyz.calvinwilliams.okjson.*;
 
 public class SqlActionGencode {
 
-	final private static String				SQLACTION_VERSION = "0.2.4.0" ;
+	final private static String				SQLACTION_VERSION = "0.2.5.0" ;
 	
 	final public static String				SELECT_COUNT___ = "count(" ;
 	final private static String				COUNT___ = "_count_" ;
@@ -313,6 +313,20 @@ public class SqlActionGencode {
 						}
 					}
 					
+					beginMetaData = sqlaction.indexOf( "@@PAGESORT(" ) ;
+					if( beginMetaData >= 0 ) {
+						endMetaData = sqlaction.indexOf( ")", beginMetaData ) ;
+						if( endMetaData == -1 ) {
+							System.out.println( "*** ERROR : sql["+parser.sql+"] invalid" );
+							return;
+						}
+						parser.pageSort = sqlaction.substring( beginMetaData+11, endMetaData ) ;
+						if( ! parser.pageSort.equalsIgnoreCase("ASC") && ! parser.pageSort.equalsIgnoreCase("DESC") ) {
+							System.out.println( "\t" + "*** ERROR : @@PAGESORT["+parser.pageSort+"] invalid" );
+							return;
+						}
+					}
+					
 					if( parser.pageKeyColumn != null ) {
 						parser.methodName = parser.methodName + "_PAGEKEY_" + parser.pageKeyColumn.columnName ;
 					}
@@ -468,9 +482,18 @@ public class SqlActionGencode {
 			
 			if( dbserverConf.dbms == SqlActionDatabase.DBMS_MYSQL ) {
 				if( parser.hasWhereStatement ) {
-					parser.statementSql += " AND "+parser.pageKeyColumn.columnName+">=(SELECT "+parser.pageKeyColumn.columnName+" FROM "+table.tableName+" ORDER BY "+parser.pageKeyColumn.columnName+" LIMIT ?,1) LIMIT ?" ;
+					wherePos = SqlActionUtil.indexOfWord( parser.statementSql.toUpperCase() , "WHERE" ) ;
+					// [SQL1                    ][SQL2]
+					// SELECT * FROM table WHERE ...
+					// [SQL1                    ][CONST                                                            ][SQL2][CONST]
+					// SELECT * FROM table WHERE id<>null AND id>=(SELECT id FROM table ORDER BY key LIMIT ?,1) AND ...   LIMIT ?
+					parser.statementSql = parser.statementSql.substring(0,wherePos+5) + " "+parser.pageKeyColumn.columnName+((parser.pageSort==null||parser.pageSort.equalsIgnoreCase("ASC"))?">=":"<=")+"(SELECT "+parser.pageKeyColumn.columnName+" FROM "+table.tableName+" ORDER BY "+parser.pageKeyColumn.columnName+(parser.pageSort!=null?" "+parser.pageSort:"")+" LIMIT ?,1) AND"+parser.statementSql.substring(wherePos+5)+" ORDER BY "+parser.pageKeyColumn.columnName+(parser.pageSort!=null?" "+parser.pageSort:"")+" LIMIT ?" ;
 				} else {
-					parser.statementSql += " WHERE "+parser.pageKeyColumn.columnName+">=(SELECT "+parser.pageKeyColumn.columnName+" FROM "+table.tableName+" ORDER BY "+parser.pageKeyColumn.columnName+" LIMIT ?,1) LIMIT ?" ;
+					// [SQL1             ]
+					// SELECT * FROM table
+					// [SQL1              ][CONST                                                               ]
+					// SELECT * FROM table WHERE id<>null AND id>=(SELECT id FROM table ORDER BY key LIMIT ?,1) LIMIT ?
+					parser.statementSql = parser.statementSql + " WHERE "+parser.pageKeyColumn.columnName+((parser.pageSort==null||parser.pageSort.equalsIgnoreCase("ASC"))?">=":"<=")+"(SELECT "+parser.pageKeyColumn.columnName+" FROM "+table.tableName+" ORDER BY "+parser.pageKeyColumn.columnName+(parser.pageSort!=null?" "+parser.pageSort:"")+" LIMIT ?,1) ORDER BY "+parser.pageKeyColumn.columnName+(parser.pageSort!=null?" "+parser.pageSort:"")+" LIMIT ?" ;
 				}
 			} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL ) {
 				parser.statementSql += " OFFSET ? LIMIT ?" ;
@@ -487,9 +510,9 @@ public class SqlActionGencode {
 				} else if( wherePos >= 0 && orderPos == -1 ) {
 					// [SQL1   ][SQL2                   ]
 					// SELECT * FROM user_order WHERE ...
-					// [SQL1   ][CONST                                           ][SQL2                   ][CONST                          ]
-					// SELECT * FROM ( SELECT t.*,ROWNUM AS rowno FROM ( SELECT * FROM user_order WHERE ... AND ROWNUM < ? ) WHERE rowno >= ?
-					parser.statementSql = parser.statementSql.substring(0,fromPos) + "FROM ( SELECT t.*,ROWNUM AS rowno FROM ( SELECT *" + parser.statementSql.substring(fromPos) + " AND ROWNUM < ? ) WHERE rowno >= ?" ;
+					// [SQL1   ][CONST                                           ][SQL2                   ][CONST                             ]
+					// SELECT * FROM ( SELECT t.*,ROWNUM AS rowno FROM ( SELECT * FROM user_order WHERE ... AND ROWNUM < ? ) WHERE rowno >= ? )
+					parser.statementSql = parser.statementSql.substring(0,fromPos) + "FROM ( SELECT t.*,ROWNUM AS rowno FROM ( SELECT *" + parser.statementSql.substring(fromPos) + " AND ROWNUM < ? ) WHERE rowno >= ? )" ;
 				} else if( wherePos == -1 && orderPos >= 0 ) {
 					// [SQL1   ][SQL2                      ]
 					// SELECT * FROM user_order ORDER BY ...

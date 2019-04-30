@@ -111,7 +111,7 @@ public class SqlActionUtil {
 			pos = str.indexOf( word, offset ) ;
 			if( pos == -1 )
 				return -1;
-			pos2 = pos + word.length() ;
+			pos2 = pos + word.length() - 1 ;
 			if(
 				( pos == 0 || ( pos > 0 && " \t\r\n".indexOf(str.charAt(pos-1))>=0 ) )
 				&&

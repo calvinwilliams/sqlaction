@@ -364,9 +364,9 @@ DDL
 ```
 CREATE TABLE `sqlaction_benchmark` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
-  `name` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT '英文�?1?71¤7',
-  `name_cn` varchar(128) COLLATE utf8mb4_bin NOT NULL COMMENT '�?文各1?71¤7',
-  `salary` decimal(12,2) NOT NULL COMMENT '�?�?',
+  `name` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT '英文县1?71¤7',
+  `name_cn` varchar(128) COLLATE utf8mb4_bin NOT NULL COMMENT '䶿文各1?71¤7',
+  `salary` decimal(12,2) NOT NULL COMMENT '蔿殿',
   `birthday` date NOT NULL COMMENT '生日',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=42332 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
@@ -459,7 +459,7 @@ public class SqlActionBenchmarkCrud {
 			
 			sqlactionBenchmark = new SqlactionBenchmarkSAO() ;
 			sqlactionBenchmark.name = "Calvin" ;
-			sqlactionBenchmark.nameCn = "卡尔�?1?71¤7" ;
+			sqlactionBenchmark.nameCn = "卡尔政1?71¤7" ;
 			sqlactionBenchmark.salary = new BigDecimal(0) ;
 			long time = System.currentTimeMillis() ;
 			sqlactionBenchmark.birthday = new java.sql.Date(time) ;
@@ -474,7 +474,7 @@ public class SqlActionBenchmarkCrud {
 			beginMillisSecondstamp = System.currentTimeMillis() ;
 			for( i = 0 ; i < count ; i++ ) {
 				sqlactionBenchmark.name = "Calvin"+i ;
-				sqlactionBenchmark.nameCn = "卡尔�?1?71¤7"+i ;
+				sqlactionBenchmark.nameCn = "卡尔政1?71¤7"+i ;
 				rows = SqlactionBenchmarkSAO.INSERT_INTO_sqlaction_benchmark( conn, sqlactionBenchmark ) ;
 				if( rows != 1 ) {
 					System.out.println( "SqlactionBenchmarkSAO.INSERT_INTO_sqlaction_benchmark failed["+rows+"]" );
@@ -708,7 +708,7 @@ public class MyBatisBenchmarkCrud {
 			SqlactionBenchmarkSAO	sqlactionBenchmark = new SqlactionBenchmarkSAO() ;
 			sqlactionBenchmark.id = 1 ;
 			sqlactionBenchmark.name = "Calvin" ;
-			sqlactionBenchmark.name_cn = "卡尔�?1?71¤7" ;
+			sqlactionBenchmark.name_cn = "卡尔政1?71¤7" ;
 			sqlactionBenchmark.salary = new BigDecimal(0) ;
 			long time = System.currentTimeMillis() ;
 			sqlactionBenchmark.birthday = new java.sql.Date(time) ;
@@ -725,7 +725,7 @@ public class MyBatisBenchmarkCrud {
 			beginMillisSecondstamp = System.currentTimeMillis() ;
 			for( i = 0 ; i < count ; i++ ) {
 				sqlactionBenchmark.name = "Calvin"+i ;
-				sqlactionBenchmark.name_cn = "卡尔�?1?71¤7"+i ;
+				sqlactionBenchmark.name_cn = "卡尔政1?71¤7"+i ;
 				mapper.insertOne(sqlactionBenchmark);
 				if( i % 10 == 0 ) {
 					session.commit();
@@ -875,13 +875,13 @@ Apache Maven
 <dependency>
   <groupId>xyz.calvinwilliams</groupId>
   <artifactId>sqlaction</artifactId>
-  <version>0.2.3.0</version>
+  <version>0.2.5.0</version>
 </dependency>
 ```
 
 Gradle Kotlin DSL
 ```
-compile("xyz.calvinwilliams:sqlaction:0.2.3.0")
+compile("xyz.calvinwilliams:sqlaction:0.2.5.0")
 ```
 
 # 8. About Author

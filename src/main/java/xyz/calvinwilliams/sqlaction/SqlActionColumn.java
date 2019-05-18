@@ -356,6 +356,95 @@ public class SqlActionColumn {
 		return 0;
 	}
 	
+	public static int getColumnMetadataFromResultSet_for_SQLITE( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionDatabase database, SqlActionTable table, SqlActionColumn column, ResultSet rs ) throws Exception {
+		int			number1Offset ;
+		int			number2Offset ;
+		int			endOffset ;
+		String		sourceDataType ;
+		String		sourceDataTypeAndLength ;
+		String		userDefineDataTypeAndLength ;
+		
+		column.columnName = rs.getString(2) ;
+		sourceDataType = rs.getString(3) ;
+		if( rs.getString(4).equals("0") )
+			column.isNullable = false ;
+		else
+			column.isNullable = true ;
+		column.columnDefault = rs.getString(5) ;
+		if( rs.getString(6).equals("1") ) {
+			column.isPrimaryKey = true ;
+		} else {
+			column.isPrimaryKey = false ;
+		}
+		
+		number1Offset = sourceDataType.indexOf("(") ;
+		if( number1Offset >= 0 ) {
+			number1Offset++;
+			number2Offset = sourceDataType.indexOf(",") ;
+			if( number2Offset >= 0 ) {
+				number2Offset++;
+				endOffset = sourceDataType.indexOf(")") ;
+				column.columnMaximumLength = 0 ;
+				column.numericPrecision = Integer.parseInt(sourceDataType.substring( number1Offset, number2Offset-1 )) ;
+				column.numericScale = Integer.parseInt(sourceDataType.substring( number2Offset, endOffset )) ;
+				sourceDataType = sourceDataType.substring( 0, number1Offset-1 ) ;
+			} else {
+				endOffset = sourceDataType.indexOf(")") ;
+				column.columnMaximumLength = Integer.parseInt(sourceDataType.substring( number1Offset, endOffset )) ;
+				column.numericPrecision = 0 ;
+				column.numericScale = 0 ;
+				sourceDataType = sourceDataType.substring( 0, number1Offset-1 ) ;
+			}
+		}
+		
+		sourceDataTypeAndLength = sourceDataType+","+column.columnMaximumLength+","+column.numericPrecision+","+column.numericScale ;
+		userDefineDataTypeAndLength = getUserDefineDataType( dbserverConf, sourceDataTypeAndLength ) ;
+		if( userDefineDataTypeAndLength != null ) {
+			String[] sa = userDefineDataTypeAndLength.split(",") ;
+			sourceDataType = sa[0] ;
+			if( ! sa[1].equals("*") )
+				column.columnMaximumLength = Long.parseLong(sa[1]) ;
+			if( ! sa[2].equals("*") )
+				column.numericPrecision = Integer.parseInt(sa[2]) ;
+			if( ! sa[3].equals("*") )
+				column.numericScale = Integer.parseInt(sa[3]) ;
+		}
+		
+		if( sourceDataType.equalsIgnoreCase("INTEGER") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_INTEGER ;
+			column.javaPropertyType = "int" ;
+			column.javaDefineTabsBetweenTypeAndName = 4 ;
+		} else if( sourceDataType.equalsIgnoreCase("REAL") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_DOUBLE ;
+			column.javaPropertyType = "double" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("NUMERIC") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_NUMBERIC ;
+			column.javaPropertyType = "BigDecimal" ;
+			column.javaDefineTabsBetweenTypeAndName = 2 ;
+		} else if( sourceDataType.equalsIgnoreCase("TEXT") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_VARCHAR ;
+			column.javaPropertyType = "String" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("VARCHAR") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_VARCHAR ;
+			column.javaPropertyType = "String" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("BLOB") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_BLOB ;
+			column.javaPropertyType = "byte[]" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else {
+			System.out.println( "*** ERROR : sourceDataType["+sourceDataType+"] not support" );
+			return -1;
+		}
+		
+		if( column.isPrimaryKey == true && column.dataType == SqlActionJdbcDataType.SQLACTION_DATA_TYPE_INTEGER )
+			column.isAutoIncrement = true ;
+		
+		return 0;
+	}
+
 	public static int fetchAllColumnsMetadataInTable( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception  {
 		PreparedStatement	prestmt = null ;
 		ResultSet			rs ;
@@ -375,6 +464,9 @@ public class SqlActionColumn {
 		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_ORACLE ) {
 			prestmt = conn.prepareStatement("SELECT column_name,data_default,nullable,data_type,data_length,data_precision,data_scale FROM user_tab_columns WHERE table_name=? ORDER BY column_id ASC") ;
 			prestmt.setString( 1, table.tableName );
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLITE ) {
+			prestmt = conn.prepareStatement("pragma table_info ('"+table.tableName+"')") ;
+			// prestmt.setString( 1, table.tableName );
 		}
 		rs = prestmt.executeQuery() ;
 		while( rs.next() ) {
@@ -386,6 +478,8 @@ public class SqlActionColumn {
 				nret = getColumnMetadataFromResultSet_for_POSTGRESQL( dbserverConf, sqlactionConf, database, table, column, rs );
 			} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_ORACLE ) {
 				nret = getColumnMetadataFromResultSet_for_ORACLE( dbserverConf, sqlactionConf, database, table, column, rs );
+			} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLITE ) {
+				nret = getColumnMetadataFromResultSet_for_SQLITE( dbserverConf, sqlactionConf, database, table, column, rs );
 			}
 			if( nret != 0 ) {
 				System.out.println( "*** ERROR : GetColumnFromResultSet_for__ failed["+nret+"] , database["+database.databaseName+"] table["+table.tableName+"] column["+column.columnName+"]" );

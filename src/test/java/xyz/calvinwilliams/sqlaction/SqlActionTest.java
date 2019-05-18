@@ -30,11 +30,11 @@ public class SqlActionTest {
 
 	public static int testSelectTable( Connection conn ) {
 
-		List<UserBaseSAO>		userList = null ;
-		List<UserBaseSAO>		userListForSelectOutput = null ;
+		List<UserBaseSAO>	userList = null ;
+		List<UserBaseSAO>	userListForSelectOutput = null ;
 		List<UserOrderSAO>	userOrderListForSelectOutput = null ;
 		int					nret = 0 ;
-
+		
 		try {
 			userList = new LinkedList<UserBaseSAO>() ;
 			nret = UserBaseSAO.SELECT_ALL_FROM_user_base( conn, userList ) ;

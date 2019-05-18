@@ -15,6 +15,7 @@ public class SqlActionDatabase {
 	final public static String	DBMS_MYSQL = "MySql" ;
 	final public static String	DBMS_POSTGRESQL = "PostgreSQL" ;
 	final public static String	DBMS_ORACLE = "Oracle" ;
+	final public static String	DBMS_SQLITE = "Sqlite" ;
 	
 	String						databaseName ;
 	List<SqlActionTable>		tableList ;

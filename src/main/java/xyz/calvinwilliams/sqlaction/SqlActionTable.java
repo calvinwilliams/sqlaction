@@ -51,8 +51,12 @@ public class SqlActionTable {
 			prestmt = conn.prepareStatement("SELECT table_name FROM user_tables WHERE table_name=?") ;
 			prestmt.setString( 1, tableName );
 		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLITE ) {
-			prestmt = conn.prepareStatement("select name,type from sqlite_master WHERE name=?") ;
+			prestmt = conn.prepareStatement("SELECT name,type FROM sqlite_master WHERE name=?") ;
 			prestmt.setString( 1, tableName );
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLSERVER ) {
+			prestmt = conn.prepareStatement("SELECT table_name,table_type FROM INFORMATION_SCHEMA.TABLES WHERE table_catalog=? AND table_name=?") ;
+			prestmt.setString( 1, database.databaseName );
+			prestmt.setString( 2, tableName );
 		}
 		rs = prestmt.executeQuery() ;
 //		if( rs.getRow() < 1 ) {
@@ -76,6 +80,10 @@ public class SqlActionTable {
 		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLITE ) {
 			tableType = rs.getString(2) ;
 			if( ! tableType.equalsIgnoreCase("table") )
+				return null;
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLSERVER ) {
+			tableType = rs.getString(2) ;
+			if( ! tableType.equalsIgnoreCase("BASE TABLE") )
 				return null;
 		}
 		database.tableList.add( table );

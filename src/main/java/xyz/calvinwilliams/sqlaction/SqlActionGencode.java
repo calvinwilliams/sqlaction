@@ -16,7 +16,7 @@ import xyz.calvinwilliams.okjson.*;
 
 public class SqlActionGencode {
 
-	final private static String				SQLACTION_VERSION = "0.2.6.0" ;
+	final private static String				SQLACTION_VERSION = "0.2.7.0" ;
 	
 	final public static String				SELECT_COUNT___ = "count(" ;
 	final private static String				COUNT___ = "_count_" ;
@@ -78,6 +78,8 @@ public class SqlActionGencode {
 					dbserverConf.dbms = SqlActionDatabase.DBMS_ORACLE ;
 				else if( dbserverConf.url.indexOf("sqlite") >= 0 )
 					dbserverConf.dbms = SqlActionDatabase.DBMS_SQLITE ;
+				else if( dbserverConf.url.indexOf("sqlserver") >= 0 )
+					dbserverConf.dbms = SqlActionDatabase.DBMS_SQLSERVER ;
 			}
 			
 			if( dbserverConf.dbms == null ) {
@@ -85,7 +87,8 @@ public class SqlActionGencode {
 			} else if( dbserverConf.dbms != SqlActionDatabase.DBMS_MYSQL
 				&& dbserverConf.dbms != SqlActionDatabase.DBMS_POSTGRESQL
 				&& dbserverConf.dbms != SqlActionDatabase.DBMS_ORACLE
-				&& dbserverConf.dbms != SqlActionDatabase.DBMS_SQLITE ) {
+				&& dbserverConf.dbms != SqlActionDatabase.DBMS_SQLITE
+				&& dbserverConf.dbms != SqlActionDatabase.DBMS_SQLSERVER ) {
 				System.out.println( "dbserverConf.dbms["+dbserverConf.dbms+"] not support" );
 				return;
 			}
@@ -196,7 +199,7 @@ public class SqlActionGencode {
 				sauFileBuffer.append( "import java.sql.PreparedStatement;\n" );
 				sauFileBuffer.append( "import java.sql.ResultSet;\n" );
 				sauFileBuffer.append( "\n" );
-				sauFileBuffer.append( "public class "+table.javaSauClassName+" {\n" );
+				sauFileBuffer.append( "public class "+table.javaSauClassName+" extends "+table.javaSaoClassName+" {\n" );
 				
 				saoFileBuffer.append( "\n" );
 				for( SqlActionColumn c : table.columnList ) {
@@ -435,7 +438,6 @@ public class SqlActionGencode {
 					}
 				}
 				
-				
 				saoFileBuffer.append( "\n" );
 				saoFileBuffer.append( "}\n" );
 				
@@ -477,7 +479,7 @@ public class SqlActionGencode {
 		
 		methodParameters.append( "Connection conn" );
 		for( SqlActionFromTableToken ct : parser.fromTableTokenList ) {
-			methodParameters.append( ", List<"+ct.table.javaSaoClassName+"> "+ct.table.javaObjectName+"ListForSelectOutput" );
+			methodParameters.append( ", List<"+ct.table.javaSauClassName+"> "+ct.table.javaObjectName+"ListForSelectOutput" );
 		}
 		
 		columnIndex = 0 ;
@@ -537,6 +539,8 @@ public class SqlActionGencode {
 				}
 			} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLITE ) {
 				parser.statementSql += " LIMIT ? OFFSET ?" ;
+			} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLSERVER ) {
+				parser.statementSql += " ORDER BY "+parser.pageKeyColumn.columnName+(parser.pageSort!=null?" "+parser.pageSort:"")+" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY" ;
 			}
 		}
 		
@@ -592,6 +596,10 @@ public class SqlActionGencode {
 					saoFileBuffer.append("\t\t").append("prestmt.setInt( ").append(columnIndex).append(", ").append("_"+(pageColumnIndex)+"_pageSize").append(" );\n");
 					columnIndex++;
 					saoFileBuffer.append("\t\t").append("prestmt.setInt( ").append(columnIndex).append(", ").append("_"+pageColumnIndex+"_pageSize*(_"+(pageColumnIndex+1)+"_pageNum-1)").append(" );\n");
+				} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLSERVER ) {
+					saoFileBuffer.append("\t\t").append("prestmt.setInt( ").append(columnIndex).append(", ").append("_"+pageColumnIndex+"_pageSize*(_"+(pageColumnIndex+1)+"_pageNum-1)").append(" );\n");
+					columnIndex++;
+					saoFileBuffer.append("\t\t").append("prestmt.setInt( ").append(columnIndex).append(", ").append("_"+(pageColumnIndex)+"_pageSize").append(" );\n");
 				}
 			}
 			saoFileBuffer.append( "\t\t" + "ResultSet rs = prestmt.executeQuery() ;\n" );
@@ -605,7 +613,7 @@ public class SqlActionGencode {
 		}
 		saoFileBuffer.append( "\t\t" + "while( rs.next() ) {\n" );
 		for( SqlActionFromTableToken ct : parser.fromTableTokenList ) {
-			saoFileBuffer.append( "\t\t\t" + ct.table.javaSaoClassName + " "+ct.table.javaObjectName+" = new "+ct.table.javaSaoClassName+"() ;\n" );
+			saoFileBuffer.append( "\t\t\t" + ct.table.javaSauClassName + " "+ct.table.javaObjectName+" = new "+ct.table.javaSauClassName+"() ;\n" );
 		}
 		if( parser.selectColumnTokenList.size() > 0 ) {
 			columnIndex = 0 ;
@@ -652,9 +660,7 @@ public class SqlActionGencode {
 		
 		columnIndex = 0 ;
 		for( SqlActionColumn c : table.columnList ) {
-			if( dbserverConf.dbms == SqlActionDatabase.DBMS_MYSQL && c.isAutoIncrement == true )
-				continue;
-			if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLITE && c.isAutoIncrement == true )
+			if( c.isAutoIncrement == true )
 				continue;
 			
 			columnIndex++;
@@ -667,9 +673,7 @@ public class SqlActionGencode {
 		
 		columnIndex = 0 ;
 		for( SqlActionColumn c : table.columnList ) {
-			if( dbserverConf.dbms == SqlActionDatabase.DBMS_MYSQL && c.isAutoIncrement == true )
-				continue;
-			if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLITE && c.isAutoIncrement == true )
+			if( c.isAutoIncrement == true )
 				continue;
 			
 			columnIndex++;
@@ -682,7 +686,7 @@ public class SqlActionGencode {
 		
 		parser.sql = statementSqlBuilder.toString() ;
 		
-		methodParameters.append( "Connection conn, " + table.javaSaoClassName + " " + table.javaObjectName );
+		methodParameters.append( "Connection conn, " + table.javaSauClassName + " " + table.javaObjectName );
 		
 		saoFileBuffer.append( "\n" );
 		OutAppendSql( saoFileBuffer, parser.sqlaction );
@@ -708,6 +712,18 @@ public class SqlActionGencode {
 		if( ( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL || dbserverConf.dbms == SqlActionDatabase.DBMS_ORACLE ) && parser.selectSeq != null && parser.selectKey != null ) {
 			saoFileBuffer.append( "\t\t" + "stmt = conn.createStatement() ;\n" );
 			saoFileBuffer.append( "\t\t" + "rs = stmt.executeQuery( \"SELECT NEXTVAL('"+parser.selectSeq+"')\" ) ;\n" );
+			saoFileBuffer.append( "\t\t" + "rs.next();\n" );
+			nret = SqlActionColumn.dumpSelectOutputColumn( "\t\t", 1, parser.selectKeyColumn, table.javaObjectName+"."+parser.selectKeyColumn.javaPropertyName, saoFileBuffer ) ;
+			if( nret != 0 ) {
+				System.out.println( "DumpSelectOutputColumn["+table.tableName+"]["+parser.selectKeyColumn.columnName+"] failed["+nret+"]" );
+				return nret;
+			}
+			saoFileBuffer.append( "\t\t" + "rs.close();\n" );
+			saoFileBuffer.append( "\t\t" + "stmt.close();\n" );
+			saoFileBuffer.append( "\t\t" + "\n" );
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLSERVER && parser.selectSeq != null && parser.selectKey != null ) {
+			saoFileBuffer.append( "\t\t" + "stmt = conn.createStatement() ;\n" );
+			saoFileBuffer.append( "\t\t" + "rs = stmt.executeQuery( \"SELECT NEXT VALUE FOR "+parser.selectSeq+"\" ) ;\n" );
 			saoFileBuffer.append( "\t\t" + "rs.next();\n" );
 			nret = SqlActionColumn.dumpSelectOutputColumn( "\t\t", 1, parser.selectKeyColumn, table.javaObjectName+"."+parser.selectKeyColumn.javaPropertyName, saoFileBuffer ) ;
 			if( nret != 0 ) {
@@ -758,7 +774,11 @@ public class SqlActionGencode {
 				saoFileBuffer.append( "\t\t" + "\n" );
 				saoFileBuffer.append( "\t\t" + "return count;\n" );
 			}
-		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL || dbserverConf.dbms == SqlActionDatabase.DBMS_ORACLE ) {
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL ) {
+			saoFileBuffer.append( "\t\t" + "int count = prestmt.executeUpdate() ;\n" );
+			saoFileBuffer.append( "\t\t" + "prestmt.close();\n" );
+			saoFileBuffer.append( "\t\t" + "return count;\n" );
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_ORACLE ) {
 			saoFileBuffer.append( "\t\t" + "int count = prestmt.executeUpdate() ;\n" );
 			saoFileBuffer.append( "\t\t" + "prestmt.close();\n" );
 			saoFileBuffer.append( "\t\t" + "return count;\n" );
@@ -786,6 +806,10 @@ public class SqlActionGencode {
 				saoFileBuffer.append( "\t\t" + "\n" );
 				saoFileBuffer.append( "\t\t" + "return count;\n" );
 			}
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLSERVER ) {
+			saoFileBuffer.append( "\t\t" + "int count = prestmt.executeUpdate() ;\n" );
+			saoFileBuffer.append( "\t\t" + "prestmt.close();\n" );
+			saoFileBuffer.append( "\t\t" + "return count;\n" );
 		}
 		saoFileBuffer.append( "\t" + "}\n" );
 		

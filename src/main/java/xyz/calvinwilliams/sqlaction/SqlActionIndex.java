@@ -35,6 +35,8 @@ public class SqlActionIndex {
 			return 0;
 		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLITE ) {
 			return 0;
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLSERVER ) {
+			return 0;
 		}
 		rs = prestmt.executeQuery() ;
 		while( rs.next() ) {

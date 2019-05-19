@@ -445,6 +445,121 @@ public class SqlActionColumn {
 		return 0;
 	}
 
+	public static int getColumnMetadataFromResultSet_for_SQLSERVER( DbServerConf dbserverConf, SqlActionConf sqlactionConf, SqlActionDatabase database, SqlActionTable table, SqlActionColumn column, ResultSet rs ) throws Exception {
+		String		sourceDataType ;
+		String		sourceDataTypeAndLength ;
+		String		userDefineDataTypeAndLength ;
+
+		column.columnName = rs.getString(1) ;
+		column.columnDefault = rs.getString(2) ;
+		if( rs.getString(3).equals("NO") )
+			column.isNullable = false ;
+		else
+			column.isNullable = true ;
+		sourceDataType = rs.getString(4) ;
+		column.columnMaximumLength = rs.getLong(5);
+		column.numericPrecision = rs.getInt(6) ;
+		column.numericScale = rs.getInt(7) ;
+		sourceDataTypeAndLength = sourceDataType+","+column.columnMaximumLength+","+column.numericPrecision+","+column.numericScale ;
+		userDefineDataTypeAndLength = getUserDefineDataType( dbserverConf, sourceDataTypeAndLength ) ;
+		if( userDefineDataTypeAndLength != null ) {
+			String[] sa = userDefineDataTypeAndLength.split(",") ;
+			sourceDataType = sa[0] ;
+			if( ! sa[1].equals("*") )
+				column.columnMaximumLength = Long.parseLong(sa[1]) ;
+			if( ! sa[2].equals("*") )
+				column.numericPrecision = Integer.parseInt(sa[2]) ;
+			if( ! sa[3].equals("*") )
+				column.numericScale = Integer.parseInt(sa[3]) ;
+		}
+		if( sourceDataType.equalsIgnoreCase("boolean") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_BIT ;
+			column.javaPropertyType = "boolean" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("smallint") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_SMALLINT ;
+			column.javaPropertyType = "short" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("tinyint") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_TINYINT ;
+			column.javaPropertyType = "short" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("int") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_INTEGER ;
+			column.javaPropertyType = "int" ;
+			column.javaDefineTabsBetweenTypeAndName = 4 ;
+		} else if( sourceDataType.equalsIgnoreCase("bigint") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_BIGINT ;
+			column.javaPropertyType = "long" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("real") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_REAL ;
+			column.javaPropertyType = "float" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("float") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_FLOAT ;
+			column.javaPropertyType = "double" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("decimal") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_DECIMAL ;
+			column.javaPropertyType = "BigDecimal" ;
+			column.javaDefineTabsBetweenTypeAndName = 2 ;
+		} else if( sourceDataType.equalsIgnoreCase("numeric") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_NUMBERIC ;
+			column.javaPropertyType = "BigDecimal" ;
+			column.javaDefineTabsBetweenTypeAndName = 2 ;
+		} else if( sourceDataType.equalsIgnoreCase("money") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_NUMBERIC ;
+			column.javaPropertyType = "BigDecimal" ;
+			column.javaDefineTabsBetweenTypeAndName = 2 ;
+		} else if( sourceDataType.equalsIgnoreCase("char") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_CHAR ;
+			column.javaPropertyType = "String" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("varchar") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_VARCHAR ;
+			column.javaPropertyType = "String" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("text") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_LONGVARCHAR ;
+			column.javaPropertyType = "String" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("date") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_DATE ;
+			column.javaPropertyType = "java.sql.Date" ;
+			column.javaDefineTabsBetweenTypeAndName = 1 ;
+		} else if( sourceDataType.equalsIgnoreCase("time") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_TIME ;
+			column.javaPropertyType = "java.sql.Time" ;
+			column.javaDefineTabsBetweenTypeAndName = 1 ;
+		} else if( sourceDataType.equalsIgnoreCase("timestamp") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_TIMESTAMP ;
+			column.javaPropertyType = "java.sql.Timestamp" ;
+			column.javaDefineTabsBetweenTypeAndName = 2 ;
+		} else if( sourceDataType.equalsIgnoreCase("binary") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_BINARY ;
+			column.javaPropertyType = "byte[]" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("varbinary") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_VARBINARY ;
+			column.javaPropertyType = "byte[]" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("xml") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_LONGVARCHAR ;
+			column.javaPropertyType = "String" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else if( sourceDataType.equalsIgnoreCase("image") ) {
+			column.dataType = SqlActionJdbcDataType.SQLACTION_DATA_TYPE_LONGVARBINARY ;
+			column.javaPropertyType = "byte[]" ;
+			column.javaDefineTabsBetweenTypeAndName = 3 ;
+		} else {
+			System.out.println( "*** ERROR : sourceDataType["+sourceDataType+"] not support" );
+			return -1;
+		}
+
+		return 0;
+	}
+	
 	public static int fetchAllColumnsMetadataInTable( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception  {
 		PreparedStatement	prestmt = null ;
 		ResultSet			rs ;
@@ -467,6 +582,10 @@ public class SqlActionColumn {
 		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLITE ) {
 			prestmt = conn.prepareStatement("pragma table_info ('"+table.tableName+"')") ;
 			// prestmt.setString( 1, table.tableName );
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLSERVER ) {
+			prestmt = conn.prepareStatement("SELECT column_name,column_default,is_nullable,data_type,character_maximum_length,numeric_precision,numeric_scale FROM INFORMATION_SCHEMA.COLUMNS WHERE table_catalog=? AND table_name=? ORDER BY ordinal_position ASC") ;
+			prestmt.setString( 1, database.databaseName );
+			prestmt.setString( 2, table.tableName );
 		}
 		rs = prestmt.executeQuery() ;
 		while( rs.next() ) {
@@ -480,6 +599,8 @@ public class SqlActionColumn {
 				nret = getColumnMetadataFromResultSet_for_ORACLE( dbserverConf, sqlactionConf, database, table, column, rs );
 			} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLITE ) {
 				nret = getColumnMetadataFromResultSet_for_SQLITE( dbserverConf, sqlactionConf, database, table, column, rs );
+			} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLSERVER ) {
+				nret = getColumnMetadataFromResultSet_for_SQLSERVER( dbserverConf, sqlactionConf, database, table, column, rs );
 			}
 			if( nret != 0 ) {
 				System.out.println( "*** ERROR : GetColumnFromResultSet_for__ failed["+nret+"] , database["+database.databaseName+"] table["+table.tableName+"] column["+column.columnName+"]" );

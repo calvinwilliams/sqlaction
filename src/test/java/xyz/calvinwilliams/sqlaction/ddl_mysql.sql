@@ -4,7 +4,7 @@ CREATE TABLE `user_base` (
   `gender` varchar(3) COLLATE utf8mb4_bin NOT NULL COMMENT '性别',
   `age` smallint(6) NOT NULL COMMENT '年龄',
   `address` varchar(100) COLLATE utf8mb4_bin NOT NULL COMMENT '地址',
-  `level` int(11) NOT NULL COMMENT '级别',
+  `lvl` int(11) NOT NULL COMMENT '级别',
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_base_idx1` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin

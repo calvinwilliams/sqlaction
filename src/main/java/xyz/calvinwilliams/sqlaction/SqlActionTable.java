@@ -141,4 +141,22 @@ public class SqlActionTable {
 		
 		return null;
 	}
+	
+	public static SqlActionTable findTableByJavaSaoClassName( List<SqlActionTable> sqlactionTableList, String javaSaoClassName ) {
+		for( SqlActionTable t : sqlactionTableList ) {
+			if( t.javaSaoClassName.equalsIgnoreCase(javaSaoClassName) )
+				return t;
+		}
+		
+		return null;
+	}
+	
+	public static SqlActionTable findTableByJavaSauClassName( List<SqlActionTable> sqlactionTableList, String javaSauClassName ) {
+		for( SqlActionTable t : sqlactionTableList ) {
+			if( t.javaSauClassName.equalsIgnoreCase(javaSauClassName) )
+				return t;
+		}
+		
+		return null;
+	}
 }

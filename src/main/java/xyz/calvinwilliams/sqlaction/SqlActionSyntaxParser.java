@@ -13,6 +13,9 @@ import java.util.*;
 
 public class SqlActionSyntaxParser {
 
+	public SqlActionPredicateEnum			sqlPredicate ;
+	public SqlActionStatementEnum			sqlStatement ;
+	
 	public String							selectHint ;
 	public boolean							selectAllColumn ;
 	public List<SqlActionSelectColumnToken>	selectColumnTokenList ;
@@ -34,14 +37,19 @@ public class SqlActionSyntaxParser {
 	public SqlActionColumn					pageKeyColumn ;
 	String									pageSort ;
 	
+	public List<SqlActionSelectColumnTokenForAdvancedMode>	selectColumnTokenForAdvancedModeList ;
+	public List<SqlActionFromTableTokenForAdvancedMode>		fromTableTokenForAdvancedModeList ;
+	public List<SqlActionWhereColumnTokenForAdvancedMode>	whereColumnTokenForAdvancedModeList ;
+	
 	String									sqlaction ;
 	String									sql ;
-	String									statementSql ;
-	String									methodName ;
-	String									statementInterceptorMethodName ;
+	boolean									advancedMode ;
+	String									prepareSql ;
 	String									selectSeq ;
 	String									selectKey ;
 	public SqlActionColumn					selectKeyColumn ;
+	String									methodName ;
+	String									statementInterceptorMethodName ;
 	
 	public int parseStatementSyntax_FROM( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception {
 		SqlActionLexicalParser	lexicalParser ;
@@ -163,7 +171,7 @@ public class SqlActionSyntaxParser {
 		return 0;
 	}
 	
-	public int parseSyntaxExceptFROM( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) {
+	public int parseStatementSyntax_ExceptFROM( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) {
 		SqlActionSelectColumnToken	selectColumnToken = null ;
 		SqlActionSetColumnToken		setColumnToken = null ;
 		SqlActionWhereColumnToken	whereColumnToken = null ;
@@ -181,6 +189,9 @@ public class SqlActionSyntaxParser {
 			return 0;
 		while( token != null ) {
 			if( token.equalsIgnoreCase("SELECT") ) {
+				if( sqlPredicate == SqlActionPredicateEnum.SQLACTION_PREDICATE_NONE )
+					sqlPredicate = SqlActionPredicateEnum.SQLACTION_PREDICATE_SELECT ;
+				
 				// Support for
 				// SELECT * (FROM)
 				// SELECT [table.]column,... (FROM)
@@ -361,6 +372,9 @@ public class SqlActionSyntaxParser {
 					}
 				}
 			} else if( token.equalsIgnoreCase("INSERT") ) {
+				if( sqlPredicate == SqlActionPredicateEnum.SQLACTION_PREDICATE_NONE )
+					sqlPredicate = SqlActionPredicateEnum.SQLACTION_PREDICATE_INSERT ;
+				
 				String token1 = lexicalParser.getSqlToken() ;
 				if( token1 == null ) {
 					System.out.println( "sql["+sql+"] invalid" );
@@ -390,6 +404,9 @@ public class SqlActionSyntaxParser {
 					return -34;
 				}
 			} else if( token.equalsIgnoreCase("UPDATE") ) {
+				if( sqlPredicate == SqlActionPredicateEnum.SQLACTION_PREDICATE_NONE )
+					sqlPredicate = SqlActionPredicateEnum.SQLACTION_PREDICATE_UPDATE ;
+				
 				String token1 = lexicalParser.getSqlToken() ;
 				if( token1 == null ) {
 					System.out.println( "sql["+sql+"] invalid" );
@@ -413,6 +430,9 @@ public class SqlActionSyntaxParser {
 					return -33;
 				}
 			} else if( token.equalsIgnoreCase("DELETE") ) {
+				if( sqlPredicate == SqlActionPredicateEnum.SQLACTION_PREDICATE_NONE )
+					sqlPredicate = SqlActionPredicateEnum.SQLACTION_PREDICATE_DELETE ;
+				
 				String token1 = lexicalParser.getSqlToken() ;
 				if( token1 == null ) {
 					//        1
@@ -710,4 +730,173 @@ public class SqlActionSyntaxParser {
 		return 0;
 	}
 	
+	public int parseStatementSyntaxForAdvancedMode_FROM( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception {
+		SqlActionFromTableTokenForAdvancedMode		fromTableTokenForAdvancedMode = null ;
+		
+		SqlActionLexicalParser lexicalParser = new SqlActionLexicalParser() ;
+		lexicalParser.setSqlString(sql);
+		
+		fromTableTokenForAdvancedModeList = new LinkedList<SqlActionFromTableTokenForAdvancedMode>() ;
+		
+		while(true) {
+			String token = lexicalParser.getSqlToken() ;
+			if( token == null )
+				break;
+			
+			if( token.equalsIgnoreCase("SELECT") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_SELECT ;
+			} else if( token.equalsIgnoreCase("INSERT") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_INSERT ;
+			} else if( token.equalsIgnoreCase("UPDATE") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_UPDATE ;
+			} else if( token.equalsIgnoreCase("DELETE") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_DELETE ;
+			} else if( token.equalsIgnoreCase("FROM") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_FROM ;
+			} else if( token.equalsIgnoreCase("SET") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_SET ;
+			} else if( token.equalsIgnoreCase("WHERE") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_WHERE ;
+			} else if( token.equalsIgnoreCase("GROUP") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_GROUP ;
+			} else if( token.equalsIgnoreCase("ORDER") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_ORDER ;
+			} else if( token.equalsIgnoreCase("JAVING") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_HAVING ;
+			} else if( token.equalsIgnoreCase("OFFSET") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_OFFSET ;
+			} else if( token.equalsIgnoreCase("LIMIT") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_LIMIT ;
+			} else {
+				if( sqlStatement == SqlActionStatementEnum.SQLACTION_STATEMENT_FROM || sqlStatement == SqlActionStatementEnum.SQLACTION_STATEMENT_UPDATE ) {
+					int beginPos = token.indexOf("#{") ;
+					if( beginPos >= 0 ) {
+						int endPos = token.indexOf("}") ;
+						if( endPos < 0 ) {
+							System.out.println( "expect '}' in '"+token+"'" );
+							return -101;
+						}
+						
+						String tableName = token.substring( beginPos+2, endPos ) ;
+						fromTableTokenForAdvancedMode = new SqlActionFromTableTokenForAdvancedMode() ;
+						fromTableTokenForAdvancedMode.table = SqlActionTable.fetchTableMetadataInDatabase( dbserverConf, sqlactionConf, conn, database, table, tableName ) ;
+						if( fromTableTokenForAdvancedMode.table == null ) {
+							System.out.println( "\t" + "*** ERROR : tableName["+tableName+"] not found in database["+database.databaseName+"]" );
+							return -102;
+						}
+						fromTableTokenForAdvancedModeList.add(fromTableTokenForAdvancedMode);
+					}
+				}
+			}
+		}
+		
+		return 0;
+	}
+	
+	public int parseStatementSyntaxForAdvancedMode_ExceptFROM( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception {
+		SqlActionSelectColumnTokenForAdvancedMode	selectColumnTokenForAdvancedMode = null ;
+		SqlActionWhereColumnTokenForAdvancedMode	whereColumnTokenForAdvancedMode = null ;
+		
+		SqlActionLexicalParser lexicalParser = new SqlActionLexicalParser() ;
+		lexicalParser.setSqlString(sql);
+		
+		selectColumnTokenForAdvancedModeList = new LinkedList<SqlActionSelectColumnTokenForAdvancedMode>() ;
+		whereColumnTokenForAdvancedModeList = new LinkedList<SqlActionWhereColumnTokenForAdvancedMode>() ;
+		
+		while(true) {
+			String token = lexicalParser.getSqlToken() ;
+			if( token == null )
+				break;
+			
+			if( token.equalsIgnoreCase("SELECT") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_SELECT ;
+			} else if( token.equalsIgnoreCase("INSERT") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_INSERT ;
+			} else if( token.equalsIgnoreCase("UPDATE") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_UPDATE ;
+			} else if( token.equalsIgnoreCase("DELETE") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_DELETE ;
+			} else if( token.equalsIgnoreCase("FROM") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_FROM ;
+			} else if( token.equalsIgnoreCase("SET") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_SET ;
+			} else if( token.equalsIgnoreCase("WHERE") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_WHERE ;
+			} else if( token.equalsIgnoreCase("GROUP") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_GROUP ;
+			} else if( token.equalsIgnoreCase("ORDER") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_ORDER ;
+			} else if( token.equalsIgnoreCase("JAVING") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_HAVING ;
+			} else if( token.equalsIgnoreCase("OFFSET") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_OFFSET ;
+			} else if( token.equalsIgnoreCase("LIMIT") ) {
+				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_LIMIT ;
+			} else {
+				if( sqlStatement == SqlActionStatementEnum.SQLACTION_STATEMENT_SELECT ) {
+					int beginPos = token.indexOf("#{") ;
+					if( beginPos >= 0 ) {
+						int endPos = token.indexOf("}") ;
+						if( endPos < 0 ) {
+							System.out.println( "expect '}' in '"+token+"'" );
+							return -101;
+						}
+						
+						int dotPos = token.indexOf(".",beginPos+2) ;
+						if( dotPos < 0 ) {
+							System.out.println( "expect '}' in '"+token+"'" );
+							return -1;
+						}
+						
+						selectColumnTokenForAdvancedMode = new SqlActionSelectColumnTokenForAdvancedMode() ;
+						String javaSauClassName = token.substring( beginPos+2, dotPos ) ;
+						String javaPropertyName =  token.substring( dotPos+1, endPos ) ;
+						selectColumnTokenForAdvancedMode.table = SqlActionTable.findTableByJavaSauClassName( database.tableList, javaSauClassName ) ;
+						if( selectColumnTokenForAdvancedMode.table == null ) {
+							System.out.println( "\t" + "*** ERROR : javaSauClassName["+javaSauClassName+"] not found" );
+							return -1;
+						}
+						selectColumnTokenForAdvancedMode.column = SqlActionColumn.findColumnByJavaPropertyName( selectColumnTokenForAdvancedMode.table.columnList, javaPropertyName ) ;
+						if( selectColumnTokenForAdvancedMode.column == null ) {
+							System.out.println( "\t" + "*** ERROR : javaPropertyName["+javaPropertyName+"] not found in javaSaoClassName["+javaSauClassName+"]" );
+							return -1;
+						}
+						selectColumnTokenForAdvancedModeList.add(selectColumnTokenForAdvancedMode);
+					}
+				} else if( sqlStatement == SqlActionStatementEnum.SQLACTION_STATEMENT_WHERE || sqlStatement == SqlActionStatementEnum.SQLACTION_STATEMENT_SET ) {
+					int beginPos = token.indexOf("#{") ;
+					if( beginPos >= 0 ) {
+						int endPos = token.indexOf("}") ;
+						if( endPos < 0 ) {
+							System.out.println( "expect '}' in '"+token+"'" );
+							return -101;
+						}
+						
+						int dotPos = token.indexOf(".",beginPos+2) ;
+						if( dotPos < 0 ) {
+							System.out.println( "expect '}' in '"+token+"'" );
+							return -1;
+						}
+						
+						whereColumnTokenForAdvancedMode = new SqlActionWhereColumnTokenForAdvancedMode() ;
+						String javaSauClassName = token.substring( beginPos+2, dotPos ) ;
+						String javaPropertyName =  token.substring( dotPos+1, endPos ) ;
+						whereColumnTokenForAdvancedMode.table = SqlActionTable.findTableByJavaSauClassName( database.tableList, javaSauClassName ) ;
+						if( whereColumnTokenForAdvancedMode.table == null ) {
+							System.out.println( "\t" + "*** ERROR : javaSauClassName["+javaSauClassName+"] not found" );
+							return -1;
+						}
+						whereColumnTokenForAdvancedMode.column = SqlActionColumn.findColumnByJavaPropertyName( whereColumnTokenForAdvancedMode.table.columnList, javaPropertyName ) ;
+						if( whereColumnTokenForAdvancedMode.column == null ) {
+							System.out.println( "\t" + "*** ERROR : javaPropertyName["+javaPropertyName+"] not found in javaSaoClassName["+javaSauClassName+"]" );
+							return -1;
+						}
+						whereColumnTokenForAdvancedModeList.add(whereColumnTokenForAdvancedMode);
+					}
+				}
+			}
+		}
+		
+		return 0;
+	}
 }

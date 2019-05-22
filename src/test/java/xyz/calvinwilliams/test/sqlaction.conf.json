@@ -30,11 +30,26 @@
 					WHERE user_base.name=? AND user_base.id=user_order.user_id
 					@@METHOD(queryUserAndOrderByName)" ,
 				"SELECT u.name,u.address,o.item_name,o.amount,o.total_price FROM user_base u,user_order o WHERE u.name=? AND u.id=o.user_id @@STATEMENT_INTERCEPTOR(statementInterceptorForQueryUserAndOrderByName)" ,
+				"SELECT user_base.name				#{UserBaseSAU.name}
+					,user_order.item_name			#{UserOrderSAU.itemName}
+					,SUM(user_order.amount)			#{UserOrderSAU.amount}
+					,SUM(user_order.total_price)	#{UserOrderSAU.totalPrice}
+					FROM user_base		#{user_base}
+						,user_order		#{user_order}
+					WHERE user_order.user_id=(
+												SELECT id
+												FROM user_base
+												WHERE id>=?		#{UserOrderSAU.id}
+											)
+						AND user_order.user_id=user_base.id
+					GROUP BY user_base.name
+					ORDER BY user_base.name
+					@@ADVANCEDMODE @@METHOD(statUsersAmountAndTotalPrice)" ,
 				"INSERT INTO user_order @@SELECTSEQ(user_order_seq_id) @@SELECTKEY(id)" ,
 				"UPDATE user_order SET total_price=? WHERE user_id=?" ,
 				"DELETE FROM user_order"
 			]
 		}
 	] ,
-	"javaPackage" : "xyz.calvinwilliams.sqlaction"
+	"javaPackage" : "xyz.calvinwilliams.test"
 }

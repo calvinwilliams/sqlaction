@@ -8,7 +8,7 @@
 
 package xyz.calvinwilliams.sqlaction;
 
-public enum SqlActionJdbcDataType {
+public enum SqlActionJdbcDataTypeEnum {
 	SQLACTION_DATA_TYPE_BIT ,
 	SQLACTION_DATA_TYPE_TINYINT ,
 	SQLACTION_DATA_TYPE_SMALLINT ,

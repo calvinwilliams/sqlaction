@@ -34,4 +34,13 @@ public class SqlActionFromTableToken {
 		
 		return null;
 	}
+	
+//	public static SqlActionTable findOrFetchTableMetadataInDatabase( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable tableCache, String tableName ) throws Exception {
+//		SqlActionTable table = SqlActionTable.findTable( database.tableList, tableName ) ;
+//		if( table != null ) {
+//			return table;
+//		}
+//		
+//		return SqlActionTable.fetchTableMetadataInDatabase( dbserverConf, sqlactionConf, conn, database, tableCache, tableName ) ;
+//	}
 }

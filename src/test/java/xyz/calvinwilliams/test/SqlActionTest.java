@@ -6,7 +6,7 @@
  * See the file LICENSE in base directory.
  */
 
-package xyz.calvinwilliams.sqlaction;
+package xyz.calvinwilliams.test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

@@ -1,2 +1,1 @@
 * Eclipse插件触发执行工具sqlaction
-* 暂不支持函数（但支持COUNT(*)）、子查询

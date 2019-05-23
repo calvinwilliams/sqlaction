@@ -32,8 +32,10 @@ sqlaction is a Database persistence layer tool based auto-gen JDBC code.
 sqlaction core advantage :
 
 1. Multi-DBMS supported: MySQL,PostgreSQL,Oracle,Sqlite,SqlServer
-1. Common paging-sql syntax configuration
+1. Abstract fetch-last-insert-rowid-sql syntax configuration
+1. Abstract paging-sql syntax configuration
 1. Performance faster 20% than MyBatis
+1. Support complex SQL on advanced-mode
 
 # 2. A demo
 
@@ -912,13 +914,13 @@ Apache Maven
 <dependency>
   <groupId>xyz.calvinwilliams</groupId>
   <artifactId>sqlaction</artifactId>
-  <version>0.2.7.0</version>
+  <version>0.2.8.0</version>
 </dependency>
 ```
 
 Gradle Kotlin DSL
 ```
-compile("xyz.calvinwilliams:sqlaction:0.2.7.0")
+compile("xyz.calvinwilliams:sqlaction:0.2.8.0")
 ```
 
 # 8. About Author

@@ -21,6 +21,7 @@ sqlaction - 自动生成JDBC代码的数据库持久层工具
         - [3.5.3. 分页](#353-分页)
         - [3.5.4. 拦截器](#354-拦截器)
             - [3.5.4.1. SQL拦截器](#3541-sql拦截器)
+        - [高级模式](#高级模式)
 - [4. 为什么这么设计？](#4-为什么这么设计)
 - [5. 与MyBatis的开发量比较](#5-与mybatis的开发量比较)
 - [6. 与MyBatis的性能比较](#6-与mybatis的性能比较)
@@ -52,8 +53,10 @@ sqlaction - 自动生成JDBC代码的数据库持久层工具
 
 `sqlaction`核心优势：
 1. 多数据库支持，目前支持有MySQL、PostgreSQL、Oracle、Sqlite、SqlServer
-1. 原生自带通用分页功能，不同数据库用一致地分页配置表达
+1. 原生自带取自增列值功能，不同数据库用一致地配置语法表达
+1. 原生自带通用分页功能，不同数据库用一致地分页配置语法表达
 1. 执行效率比MyBatis快约20%
+1. 高级模式支持任意复杂SQL
 
 # 2. 一个DEMO
 
@@ -729,6 +732,70 @@ public class UserOrderSAU {
 
 由于`XxxSau.java`只有在首次执行`sqlaction`才会自动生成，后面增加的拦截器方法框架源代码虽然不会自动添加到`XxxSau.java`中，但会作为注释出现在`XxxSao.java`中，方便开发者复制粘贴过去。
 
+### 高级模式
+
+之前介绍的普通模式支持SQL语法有限（详见章节 配置文件sqlaction.conf.json），如果要支持复杂SQL（AP场景）可使用高级模式。
+
+在sqlaction.conf.json的SQL中加上元配置`@@ADVANCEDMODE`即可开启这条SQL的高级模式。高级模式对SQL书写几乎没有任何限制，但引入一定的配置复杂性，示例：
+
+```
+				"SELECT user_base.name				#{UserBaseSAU.name}
+					,user_order.item_name			#{UserOrderSAU.itemName}
+					,SUM(user_order.amount)			#{UserOrderSAU.amount}
+					,SUM(user_order.total_price)	#{UserOrderSAU.totalPrice}
+					FROM user_base		#{user_base}
+						,user_order		#{user_order}
+					WHERE user_order.user_id IN (
+												SELECT id
+												FROM user_base
+												WHERE id>=?		#{UserOrderSAU.id}
+											)
+						AND user_order.user_id=user_base.id
+					GROUP BY user_base.name
+					ORDER BY user_base.name
+					@@ADVANCEDMODE @@METHOD(statUsersAmountAndTotalPrice)" ,
+```
+
+SQL的FROM后必须配置有`#{表名}`，在SELECT后的每一个字段后都要有`#{SAU类名.类属性名}`绑定以便查询结果输出，在WHERE或SET后的每一个字段后都要有`#{SAU类名.类属性名}`绑定以便查询请求输入，给足了这些信息就能让工具自动生成完整的JDBC源代码了。
+
+之前示例action生成的源代码：
+
+```
+	// SELECT user_base.name				#{UserBaseSAU.name}
+	// 					,user_order.item_name			#{UserOrderSAU.itemName}
+	// 					,SUM(user_order.amount)			#{UserOrderSAU.amount}
+	// 					,SUM(user_order.total_price)	#{UserOrderSAU.totalPrice}
+	// 					FROM user_base		#{user_base}
+	// 						,user_order		#{user_order}
+	// 					WHERE user_order.user_id IN (
+	// 												SELECT id
+	// 												FROM user_base
+	// 												WHERE id>=?		#{UserOrderSAU.id}
+	// 											)
+	// 						AND user_order.user_id=user_base.id
+	// 					GROUP BY user_base.name
+	// 					ORDER BY user_base.name
+	// 					@@ADVANCEDMODE @@METHOD(statUsersAmountAndTotalPrice)
+	public static int statUsersAmountAndTotalPrice( Connection conn, List<UserBaseSAU> userBaseListForSelectOutput, List<UserOrderSAU> userOrderListForSelectOutput, int _1_UserOrderSAU_id ) throws Exception {
+		PreparedStatement prestmt = conn.prepareStatement( "SELECT user_base.name ,user_order.item_name ,SUM(user_order.amount) ,SUM(user_order.total_price) FROM user_base ,user_order WHERE user_order.user_id IN ( SELECT id FROM user_base WHERE id>=? ) AND user_order.user_id=user_base.id GROUP BY user_base.name ORDER BY user_base.name" ) ;
+		prestmt.setInt( 1, _1_UserOrderSAU_id );
+		ResultSet rs = prestmt.executeQuery() ;
+		while( rs.next() ) {
+			UserBaseSAU userBase = new UserBaseSAU() ;
+			UserOrderSAU userOrder = new UserOrderSAU() ;
+			userBase.name = rs.getString( 1 ) ;
+			userOrder.itemName = rs.getString( 2 ) ;
+			userOrder.amount = rs.getInt( 3 ) ;
+			userOrder.totalPrice = rs.getDouble( 4 ) ;
+			userBaseListForSelectOutput.add(userBase) ;
+			userOrderListForSelectOutput.add(userOrder) ;
+		}
+		rs.close();
+		prestmt.close();
+		return userBaseListForSelectOutput.size();
+	}
+```
+
 # 4. 为什么这么设计？
 
 数据库应用接口层框架/工具对于表结构的配置源的有两派思路，一派是定义在配置文件中，好处是可以做不同DBMS的统一规范，如同一种数据类型的统一表达，坏处是与数据库之间同步较麻烦，另一派是定义在数据库中，需要用时读数据库中的元信息，好处是可以利用数据库设计工具，图形化界面管理表结构，还能自动生成E-R图，坏处是不同DBMS存在标准差异。`sqlaction`采用后一派思路，在数据类型与JAVA属性类型之间建立多DBMS映射表来解决标准差异。
@@ -1312,13 +1379,13 @@ Apache Maven
 <dependency>
   <groupId>xyz.calvinwilliams</groupId>
   <artifactId>sqlaction</artifactId>
-  <version>0.2.7.0</version>
+  <version>0.2.8.0</version>
 </dependency>
 ```
 
 Gradle Kotlin DSL
 ```
-compile("xyz.calvinwilliams:sqlaction:0.2.7.0")
+compile("xyz.calvinwilliams:sqlaction:0.2.8.0")
 ```
 
 # 9. 关于作者

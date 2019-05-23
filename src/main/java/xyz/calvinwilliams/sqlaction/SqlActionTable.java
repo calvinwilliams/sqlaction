@@ -113,6 +113,8 @@ public class SqlActionTable {
 		table.javaSauFileName = table.javaSauClassName + ".java" ;
 		table.javaObjectName = sb.toString().substring(0,1).toLowerCase(Locale.getDefault()) + sb.toString().substring(1) ;
 		
+		travelTable( dbserverConf, sqlactionConf, database, tableName, 1 );
+		
 		return table;
 	}
 	

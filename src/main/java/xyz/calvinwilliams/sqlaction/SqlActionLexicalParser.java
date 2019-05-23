@@ -66,6 +66,24 @@ public class SqlActionLexicalParser {
 				} else {
 					return new String(sql,beginOffset,1);
 				}
+			} else if( sql[parserOffset] == '#' ) {
+				if( parserOffset != beginOffset ) {
+					return new String(sql,beginOffset,parserOffset-beginOffset);
+				}
+				
+				parserOffset++;
+				if( sql[parserOffset] == '{' ) {
+					parserOffset++;
+					while(true) {
+						if( sql[parserOffset] == '}' )
+							break;
+						parserOffset++;
+					}
+					parserOffset++;
+					return new String(sql,beginOffset,parserOffset-beginOffset);
+				} else {
+					return new String(sql,beginOffset,1);
+				}
 			} else if( sql[parserOffset] == '.' ) {
 				if( parserOffset != beginOffset ) {
 					return new String(sql,beginOffset,parserOffset-beginOffset);

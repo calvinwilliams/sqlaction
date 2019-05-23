@@ -36,7 +36,7 @@
 					,SUM(user_order.total_price)	#{UserOrderSAU.totalPrice}
 					FROM user_base		#{user_base}
 						,user_order		#{user_order}
-					WHERE user_order.user_id=(
+					WHERE user_order.user_id IN (
 												SELECT id
 												FROM user_base
 												WHERE id>=?		#{UserOrderSAU.id}
@@ -47,7 +47,8 @@
 					@@ADVANCEDMODE @@METHOD(statUsersAmountAndTotalPrice)" ,
 				"INSERT INTO user_order @@SELECTSEQ(user_order_seq_id) @@SELECTKEY(id)" ,
 				"UPDATE user_order SET total_price=? WHERE user_id=?" ,
-				"DELETE FROM user_order"
+				"DELETE FROM user_order" ,
+				"DELETE FROM user_order WHERE user_id=? #{UserOrderSAU.userId} @@ADVANCEDMODE @@METHOD(removeUserOrder)"
 			]
 		}
 	] ,

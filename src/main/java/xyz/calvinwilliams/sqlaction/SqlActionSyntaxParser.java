@@ -13,43 +13,42 @@ import java.util.*;
 
 public class SqlActionSyntaxParser {
 
-	public SqlActionPredicateEnum			sqlPredicate ;
-	public SqlActionStatementEnum			sqlStatement ;
+	SqlActionPredicateEnum				sqlPredicate ;
 	
-	public String							selectHint ;
-	public boolean							selectAllColumn ;
-	public List<SqlActionSelectColumnToken>	selectColumnTokenList ;
-	public List<SqlActionFromTableToken>	fromTableTokenList ;
+	String								selectHint ;
+	boolean								selectAllColumn ;
+	List<SqlActionSelectColumnToken>	selectColumnTokenList ;
+	List<SqlActionFromTableToken>		fromTableTokenList ;
 	
-	public String							insertTableName ;
+	String								insertTableName ;
 	
-	public String							updateTableName ;
-	public List<SqlActionSetColumnToken>	setColumnTokenList ;
+	String								updateTableName ;
+	List<SqlActionSetColumnToken>		setColumnTokenList ;
 	
-	public String							deleteTableName ;
+	String								deleteTableName ;
 	
-	public boolean							hasWhereStatement ;
-	public List<SqlActionWhereColumnToken>	whereColumnTokenList ;
+	boolean								hasWhereStatement ;
+	List<SqlActionWhereColumnToken>		whereColumnTokenList ;
 	
-	public String							otherTokens ;
+	String								otherTokens ;
 	
-	String									pageKey ;
-	public SqlActionColumn					pageKeyColumn ;
-	String									pageSort ;
+	String								pageKey ;
+	SqlActionColumn						pageKeyColumn ;
+	String								pageSort ;
 	
-	public List<SqlActionSelectColumnTokenForAdvancedMode>	selectColumnTokenForAdvancedModeList ;
-	public List<SqlActionFromTableTokenForAdvancedMode>		fromTableTokenForAdvancedModeList ;
-	public List<SqlActionWhereColumnTokenForAdvancedMode>	whereColumnTokenForAdvancedModeList ;
+	List<SqlActionSelectColumnTokenForAdvancedMode>	selectColumnTokenForAdvancedModeList ;
+	List<SqlActionFromTableTokenForAdvancedMode>	fromTableTokenForAdvancedModeList ;
+	List<SqlActionWhereColumnTokenForAdvancedMode>	whereColumnTokenForAdvancedModeList ;
 	
-	String									sqlaction ;
-	String									sql ;
-	boolean									advancedMode ;
-	String									prepareSql ;
-	String									selectSeq ;
-	String									selectKey ;
-	public SqlActionColumn					selectKeyColumn ;
-	String									methodName ;
-	String									statementInterceptorMethodName ;
+	String								sqlaction ;
+	String								sql ;
+	boolean								advancedMode ;
+	String								prepareSql ;
+	String								selectSeq ;
+	String								selectKey ;
+	SqlActionColumn						selectKeyColumn ;
+	String								methodName ;
+	String								statementInterceptorMethodName ;
 	
 	public int parseStatementSyntax_FROM( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception {
 		SqlActionLexicalParser	lexicalParser ;
@@ -58,8 +57,6 @@ public class SqlActionSyntaxParser {
 		
 		lexicalParser = new SqlActionLexicalParser() ;
 		lexicalParser.setSqlString(sql);
-		
-		fromTableTokenList = new LinkedList<SqlActionFromTableToken>() ;
 		
 		while(true) {
 			token = lexicalParser.getSqlToken() ;
@@ -180,9 +177,7 @@ public class SqlActionSyntaxParser {
 		SqlActionLexicalParser lexicalParser = new SqlActionLexicalParser() ;
 		lexicalParser.setSqlString(sql);
 		
-		selectColumnTokenList = new LinkedList<SqlActionSelectColumnToken>() ;
-		setColumnTokenList = new LinkedList<SqlActionSetColumnToken>() ;
-		whereColumnTokenList = new LinkedList<SqlActionWhereColumnToken>() ;
+		sqlPredicate = SqlActionPredicateEnum.SQLACTION_PREDICATE_NONE ;
 		
 		String	token = lexicalParser.getSqlToken() ;
 		if( token == null )
@@ -732,11 +727,10 @@ public class SqlActionSyntaxParser {
 	
 	public int parseStatementSyntaxForAdvancedMode_FROM( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception {
 		SqlActionFromTableTokenForAdvancedMode		fromTableTokenForAdvancedMode = null ;
+		SqlActionStatementEnum						sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_NONE ;
 		
 		SqlActionLexicalParser lexicalParser = new SqlActionLexicalParser() ;
 		lexicalParser.setSqlString(sql);
-		
-		fromTableTokenForAdvancedModeList = new LinkedList<SqlActionFromTableTokenForAdvancedMode>() ;
 		
 		while(true) {
 			String token = lexicalParser.getSqlToken() ;
@@ -796,12 +790,12 @@ public class SqlActionSyntaxParser {
 	public int parseStatementSyntaxForAdvancedMode_ExceptFROM( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception {
 		SqlActionSelectColumnTokenForAdvancedMode	selectColumnTokenForAdvancedMode = null ;
 		SqlActionWhereColumnTokenForAdvancedMode	whereColumnTokenForAdvancedMode = null ;
+		SqlActionStatementEnum						sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_NONE ;
 		
 		SqlActionLexicalParser lexicalParser = new SqlActionLexicalParser() ;
 		lexicalParser.setSqlString(sql);
 		
-		selectColumnTokenForAdvancedModeList = new LinkedList<SqlActionSelectColumnTokenForAdvancedMode>() ;
-		whereColumnTokenForAdvancedModeList = new LinkedList<SqlActionWhereColumnTokenForAdvancedMode>() ;
+		sqlPredicate = SqlActionPredicateEnum.SQLACTION_PREDICATE_NONE ;
 		
 		while(true) {
 			String token = lexicalParser.getSqlToken() ;
@@ -809,12 +803,20 @@ public class SqlActionSyntaxParser {
 				break;
 			
 			if( token.equalsIgnoreCase("SELECT") ) {
+				if( sqlPredicate == SqlActionPredicateEnum.SQLACTION_PREDICATE_NONE )
+					sqlPredicate = SqlActionPredicateEnum.SQLACTION_PREDICATE_SELECT ;
 				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_SELECT ;
 			} else if( token.equalsIgnoreCase("INSERT") ) {
+				if( sqlPredicate == SqlActionPredicateEnum.SQLACTION_PREDICATE_NONE )
+					sqlPredicate = SqlActionPredicateEnum.SQLACTION_PREDICATE_INSERT ;
 				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_INSERT ;
 			} else if( token.equalsIgnoreCase("UPDATE") ) {
+				if( sqlPredicate == SqlActionPredicateEnum.SQLACTION_PREDICATE_NONE )
+					sqlPredicate = SqlActionPredicateEnum.SQLACTION_PREDICATE_UPDATE ;
 				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_UPDATE ;
 			} else if( token.equalsIgnoreCase("DELETE") ) {
+				if( sqlPredicate == SqlActionPredicateEnum.SQLACTION_PREDICATE_NONE )
+					sqlPredicate = SqlActionPredicateEnum.SQLACTION_PREDICATE_DELETE ;
 				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_DELETE ;
 			} else if( token.equalsIgnoreCase("FROM") ) {
 				sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_FROM ;
@@ -836,15 +838,15 @@ public class SqlActionSyntaxParser {
 				if( sqlStatement == SqlActionStatementEnum.SQLACTION_STATEMENT_SELECT ) {
 					int beginPos = token.indexOf("#{") ;
 					if( beginPos >= 0 ) {
-						int endPos = token.indexOf("}") ;
+						int endPos = token.indexOf( "}", beginPos+2 ) ;
 						if( endPos < 0 ) {
 							System.out.println( "expect '}' in '"+token+"'" );
 							return -101;
 						}
 						
-						int dotPos = token.indexOf(".",beginPos+2) ;
+						int dotPos = token.indexOf( ".", beginPos+2 ) ;
 						if( dotPos < 0 ) {
-							System.out.println( "expect '}' in '"+token+"'" );
+							System.out.println( "expect '.' in '"+token+"'" );
 							return -1;
 						}
 						

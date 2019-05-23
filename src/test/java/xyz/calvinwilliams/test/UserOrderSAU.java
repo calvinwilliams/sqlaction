@@ -20,7 +20,7 @@ public class UserOrderSAU extends UserOrderSAO {
 	}
 	
 	// SELECT u.name,u.address,o.item_name,o.amount,o.total_price FROM user_base u,user_order o WHERE u.name=? AND u.id=o.user_id @@STATEMENT_INTERCEPTOR(statementInterceptorForQueryUserAndOrderByName)
-	public static String statementInterceptorForQueryUserAndOrderByName( String statementSql ) {
+	public static String statementInterceptorForQueryUserAndOrderByName( String statementSql, String _1_UserBaseSAU_name ) {
 		
 		return statementSql;
 	}

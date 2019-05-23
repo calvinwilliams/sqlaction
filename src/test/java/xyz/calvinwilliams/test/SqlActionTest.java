@@ -117,7 +117,7 @@ public class SqlActionTest {
 			for( UserOrderSAU o : userOrderListForSelectOutput ) {
 				System.out.println( "\t\t" + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
 			}
-
+			
 			userListForSelectOutput = new LinkedList<UserBaseSAU>() ;
 			userOrderListForSelectOutput = new LinkedList<UserOrderSAU>() ;
 			nret = UserOrderSAU.SELECT_u_O_name_j_u_O_address_j_o_O_item_name_j_o_O_amount_j_o_O_total_price_FROM_user_base_u_j_user_order_o_WHERE_u_O_name_E_AND_u_O_id_E_o_O_user_id( conn, userListForSelectOutput, userOrderListForSelectOutput, "Calvin" ) ;
@@ -126,6 +126,23 @@ public class SqlActionTest {
 				return -22;
 			} else {
 				System.out.println( "\t" + "SELECT_u_O_name_j_u_O_address_j_o_O_item_name_j_o_O_amount_j_o_O_total_price_FROM_user_base_u_j_user_order_o_WHERE_u_O_name_E_AND_u_O_id_E_o_O_user_id ok , ["+userListForSelectOutput.size()+"]records" );
+			}
+
+			for( UserBaseSAU u : userListForSelectOutput ) {
+				System.out.println( "\t\t" + "id["+u.id+"] name["+u.name+"] gender["+u.gender+"] age["+u.age+"] address["+u.address+"] lvl["+u.lvl+"]" );
+			}
+			for( UserOrderSAU o : userOrderListForSelectOutput ) {
+				System.out.println( "\t\t" + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
+			}
+			
+			userListForSelectOutput = new LinkedList<UserBaseSAU>() ;
+			userOrderListForSelectOutput = new LinkedList<UserOrderSAU>() ;
+			nret = UserOrderSAU.statUsersAmountAndTotalPrice( conn, userListForSelectOutput, userOrderListForSelectOutput, 0 ) ;
+			if( nret < 0 ) {
+				System.out.println( "\t" + "statUsersAmountAndTotalPrice failed["+nret+"]" );
+				return -22;
+			} else {
+				System.out.println( "\t" + "statUsersAmountAndTotalPrice ok , ["+userListForSelectOutput.size()+"]records" );
 			}
 
 			for( UserBaseSAU u : userListForSelectOutput ) {

@@ -1383,11 +1383,6 @@ Apache Maven
 </dependency>
 ```
 
-Gradle Kotlin DSL
-```
-compile("xyz.calvinwilliams:sqlaction:0.2.8.0")
-```
-
 # 9. 关于作者
 
 厉华，右手C，左手JAVA，写过小到性能卓越方便快捷的日志库、HTTP解析器、日志采集器等，大到交易平台/中间件等，分布式系统实践者，容器技术专研者，目前在某城商行负责基础架构。

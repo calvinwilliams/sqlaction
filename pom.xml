@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>xyz.calvinwilliams</groupId>
 	<artifactId>sqlaction</artifactId>
-	<version>0.2.7.0</version>
+	<version>0.2.8.0</version>
 	<dependencies>
 		<dependency>
 			<groupId>xyz.calvinwilliams</groupId>
@@ -21,6 +21,11 @@
 			<artifactId>postgresql</artifactId>
 			<version>42.2.5</version>
 		</dependency>
+		<!--
+		http://114.215.179.129/oracle.jdbc.driver.OracleDriver-12.2.0.1.rar
+		maven_install.bat
+		mvn clean deploy -P sonatype-oss-release -Darguments="gpg.passphrase==??????"
+		-->
 		<dependency>
 			<groupId>com.oracle</groupId>
 			<artifactId>ojdbc8</artifactId>

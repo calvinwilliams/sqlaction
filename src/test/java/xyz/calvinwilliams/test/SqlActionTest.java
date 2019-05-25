@@ -28,6 +28,9 @@ import xyz.calvinwilliams.okjson.OKJSON;
 
 public class SqlActionTest {
 
+	double		minTotalPrice ;
+	double		maxTotalPrice ;
+	
 	public static int testSelectTable( Connection conn ) {
 
 		List<UserBaseSAU>	userList = null ;
@@ -120,12 +123,12 @@ public class SqlActionTest {
 			
 			userListForSelectOutput = new LinkedList<UserBaseSAU>() ;
 			userOrderListForSelectOutput = new LinkedList<UserOrderSAU>() ;
-			nret = UserOrderSAU.SELECT_u_O_name_j_u_O_address_j_o_O_item_name_j_o_O_amount_j_o_O_total_price_FROM_user_base_u_j_user_order_o_WHERE_u_O_name_E_AND_u_O_id_E_o_O_user_id( conn, userListForSelectOutput, userOrderListForSelectOutput, "Calvin" ) ;
+			nret = UserOrderSAU.SELECT_u_O_name_j_u_O_address_j_o_O_ALL_FROM_user_base_u_j_user_order_o_WHERE_u_O_name_E_AND_u_O_id_E_o_O_user_id( conn, userListForSelectOutput, userOrderListForSelectOutput, "Calvin" ) ;
 			if( nret < 0 ) {
-				System.out.println( "\t" + "SELECT_u_O_name_j_u_O_address_j_o_O_item_name_j_o_O_amount_j_o_O_total_price_FROM_user_base_u_j_user_order_o_WHERE_u_O_name_E_AND_u_O_id_E_o_O_user_id failed["+nret+"]" );
+				System.out.println( "\t" + "SELECT_u_O_name_j_u_O_address_j_o_O_ALL_FROM_user_base_u_j_user_order_o_WHERE_u_O_name_E_AND_u_O_id_E_o_O_user_id failed["+nret+"]" );
 				return -22;
 			} else {
-				System.out.println( "\t" + "SELECT_u_O_name_j_u_O_address_j_o_O_item_name_j_o_O_amount_j_o_O_total_price_FROM_user_base_u_j_user_order_o_WHERE_u_O_name_E_AND_u_O_id_E_o_O_user_id ok , ["+userListForSelectOutput.size()+"]records" );
+				System.out.println( "\t" + "SELECT_u_O_name_j_u_O_address_j_o_O_ALL_FROM_user_base_u_j_user_order_o_WHERE_u_O_name_E_AND_u_O_id_E_o_O_user_id ok , ["+userListForSelectOutput.size()+"]records" );
 			}
 
 			for( UserBaseSAU u : userListForSelectOutput ) {
@@ -133,6 +136,23 @@ public class SqlActionTest {
 			}
 			for( UserOrderSAU o : userOrderListForSelectOutput ) {
 				System.out.println( "\t\t" + "id["+o.id+"] userId["+o.userId+"] itemName["+o.itemName+"] amount["+o.amount+"] totalPrice["+o.totalPrice+"]" );
+			}
+			
+			userOrderListForSelectOutput = new LinkedList<UserOrderSAU>() ;
+			List<SqlActionTest> sqlActionTestListForSelectOutput = new LinkedList<SqlActionTest>() ;
+			nret = UserOrderSAU.SELECT_MIN_total_price_j_MAX_total_price_j_COUNT_ALL_FROM_user_order( conn, userOrderListForSelectOutput, sqlActionTestListForSelectOutput ) ;
+			if( nret < 0 ) {
+				System.out.println( "\t" + "SELECT_MIN_total_price_j_MAX_total_price_j_COUNT_ALL_FROM_user_order failed["+nret+"]" );
+				return -22;
+			} else {
+				System.out.println( "\t" + "SELECT_MIN_total_price_j_MAX_total_price_j_COUNT_ALL_FROM_user_order ok , ["+userOrderListForSelectOutput.size()+"]records" );
+			}
+			
+			for( UserOrderSAU o : userOrderListForSelectOutput ) {
+				System.out.println( "\t\t" + "_count_["+o._count_+"]" );
+			}
+			for( SqlActionTest t : sqlActionTestListForSelectOutput ) {
+				System.out.println( "\t\t" + "minTotalPrice["+t.minTotalPrice+"] maxTotalPrice["+t.maxTotalPrice+"]" );
 			}
 			
 			userListForSelectOutput = new LinkedList<UserBaseSAU>() ;

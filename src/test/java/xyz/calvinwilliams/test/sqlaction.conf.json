@@ -29,13 +29,17 @@
 					FROM user_base,user_order
 					WHERE user_base.name=? AND user_base.id=user_order.user_id
 					@@METHOD(queryUserAndOrderByName)" ,
-				"SELECT u.name,u.address,o.item_name,o.amount,o.total_price FROM user_base u,user_order o WHERE u.name=? AND u.id=o.user_id @@STATEMENT_INTERCEPTOR(statementInterceptorForQueryUserAndOrderByName)" ,
+				"SELECT u.name,u.address,o.* FROM user_base u,user_order o WHERE u.name=? AND u.id=o.user_id @@STATEMENT_INTERCEPTOR(statementInterceptorForQueryUserAndOrderByName)" ,
+				"SELECT o.* #{UserOrderSAU.*} FROM user_order o #{user_order} @@ADVANCEDMODE" ,
+				"SELECT MIN(total_price) #{SqlActionTest.minTotalPrice:double}, MAX(total_price) #{SqlActionTest.maxTotalPrice:double}, COUNT(*) #{UserOrderSAU._count_}
+					FROM user_order #{user_order}
+					@@ADVANCEDMODE" ,
 				"SELECT user_base.name				#{UserBaseSAU.name}
 					,user_order.item_name			#{UserOrderSAU.itemName}
 					,SUM(user_order.amount)			#{UserOrderSAU.amount}
 					,SUM(user_order.total_price)	#{UserOrderSAU.totalPrice}
-					FROM user_base		#{user_base}
-						,user_order		#{user_order}
+					FROM user_base					#{user_base}
+						,user_order					#{user_order}
 					WHERE user_order.user_id IN (
 												SELECT id
 												FROM user_base

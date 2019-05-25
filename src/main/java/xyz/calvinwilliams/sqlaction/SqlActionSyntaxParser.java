@@ -16,7 +16,6 @@ public class SqlActionSyntaxParser {
 	SqlActionPredicateEnum				sqlPredicate ;
 	
 	String								selectHint ;
-	boolean								selectAllColumn ;
 	List<SqlActionSelectColumnToken>	selectColumnTokenList ;
 	List<SqlActionFromTableToken>		fromTableTokenList ;
 	
@@ -38,6 +37,7 @@ public class SqlActionSyntaxParser {
 	
 	List<SqlActionSelectColumnTokenForAdvancedMode>	selectColumnTokenForAdvancedModeList ;
 	List<SqlActionFromTableTokenForAdvancedMode>	fromTableTokenForAdvancedModeList ;
+	List<SqlActionOtherClassTokenForAdvancedMode>	otherClassTokenForAdvancedModeList ;
 	List<SqlActionWhereColumnTokenForAdvancedMode>	whereColumnTokenForAdvancedModeList ;
 	
 	String								sqlaction ;
@@ -202,7 +202,14 @@ public class SqlActionSyntaxParser {
 						continue;
 					} else if( token1.equals("*") ) {
 						// SELECT *
-						selectAllColumn = true ;
+						for( SqlActionColumn c : table.columnList ) {
+							SqlActionSelectColumnToken ct = new SqlActionSelectColumnToken() ;
+							ct.tableName = table.tableName ;
+							ct.table = table ;
+							ct.columnName = c.columnName ;
+							ct.column = c ;
+							selectColumnTokenList.add( ct );
+						}
 						
 						String token2 = lexicalParser.getSqlToken() ;
 						if( token2 == null ) {
@@ -247,7 +254,7 @@ public class SqlActionSyntaxParser {
 						selectColumnToken = new SqlActionSelectColumnToken() ;
 						selectColumnToken.tableName = table.tableName ;
 						selectColumnToken.table = table ;
-						selectColumnToken.columnName = SqlActionGencode.SELECT_COUNT___ ;
+						selectColumnToken.columnName = SqlActionGencode.SQL_COUNT_ ;
 						selectColumnTokenList.add(selectColumnToken);
 						
 						String token5 = lexicalParser.getSqlToken() ;
@@ -325,22 +332,41 @@ public class SqlActionSyntaxParser {
 							System.out.println( "sql["+sql+"] invalid" );
 							return -261;
 						} else {
-							//        1    23
-							// SELECT table.coumn
-							selectColumnToken = new SqlActionSelectColumnToken() ;
-							selectColumnToken.tableName = token1 ;
-							selectColumnToken.table = SqlActionFromTableToken.findTable( fromTableTokenList , selectColumnToken.tableName ) ;
-							if( selectColumnToken.table == null ) {
-								System.out.println( "\t" + "*** ERROR : table["+selectColumnToken.tableName+"] not found in database["+database.databaseName+"] on parsing sql["+sql+"]" );
-								return -262;
+							if( token3.equals("*") ) {
+								//        1    23
+								// SELECT table.*
+								SqlActionTable t = SqlActionFromTableToken.findTable( fromTableTokenList , token1 ) ;
+								if( t == null ) {
+									System.out.println( "\t" + "*** ERROR : table["+token1+"] not found in database["+database.databaseName+"] on parsing sql["+sql+"]" );
+									return -2621;
+								}
+								
+								for( SqlActionColumn c : t.columnList ) {
+									SqlActionSelectColumnToken ct = new SqlActionSelectColumnToken() ;
+									ct.tableName = t.tableName ;
+									ct.table = t ;
+									ct.columnName = c.columnName ;
+									ct.column = c ;
+									selectColumnTokenList.add( ct );
+								}
+							} else {
+								//        1    23
+								// SELECT table.coumn
+								selectColumnToken = new SqlActionSelectColumnToken() ;
+								selectColumnToken.tableName = token1 ;
+								selectColumnToken.table = SqlActionFromTableToken.findTable( fromTableTokenList , selectColumnToken.tableName ) ;
+								if( selectColumnToken.table == null ) {
+									System.out.println( "\t" + "*** ERROR : table["+selectColumnToken.tableName+"] not found in database["+database.databaseName+"] on parsing sql["+sql+"]" );
+									return -2622;
+								}
+								selectColumnToken.columnName = token3 ;
+								selectColumnToken.column = SqlActionColumn.findColumn( selectColumnToken.table.columnList, selectColumnToken.columnName ) ;
+								if( selectColumnToken.column == null ) {
+									System.out.println( "\t" + "*** ERROR : column["+selectColumnToken.columnName+"] not found in table["+selectColumnToken.tableName+"] on parsing sql["+sql+"]" );
+									return -2623;
+								}
+								selectColumnTokenList.add(selectColumnToken);
 							}
-							selectColumnToken.columnName = token3 ;
-							selectColumnToken.column = SqlActionColumn.findColumn( selectColumnToken.table.columnList, selectColumnToken.columnName ) ;
-							if( selectColumnToken.column == null ) {
-								System.out.println( "\t" + "*** ERROR : column["+selectColumnToken.columnName+"] not found in table["+selectColumnToken.tableName+"] on parsing sql["+sql+"]" );
-								return -263;
-							}
-							selectColumnTokenList.add(selectColumnToken);
 							
 							String token4 = lexicalParser.getSqlToken() ;
 							if( token4 == null ) {
@@ -727,6 +753,7 @@ public class SqlActionSyntaxParser {
 	
 	public int parseStatementSyntaxForAdvancedMode_FROM( DbServerConf dbserverConf, SqlActionConf sqlactionConf, Connection conn, SqlActionDatabase database, SqlActionTable table ) throws Exception {
 		SqlActionFromTableTokenForAdvancedMode		fromTableTokenForAdvancedMode = null ;
+		SqlActionOtherClassTokenForAdvancedMode		otherClassTokenForAdvancedMode = null ;
 		SqlActionStatementEnum						sqlStatement = SqlActionStatementEnum.SQLACTION_STATEMENT_NONE ;
 		
 		SqlActionLexicalParser lexicalParser = new SqlActionLexicalParser() ;
@@ -772,6 +799,7 @@ public class SqlActionSyntaxParser {
 						}
 						
 						String tableName = token.substring( beginPos+2, endPos ) ;
+						
 						fromTableTokenForAdvancedMode = new SqlActionFromTableTokenForAdvancedMode() ;
 						fromTableTokenForAdvancedMode.table = SqlActionTable.fetchTableMetadataInDatabase( dbserverConf, sqlactionConf, conn, database, table, tableName ) ;
 						if( fromTableTokenForAdvancedMode.table == null ) {
@@ -838,6 +866,10 @@ public class SqlActionSyntaxParser {
 				if( sqlStatement == SqlActionStatementEnum.SQLACTION_STATEMENT_SELECT ) {
 					int beginPos = token.indexOf("#{") ;
 					if( beginPos >= 0 ) {
+						String javaSauClassName ;
+						String javaPropertyName ;
+						String javaPropertyType ;
+						
 						int endPos = token.indexOf( "}", beginPos+2 ) ;
 						if( endPos < 0 ) {
 							System.out.println( "expect '}' in '"+token+"'" );
@@ -847,23 +879,75 @@ public class SqlActionSyntaxParser {
 						int dotPos = token.indexOf( ".", beginPos+2 ) ;
 						if( dotPos < 0 ) {
 							System.out.println( "expect '.' in '"+token+"'" );
-							return -1;
+							return -102;
 						}
 						
-						selectColumnTokenForAdvancedMode = new SqlActionSelectColumnTokenForAdvancedMode() ;
-						String javaSauClassName = token.substring( beginPos+2, dotPos ) ;
-						String javaPropertyName =  token.substring( dotPos+1, endPos ) ;
-						selectColumnTokenForAdvancedMode.table = SqlActionTable.findTableByJavaSauClassName( database.tableList, javaSauClassName ) ;
-						if( selectColumnTokenForAdvancedMode.table == null ) {
-							System.out.println( "\t" + "*** ERROR : javaSauClassName["+javaSauClassName+"] not found" );
-							return -1;
+						int colonPos = token.indexOf( ":", dotPos+1 ) ;
+						
+						javaSauClassName = token.substring( beginPos+2, dotPos ) ;
+						if( colonPos >= 0 ) {
+							javaPropertyName =  token.substring( dotPos+1, colonPos ) ;
+							javaPropertyType = token.substring( colonPos+1, endPos ) ;
+						} else {
+							javaPropertyName =  token.substring( dotPos+1, endPos ) ;
+							javaPropertyType = null ;
 						}
-						selectColumnTokenForAdvancedMode.column = SqlActionColumn.findColumnByJavaPropertyName( selectColumnTokenForAdvancedMode.table.columnList, javaPropertyName ) ;
-						if( selectColumnTokenForAdvancedMode.column == null ) {
-							System.out.println( "\t" + "*** ERROR : javaPropertyName["+javaPropertyName+"] not found in javaSaoClassName["+javaSauClassName+"]" );
-							return -1;
+						
+						if( javaPropertyType == null ) {
+							if( javaPropertyName.equals("*") ) {
+								SqlActionTable t = SqlActionTable.findTableByJavaSauClassName( database.tableList, javaSauClassName ) ;
+								if( t == null ) {
+									System.out.println( "\t" + "*** ERROR : javaSauClassName["+javaSauClassName+"] not found" );
+									return -111;
+								}
+								
+								for( SqlActionColumn c : t.columnList ) {
+									selectColumnTokenForAdvancedMode = new SqlActionSelectColumnTokenForAdvancedMode() ;
+									selectColumnTokenForAdvancedMode.table = t ;
+									selectColumnTokenForAdvancedMode.columnName = c.columnName ;
+									selectColumnTokenForAdvancedMode.column = c ;
+									selectColumnTokenForAdvancedModeList.add(selectColumnTokenForAdvancedMode);
+								}
+							} else {
+								selectColumnTokenForAdvancedMode = new SqlActionSelectColumnTokenForAdvancedMode() ;
+								selectColumnTokenForAdvancedMode.table = SqlActionTable.findTableByJavaSauClassName( database.tableList, javaSauClassName ) ;
+								if( selectColumnTokenForAdvancedMode.table == null ) {
+									System.out.println( "\t" + "*** ERROR : javaSauClassName["+javaSauClassName+"] not found" );
+									return -112;
+								}
+								selectColumnTokenForAdvancedMode.columnName = javaPropertyName ;
+								if( selectColumnTokenForAdvancedMode.columnName.equals(SqlActionGencode.SAO_PROPERTY_COUNT_) ) {
+									selectColumnTokenForAdvancedMode.column = null ;
+								} else {
+									selectColumnTokenForAdvancedMode.column = SqlActionColumn.findColumnByJavaPropertyName( selectColumnTokenForAdvancedMode.table.columnList, javaPropertyName ) ;
+									if( selectColumnTokenForAdvancedMode.column == null ) {
+										System.out.println( "\t" + "*** ERROR : javaPropertyName["+javaPropertyName+"] not found in javaSaoClassName["+javaSauClassName+"]" );
+										return -113;
+									}
+								}
+								selectColumnTokenForAdvancedModeList.add(selectColumnTokenForAdvancedMode);
+							}
+						} else {
+							selectColumnTokenForAdvancedMode = new SqlActionSelectColumnTokenForAdvancedMode() ;
+							selectColumnTokenForAdvancedMode.javaClassName = javaSauClassName ;
+							selectColumnTokenForAdvancedMode.javaObjectName = javaSauClassName.substring(0,1).toLowerCase(Locale.getDefault()) + javaSauClassName.substring(1) ;
+							selectColumnTokenForAdvancedMode.javaPropertyName = javaPropertyName ;
+							selectColumnTokenForAdvancedMode.javaPropertyType = javaPropertyType.substring(0,1).toUpperCase(Locale.getDefault()) + javaPropertyType.substring(1) ;
+							selectColumnTokenForAdvancedModeList.add(selectColumnTokenForAdvancedMode);
+							
+							boolean needAdd = true ;
+							for( SqlActionOtherClassTokenForAdvancedMode oc : otherClassTokenForAdvancedModeList ) {
+								if( oc.javaClassName.equals(selectColumnTokenForAdvancedMode.javaClassName) ) {
+									needAdd = false ;
+									break;
+								}
+							}
+							if( needAdd ) {
+								SqlActionOtherClassTokenForAdvancedMode otherClassTokenForAdvancedMode = new SqlActionOtherClassTokenForAdvancedMode() ;
+								otherClassTokenForAdvancedMode.javaClassName = selectColumnTokenForAdvancedMode.javaClassName ;
+								otherClassTokenForAdvancedMode.javaObjectName = selectColumnTokenForAdvancedMode.javaObjectName ;
+								otherClassTokenForAdvancedModeList.add(otherClassTokenForAdvancedMode);							}
 						}
-						selectColumnTokenForAdvancedModeList.add(selectColumnTokenForAdvancedMode);
 					}
 				} else if( sqlStatement == SqlActionStatementEnum.SQLACTION_STATEMENT_WHERE || sqlStatement == SqlActionStatementEnum.SQLACTION_STATEMENT_SET ) {
 					int beginPos = token.indexOf("#{") ;
@@ -871,13 +955,13 @@ public class SqlActionSyntaxParser {
 						int endPos = token.indexOf("}") ;
 						if( endPos < 0 ) {
 							System.out.println( "expect '}' in '"+token+"'" );
-							return -101;
+							return -121;
 						}
 						
 						int dotPos = token.indexOf(".",beginPos+2) ;
 						if( dotPos < 0 ) {
 							System.out.println( "expect '}' in '"+token+"'" );
-							return -1;
+							return -122;
 						}
 						
 						whereColumnTokenForAdvancedMode = new SqlActionWhereColumnTokenForAdvancedMode() ;
@@ -886,12 +970,12 @@ public class SqlActionSyntaxParser {
 						whereColumnTokenForAdvancedMode.table = SqlActionTable.findTableByJavaSauClassName( database.tableList, javaSauClassName ) ;
 						if( whereColumnTokenForAdvancedMode.table == null ) {
 							System.out.println( "\t" + "*** ERROR : javaSauClassName["+javaSauClassName+"] not found" );
-							return -1;
+							return -123;
 						}
 						whereColumnTokenForAdvancedMode.column = SqlActionColumn.findColumnByJavaPropertyName( whereColumnTokenForAdvancedMode.table.columnList, javaPropertyName ) ;
 						if( whereColumnTokenForAdvancedMode.column == null ) {
 							System.out.println( "\t" + "*** ERROR : javaPropertyName["+javaPropertyName+"] not found in javaSaoClassName["+javaSauClassName+"]" );
-							return -1;
+							return -124;
 						}
 						whereColumnTokenForAdvancedModeList.add(whereColumnTokenForAdvancedMode);
 					}

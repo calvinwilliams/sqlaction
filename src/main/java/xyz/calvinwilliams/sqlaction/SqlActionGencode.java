@@ -16,10 +16,10 @@ import xyz.calvinwilliams.okjson.*;
 
 public class SqlActionGencode {
 
-	final private static String				SQLACTION_VERSION = "0.2.8.0" ;
+	final private static String				SQLACTION_VERSION = "0.2.9.0" ;
 
-	final public static String				SELECT_COUNT___ = "count(" ;
-	final private static String				COUNT___ = "_count_" ;
+	final public static String				SQL_COUNT_ = "count(" ;
+	final public static String				SAO_PROPERTY_COUNT_ = "_count_" ;
 
 	public static void main(String[] args) {
 		Path					currentPath ;
@@ -208,7 +208,7 @@ public class SqlActionGencode {
 					SqlActionColumn.dumpDefineProperty( c, saoFileBuffer );
 				}
 				saoFileBuffer.append( "\n" );
-				saoFileBuffer.append("\t").append("int				").append(COUNT___).append(" ; // defining for 'SELECT COUNT(*)'\n");
+				saoFileBuffer.append("\t").append("int				").append(SAO_PROPERTY_COUNT_).append(" ; // defining for 'SELECT COUNT(*)'\n");
 
 				// Parse sql actions and dump gencode
 				for( String sqlaction : tc.sqlactions ) {
@@ -224,6 +224,7 @@ public class SqlActionGencode {
 
 					parser.fromTableTokenForAdvancedModeList = new LinkedList<SqlActionFromTableTokenForAdvancedMode>() ;
 					parser.selectColumnTokenForAdvancedModeList = new LinkedList<SqlActionSelectColumnTokenForAdvancedMode>() ;
+					parser.otherClassTokenForAdvancedModeList = new LinkedList<SqlActionOtherClassTokenForAdvancedMode>() ;
 					parser.whereColumnTokenForAdvancedModeList = new LinkedList<SqlActionWhereColumnTokenForAdvancedMode>() ;
 
 					parser.sqlaction = sqlaction.trim() ;
@@ -395,28 +396,12 @@ public class SqlActionGencode {
 					// Fixed SELECT * by fill all column to parser.selectColumnTokenList
 					System.out.println( "Fixed SELECT * by fill all column to parser.selectColumnTokenList ["+parser.sql+"]" );
 
-					if( parser.selectAllColumn == true ) {
-						for( SqlActionFromTableToken tt : parser.fromTableTokenList ) {
-							for( SqlActionColumn c : table.columnList ) {
-								SqlActionSelectColumnToken ct = new SqlActionSelectColumnToken() ;
-								ct.tableName = tt.tableName ;
-								// ct.tableAliasName = tt.tableAliasName ;
-								ct.table = table ;
-								ct.columnName = c.columnName ;
-								ct.column = c ;
-								parser.selectColumnTokenList.add( ct );
-							}
-						}
-					}
-
 					// Show parser result
 					System.out.println( "Show parser result ["+parser.sql+"]" );
 
 					System.out.println( "\t" + "sqlPredicate["+parser.sqlPredicate+"]" );
 
 					System.out.println( "\t" + "selectHint["+parser.selectHint+"]" );
-
-					System.out.println( "\t" + "selectAllColumn["+parser.selectAllColumn+"]" );
 
 					for( SqlActionSelectColumnToken ct : parser.selectColumnTokenList ) {
 						System.out.println( "\t" + "selectColumnToken.tableName["+ct.tableName+"] .table["+ct.table+"] .columnName["+ct.columnName+"] .column["+ct.column+"]" );
@@ -443,7 +428,15 @@ public class SqlActionGencode {
 					System.out.println( "\t" + "parser.otherTokens["+parser.otherTokens+"]" );
 
 					for( SqlActionSelectColumnTokenForAdvancedMode cta : parser.selectColumnTokenForAdvancedModeList ) {
-						System.out.println( "\t" + "selectColumnTokenForAdvancedMode.tableName["+cta.table.tableName+"] .table["+cta.table+"] .columnName["+cta.column.columnName+"] .column["+cta.column+"]" );
+						if( cta.table != null ) {
+							if( cta.column != null ) {
+								System.out.println( "\t" + "selectColumnTokenForAdvancedMode.tableName["+cta.table.tableName+"] .table["+cta.table.tableName+"] .columnName["+cta.columnName+"] .column["+cta.column.columnName+"]" );
+							} else {
+								System.out.println( "\t" + "selectColumnTokenForAdvancedMode.tableName["+cta.table.tableName+"] .table["+cta.table.tableName+"] .columnName["+cta.columnName+"]" );
+							}
+						} else {
+							System.out.println( "\t" + "selectColumnTokenForAdvancedMode.javaClassName["+cta.javaClassName+"] .javaObjectName["+cta.javaObjectName+"] .javaPropertyName["+cta.javaPropertyName+"] .javaPropertyType["+cta.javaPropertyType+"]" );
+						}
 					}
 
 					for( SqlActionFromTableTokenForAdvancedMode cta : parser.fromTableTokenForAdvancedModeList ) {
@@ -704,8 +697,8 @@ public class SqlActionGencode {
 			columnIndex = 0 ;
 			for( SqlActionSelectColumnToken ct : parser.selectColumnTokenList ) {
 				columnIndex++;
-				if( ct.columnName.equalsIgnoreCase(SqlActionGencode.SELECT_COUNT___) ) {
-					saoFileBuffer.append("\t\t\t").append(ct.table.javaObjectName+"."+COUNT___).append(" = rs.getInt( "+columnIndex+" ) ;\n" );
+				if( ct.columnName.equalsIgnoreCase(SqlActionGencode.SQL_COUNT_) ) {
+					saoFileBuffer.append("\t\t\t").append(ct.table.javaObjectName+"."+SAO_PROPERTY_COUNT_).append(" = rs.getInt( "+columnIndex+" ) ;\n" );
 				} else {
 					nret = SqlActionColumn.dumpSelectOutputColumn( "\t\t\t", columnIndex, ct.column, ct.table.javaObjectName+"."+ct.column.javaPropertyName, saoFileBuffer ) ;
 					if( nret != 0 ) {
@@ -1099,7 +1092,10 @@ public class SqlActionGencode {
 		for( SqlActionFromTableTokenForAdvancedMode cta : parser.fromTableTokenForAdvancedModeList ) {
 			methodParameters.append( ", List<"+cta.table.javaSauClassName+"> "+cta.table.javaObjectName+"ListForSelectOutput" );
 		}
-
+		for( SqlActionOtherClassTokenForAdvancedMode cta : parser.otherClassTokenForAdvancedModeList ) {
+			methodParameters.append( ", List<"+cta.javaClassName+"> "+cta.javaObjectName+"ListForSelectOutput" );
+		}
+		
 		columnIndex = 0 ;
 		for( SqlActionWhereColumnTokenForAdvancedMode cta : parser.whereColumnTokenForAdvancedModeList ) {
 			columnIndex++;
@@ -1152,19 +1148,33 @@ public class SqlActionGencode {
 		for( SqlActionFromTableTokenForAdvancedMode cta : parser.fromTableTokenForAdvancedModeList ) {
 			saoFileBuffer.append( "\t\t\t" + cta.table.javaSauClassName + " "+cta.table.javaObjectName+" = new "+cta.table.javaSauClassName+"() ;\n" );
 		}
+		for( SqlActionOtherClassTokenForAdvancedMode oct : parser.otherClassTokenForAdvancedModeList ) {
+			saoFileBuffer.append( "\t\t\t" + oct.javaClassName + " "+oct.javaObjectName+" = new "+oct.javaClassName+"() ;\n" );
+		}
 		if( parser.selectColumnTokenForAdvancedModeList.size() > 0 ) {
 			columnIndex = 0 ;
 			for( SqlActionSelectColumnTokenForAdvancedMode cta : parser.selectColumnTokenForAdvancedModeList ) {
 				columnIndex++;
-				nret = SqlActionColumn.dumpSelectOutputColumn( "\t\t\t", columnIndex, cta.column, cta.table.javaObjectName+"."+cta.column.javaPropertyName, saoFileBuffer ) ;
-				if( nret != 0 ) {
-					System.out.println( "DumpSelectOutputColumn["+table.tableName+"]["+cta.column.columnName+"] failed["+nret+"]" );
-					return nret;
+				if( cta.table != null ) {
+					if( cta.column != null ) {
+						nret = SqlActionColumn.dumpSelectOutputColumn( "\t\t\t", columnIndex, cta.column, cta.table.javaObjectName+"."+cta.column.javaPropertyName, saoFileBuffer ) ;
+						if( nret != 0 ) {
+							System.out.println( "DumpSelectOutputColumn["+table.tableName+"]["+cta.column.columnName+"] failed["+nret+"]" );
+							return nret;
+						}
+					} else {
+						saoFileBuffer.append("\t\t\t").append(cta.table.javaObjectName+"."+cta.columnName).append(" = rs.getInt( "+columnIndex+" ) ;\n" );
+					}
+				} else {
+					saoFileBuffer.append("\t\t\t").append(cta.javaObjectName+"."+cta.javaPropertyName).append(" = rs.get"+cta.javaPropertyType+"( "+columnIndex+" ) ;\n" );
 				}
 			}
 		}
 		for( SqlActionFromTableTokenForAdvancedMode cta : parser.fromTableTokenForAdvancedModeList ) {
 			saoFileBuffer.append( "\t\t\t" + cta.table.javaObjectName+"ListForSelectOutput.add("+cta.table.javaObjectName+") ;\n" );
+		}
+		for( SqlActionOtherClassTokenForAdvancedMode oct : parser.otherClassTokenForAdvancedModeList ) {
+			saoFileBuffer.append( "\t\t\t" + oct.javaObjectName+"ListForSelectOutput.add("+oct.javaObjectName+") ;\n" );
 		}
 		saoFileBuffer.append( "\t\t" + "}\n" );
 		saoFileBuffer.append( "\t\t" + "rs.close();\n" );

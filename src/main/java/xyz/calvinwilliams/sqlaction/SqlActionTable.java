@@ -59,10 +59,16 @@ public class SqlActionTable {
 			prestmt.setString( 2, tableName );
 		}
 		rs = prestmt.executeQuery() ;
-//		if( rs.getRow() < 1 ) {
-//			System.out.println( "GetAllColumnsInTable table not found , database["+database.databaseName+"] table["+tableName+"]" );
-//			return null;
-//		}
+		if( dbserverConf.dbms == SqlActionDatabase.DBMS_MYSQL ) {
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_POSTGRESQL ) {
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_ORACLE ) {
+			if( rs.getRow() < 1 ) {
+				System.out.println( "*** ERROR : GetAllColumnsInTable table not found , database["+database.databaseName+"] table["+tableName+"]" );
+				return null;
+			}
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLITE ) {
+		} else if( dbserverConf.dbms == SqlActionDatabase.DBMS_SQLSERVER ) {
+		}
 		rs.next();
 		
 		table = new SqlActionTable() ;

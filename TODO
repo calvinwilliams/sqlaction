@@ -1,1 +1,3 @@
 * Eclipse插件触发执行工具sqlaction
+* 增加缓存
+* 进一步优化支持Oracle

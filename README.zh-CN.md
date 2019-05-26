@@ -1819,6 +1819,8 @@ All mybatis DELETE WHERE done , count[500] elapse[6.035]s
 
 # 7. 后续开发
 
+1. Eclipse插件触发执行工具sqlaction
+1. 增加缓存
 1. 进一步优化支持Oracle。
 
 # 8. 关于本项目

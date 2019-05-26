@@ -1,39 +1,7 @@
 sqlaction - 自动生成JDBC代码的数据库持久层工具
 =============================================
 
-<!-- TOC -->
-
-- [1. 概述](#1-概述)
-- [2. 一个DEMO](#2-一个demo)
-    - [2.1. 建表DDL](#21-建表ddl)
-    - [2.2. 新建JAVA项目](#22-新建java项目)
-    - [2.3. 在包目录中执行sqlaction工具](#23-在包目录中执行sqlaction工具)
-    - [2.4. 到目前为止，一行JAVA代码都没写，现在开始写应用代码](#24-到目前为止一行java代码都没写现在开始写应用代码)
-    - [2.5. 执行](#25-执行)
-- [3. 使用参考](#3-使用参考)
-    - [3.1. 开发流程](#31-开发流程)
-    - [3.2. 配置文件dbserver.conf.json](#32-配置文件dbserverconfjson)
-    - [3.3. 配置文件sqlaction.conf.json](#33-配置文件sqlactionconfjson)
-    - [3.4. 自动生成规则](#34-自动生成规则)
-    - [3.5. 元配置](#35-元配置)
-        - [3.5.1. 自定义SQL动作方法名](#351-自定义sql动作方法名)
-        - [3.5.2. 自动返回自增主键值](#352-自动返回自增主键值)
-        - [3.5.3. 分页](#353-分页)
-        - [3.5.4. 拦截器](#354-拦截器)
-            - [3.5.4.1. SQL拦截器](#3541-sql拦截器)
-        - [高级模式](#高级模式)
-- [4. 为什么这么设计？](#4-为什么这么设计)
-- [5. 与MyBatis的开发量比较](#5-与mybatis的开发量比较)
-- [6. 与MyBatis的性能比较](#6-与mybatis的性能比较)
-    - [6.1. 准备sqlaction](#61-准备sqlaction)
-    - [6.2. 准备MyBatis](#62-准备mybatis)
-    - [6.3. 测试案例](#63-测试案例)
-    - [6.4. 测试结果](#64-测试结果)
-- [7. 后续开发](#7-后续开发)
-- [8. 关于本项目](#8-关于本项目)
-- [9. 关于作者](#9-关于作者)
-
-<!-- /TOC -->
+<!-- TOC -->autoauto- [1. 概述](#1-概述)auto- [2. 一个DEMO](#2-一个demo)auto    - [2.1. 建表DDL](#21-建表ddl)auto    - [2.2. 新建JAVA项目](#22-新建java项目)auto    - [2.3. 在包目录中执行sqlaction工具](#23-在包目录中执行sqlaction工具)auto    - [2.4. 到目前为止，一行JAVA代码都没写，现在开始写应用代码](#24-到目前为止一行java代码都没写现在开始写应用代码)auto    - [2.5. 执行](#25-执行)auto- [3. 使用参考](#3-使用参考)auto    - [3.1. 开发流程](#31-开发流程)auto    - [3.2. 配置文件dbserver.conf.json](#32-配置文件dbserverconfjson)auto    - [3.3. 配置文件sqlaction.conf.json](#33-配置文件sqlactionconfjson)auto    - [3.4. 自动生成规则](#34-自动生成规则)auto    - [3.5. 配置元](#35-配置元)auto        - [3.5.1. 自定义SQL动作方法名](#351-自定义sql动作方法名)auto        - [3.5.2. 自动返回自增主键值](#352-自动返回自增主键值)auto        - [3.5.3. 分页](#353-分页)auto        - [3.5.4. 拦截器](#354-拦截器)auto            - [3.5.4.1. SQL拦截器](#3541-sql拦截器)auto        - [高级模式](#高级模式)auto- [4. 为什么这么设计？](#4-为什么这么设计)auto- [5. 与MyBatis的开发量比较](#5-与mybatis的开发量比较)auto- [6. 与MyBatis的性能比较](#6-与mybatis的性能比较)auto    - [6.1. 准备sqlaction](#61-准备sqlaction)auto    - [6.2. 准备MyBatis](#62-准备mybatis)auto    - [6.3. 测试案例](#63-测试案例)auto    - [6.4. 测试结果](#64-测试结果)auto- [7. 后续开发](#7-后续开发)auto- [8. 关于本项目](#8-关于本项目)auto- [9. 关于作者](#9-关于作者)autoauto<!-- /TOC -->
 
 # 1. 概述
 
@@ -45,24 +13,28 @@ sqlaction - 自动生成JDBC代码的数据库持久层工具
 
 能否造一个更好的轮子？
 
-于是，我花了十多个晚上，结合之前在C技术栈中的设计和经验，结合JAVA特点，写了sqlaction。
+于是，我结合之前在C技术栈中的设计和经验，结合JAVA特点，写了sqlaction。
 
-`sqlaction`是自动生成JDBC代码的数据库持久层工具，它为应用提供了类似`MyBatis`和`Hibernate`操作数据库能力，但更轻量级和几乎消除了所有的手工冗余编码，提高开发效率，也易于与其它框架搭配使用。
+`sqlaction`是自动生成JDBC代码的数据库持久层工具，它为应用提供了类似`MyBatis`和`Hibernate`操作数据库能力，但更轻量级和几乎消除了所有的手工冗余工作（编码和配置），提高开发效率，也最大化运行效率。
 
-`sqlaction`读取数据库中的表结构元信息和少量配置文件信息（SQL），自动生成数据库表实体类，自动生成基于JDBC的SQL动作方法代码，自动生成拦截器框架等代码，应用调用其自动生成的代码就能极其快捷的操作数据库，同时还拥有JDBC的高性能，更重要的是开发者能直接看到底层操作代码，增加自主可控，没有低效的反射，没有复杂的热修改字节码，没有庞大笨重的隐藏核心。
+`sqlaction`只负责把配置的SQL规则转换为完整的JDBC代码，不干涉数据库连接池管理、数据库事务控制等，也就易于与其它框架搭配使用。
+
+`sqlaction`核心工作原理是读取数据库中的表结构元信息和少量配置文件信息（SQL语法），自动生成数据库表实体类，自动生成基于JDBC的SQL动作方法代码，自动生成拦截器框架等代码，应用调用其自动生成的代码就能极其快捷的操作数据库，同时还拥有JDBC的高性能，更重要的是开发者能直接看到底层操作代码，增加自主可控，没有低效的反射，没有复杂的热修改字节码，没有庞大笨重的隐藏核心要学习。
 
 `sqlaction`核心优势：
-1. 多数据库支持，目前支持有MySQL、PostgreSQL、Oracle、Sqlite、SqlServer
-1. 原生自带取自增列值功能，不同数据库用一致地配置语法表达
-1. 原生自带通用分页功能，不同数据库用一致地分页配置语法表达
-1. 执行效率比MyBatis快约20%
-1. 高级模式支持任意复杂SQL
+1. 多数据库支持，目前支持有MySQL、PostgreSQL、Oracle、Sqlite、SqlServer。
+2. 抽象统一了自增字段和序列两大数据库阵营对主键值的赋值，不同数据库用一样的语法配置。
+3. 抽象统一了物理分页功能，原生自带通用分页能力，不同数据库用一样的语法配置。
+4. 执行效率比MyBatis快约20%。
+5. 高级模式支持任意复杂SQL。
 
 # 2. 一个DEMO
 
 放一个DEMO感受一下：
 
 ## 2.1. 建表DDL
+
+以MySQL为例
 
 `ddl.sql`
 
@@ -78,7 +50,7 @@ CREATE TABLE `sqlaction_demo` (
 
 ## 2.2. 新建JAVA项目
 
-只依赖数据库连接库和作者另一个JSON解析器`okjson`，引入`mysql-connector-java-X.Y.Z.jar`、`okjson-0.0.9.0.jar`。
+`sqlaction`只依赖数据库连接库和作者另一个JSON解析器`okjson`，引入`mysql-connector-java-X.Y.Z.jar`、`okjson-0.0.9.0.jar`文件或Maven坐标。
 
 建立包目录，在包目录或上级某一级目录中创建数据库连接配置文件`dbserver.conf.json`，工具会从执行目录开始往上查找，只要某一级目录中存在这个配置文件即可。
 
@@ -114,22 +86,22 @@ CREATE TABLE `sqlaction_demo` (
 
 ## 2.3. 在包目录中执行sqlaction工具
 
-我把执行命令行包成批处理文件后执行，欢迎懂`Eclipse`插件开发的同学帮我写个插件 :)
+此示例中我把执行命令行包装成批处理文件执行，欢迎懂`Eclipse`插件开发的同学帮我写个插件 :)
 
 `pp.bat`
 
 ```
-java -Dfile.encoding=UTF-8 -classpath "D:\Work\mysql-connector-java-8.0.15\mysql-connector-java-8.0.15.jar;%USERPROFILE%\.m2\repository\xyz\calvinwilliams\okjson\0.0.9.0\okjson-0.0.9.0.jar;%USERPROFILE%\.m2\repository\xyz\calvinwilliams\sqlaction\0.2.7.0\sqlaction-0.2.7.0.jar" xyz.calvinwilliams.sqlaction.SqlActionGencode
+java -Dfile.encoding=UTF-8 -classpath "D:\Work\mysql-connector-java-8.0.15\mysql-connector-java-8.0.15.jar;%USERPROFILE%\.m2\repository\xyz\calvinwilliams\okjson\0.0.9.0\okjson-0.0.9.0.jar;%USERPROFILE%\.m2\repository\xyz\calvinwilliams\sqlaction\0.2.7.0\sqlaction-0.2.9.0.jar" xyz.calvinwilliams.sqlaction.SqlActionGencode
 pause
 ```
 
-注意：使用`Maven`管理的项目，在添加`sqlaction`依赖声明后，`maven`会自动下载`sqlaction`以及其依赖`okjson`的jar到`C:\User\用户名\.m2\repository\xyz\calvinwilliams\`下。`sqlaction`依赖声明见最后面“关于本项目”章节。
+注意：使用`Maven`管理的项目，在`pom.xml`里添加`sqlaction`坐标后，`maven`会自动下载`sqlaction`以及其依赖`okjson`的jar到`C:\User\用户名\.m2\repository\xyz\calvinwilliams\`下，上面执行命令直接引用了Maven目录里的包。`sqlaction`坐标见最后面“关于本项目”章节。
 
-执行pp.bat，工具`sqlaction`会从执行目录开始往上查找读入`dbserver.conf.json`和`sqlaction.conf.json`并自动生成所有代码。
+执行`pp.bat`，工具`sqlaction`会从执行目录开始往上查找读入`dbserver.conf.json`和`sqlaction.conf.json`并自动生成所有代码。
 
 ```
 //////////////////////////////////////////////////////////////////////////////
-/// sqlaction v0.0.8.0
+/// sqlaction v0.2.9.0
 /// Copyright by calvin<calvinwilliams@163.com,calvinwilliams@gmail.com>
 //////////////////////////////////////////////////////////////////////////////
 --- dbserverConf ---
@@ -148,16 +120,14 @@ driver[com.mysql.jdbc.Driver]
                 sqlaction[DELETE FROM sqlaction_demo WHERE name=?]
 SqlActionTable.getTableInDatabase[sqlaction_demo] ...
 ...
-...
-...
 *** NOTICE : Write SqlactionDemoSAO.java completed!!!
 ```
 
-如果没有出现`*** ERROR : ...`说明工具执行成功，在执行所在目录中自动生成了一个JAVA源代码文件
+如果没有出现`*** ERROR : ...`说明工具执行成功，在执行所在目录中自动生成了两个JAVA源代码文件
 
 `SqlactionDemoSAO.java`
 ```
-// This file generated by sqlaction v0.2.7.0
+// This file generated by sqlaction v0.2.9.0
 // WARN : DON'T MODIFY THIS FILE
 
 package xyz.calvinwilliams.sqlaction;
@@ -249,7 +219,7 @@ public class SqlactionDemoSAO {
 
 `SqlactionDemoSAU.java`
 ```
-// This file generated by sqlaction v0.2.7.0
+// This file generated by sqlaction v0.2.9.0
 
 package xyz.calvinwilliams.sqlaction;
 
@@ -266,11 +236,6 @@ public class SqlactionDemoSAU extends SqlactionDemoSAO {
 
 }
 ```
-
-工具`sqlaction`内部处理流程如下：
-
-1. 首先查找执行目录中的数据库连接配置文件`dbserver.conf.json`，如果没有找到就迭代往上级目录继续找，从该配置文件中获得数据库连接配置信息。然后以相同的查找逻辑读取`sqlaction.conf.json`获得数据库名、表列表、以及每张表需要执行的SQL语句列表等信息。配置文件往上查找机制是为了灵活适应不同规模项目目录的规划。
-2. 连接数据库，读取表结构元信息，每张表对应自动生成数据库表实体类和SQL动作方法JAVA源代码文件`XxxSao.java`（每次生成都会覆盖该文件）和用户自定义代码文件`XxxSau.java`（重复生成不会覆盖该文件，可以把自定义源码写在此文件中），sqlaction配置文件中的每一条SQL自动解析生成基于JDBC的JAVA方法，从此再也不用手工写JDBC代码了！
 
 ## 2.4. 到目前为止，一行JAVA代码都没写，现在开始写应用代码
 
@@ -380,9 +345,9 @@ SqlactionDemoSAO.SELECT_ALL_FROM_sqlaction_demo ok
 
 总结：
 
-对表的增删改查只需调用前面自动生成的数据库表实体类中的方法即可，而且底层执行代码可随时查看，没有什么秘密，没有什么高深的技术。
+对表的增删改查只需调用前面自动生成的SAU类中的方法即可，底层执行代码完全基于JDBC，可随时查看，没有什么秘密，没有什么高深的技术。
 
-工具`sqlaction`只在开发阶段使用，与运行阶段无关，说到底只是在应用与JDBC之间自动生成了薄薄的一层代码而已，把大量手工冗余代码都自动生成了，让开发者节省大量时间而去关注业务，减少大量机械操作减轻心智负担，提高生产力，早点做完工作回家抱女盆友/老婆 :)
+工具`sqlaction`只在开发阶段使用，与运行阶段无关，说到底只是在应用与JDBC之间自动生成了薄薄的一层代码而已，把大量手工冗余代码都通过自动化生成了，让开发者节省大量时间而去关注业务逻辑，减少大量机械操作减轻心智负担，提高生产力，早点做完工作回家抱女盆友/老婆 :)
 
 # 3. 使用参考
 
@@ -390,10 +355,16 @@ SqlactionDemoSAO.SELECT_ALL_FROM_sqlaction_demo ok
 
 ```
                                         sqlaction
-dbserver.conf.json、sqlaction.conf.json ---------> XxxSao.java(Auto-gen JDBC code)、XxxSau.java(Custom code) --\
-                                                                                                                ---> Zzz.jar
-                                                                                                    Yyy.java --/
+dbserver.conf.json、sqlaction.conf.json ---------> XxxSao.java、XxxSau.java --\
+                                                                               ---> App.jar
+                                                                   App.java --/
 ```
+
+`sqlaction`读取执行目录或上级目录中的数据库连接配置文件`dbserver.conf.json`和SQL动作配置文件`sqlaction.conf.json`，自动生成基于JDBC的SQL动作源代码的SAO类，以及继承SAO类的SAU类，应用直接调用SAU类就能操作数据库DML。
+
+SAO类`XXXSao.java`在每次执行工具`sqlaction`时都会被覆盖刷新，所以不要手工修改。
+
+SAU类`XXXSau.java`在首次执行工具`sqlaction`时创建，后续执行时不会被覆盖刷新，所以需要定制、扩展的方法和属性都加在这个类中，又因为SAU类继承自SAO类，如果存在相同的方法，应用调用的始终都是SAU类中的版本。
 
 ## 3.2. 配置文件dbserver.conf.json
 
@@ -568,9 +539,9 @@ SQL动作对应缺省方法名为SQL转换而来，具体算法为所有非字�
 
 就这么简单！
 
-## 3.5. 元配置
+## 3.5. 配置元
 
-SQL中可追加一些以"@@"开头的元配置以实现一些额外的功能。
+SQL中可追加一些以"@@"开头的配置元以实现一些额外的功能。
 
 ### 3.5.1. 自定义SQL动作方法名
 
@@ -588,7 +559,7 @@ CREATE TABLE `user` (
   ...
 ```
 
-有些数据库没有自增功能，自增主键值从序列中取得，`sqlaction`为了统一其访问抽象，提供元配置"@@SELECTKEY"，在`sqlaction.conf.json`配置如下：
+有些数据库没有自增功能，自增主键值从序列中取得，`sqlaction`为了统一其访问抽象，提供配置元"@@SELECTKEY"，在`sqlaction.conf.json`配置如下：
 ```
 {
 	"database" : "calvindb" ,
@@ -605,7 +576,7 @@ CREATE TABLE `user` (
 
 ### 3.5.3. 分页
 
-在SQL动作追加元配置"@@PAGEKEY(...)"以自动生成分页代码，如：
+在SQL动作追加配置元"@@PAGEKEY(...)"以自动生成分页代码，如：
 ```
 "SELECT * FROM user_order @@PAGEKEY(id)" ,
 "SELECT * FROM user_order WHERE item_name<>'' @@PAGEKEY(id)" ,
@@ -736,7 +707,7 @@ public class UserOrderSAU {
 
 之前介绍的普通模式支持SQL语法有限（详见章节 配置文件sqlaction.conf.json），如果要支持复杂SQL（AP场景）可使用高级模式。
 
-在sqlaction.conf.json的SQL中加上元配置`@@ADVANCEDMODE`即可开启这条SQL的高级模式。高级模式对SQL书写几乎没有任何限制，但引入一定的配置复杂性，示例：
+在sqlaction.conf.json的SQL中加上配置元`@@ADVANCEDMODE`即可开启这条SQL的高级模式。高级模式对SQL书写几乎没有任何限制，但引入一定的配置复杂性，示例：
 
 ```
 				"SELECT user_base.name				#{UserBaseSAU.name}
